@@ -1,4 +1,6 @@
 ﻿namespace DO;
+
+
 /// <summary>
 /// Represents a call entity with all its properties.
 /// </summary>
@@ -12,7 +14,7 @@
 /// <param name="Description">Detailed description of the call (nullable).</param>
 public record Call
 (
-    int Id,
+    int Id ,
     CallType Type,
     string FullAddress,
     double Latitude,

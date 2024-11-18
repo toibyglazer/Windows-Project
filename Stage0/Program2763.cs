@@ -8,10 +8,10 @@ namespace Targile0
 {
     partial class Program
     {
-        static partial void Welcome2763()
-        {
+        //static partial void Welcome2763()
+        //{
 
-            Console.WriteLine("I am also here!");
-        }
+        //    Console.WriteLine("I am also here!");
+        //}
     } 
 }
