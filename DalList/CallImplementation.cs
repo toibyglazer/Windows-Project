@@ -9,13 +9,10 @@ public class CallImplementation : ICall
 {
     public void Create(Call item)
     {
-        if (DataSource.Calls.Any(v => v.Id == item.Id))
-        {
-            throw new InvalidOperationException($"Call with ID {item.Id} already exists.");
-        }
 
-        item = item with { Id = Config.NextCallId };
-        DataSource.Calls.Add(item);
+        int id = Config.NextCallId;
+        Call copy = item with { Id =id  };
+        DataSource.Calls.Add(copy);
     }
 
     public void Delete(int id)
@@ -42,6 +39,10 @@ public class CallImplementation : ICall
 
     public Call? Read(int id)
     {
+        if (DataSource.Calls.FirstOrDefault(a => a.Id == id) == null)
+        {
+            throw new KeyNotFoundException($"Call with ID {id} does not exist.");
+        }
         return DataSource.Calls.FirstOrDefault(c => c.Id == id);
     }
 

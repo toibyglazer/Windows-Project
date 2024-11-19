@@ -20,7 +20,14 @@ public enum CallType
     FoodPreparation,         // הכנת אוכל
     FoodDelivery,            // משלוח אוכל
     EquipmentDelivery,       // משלוח ציוד
-    SoldierTransportation    // הסעת חיילים בין בסיסים
+    SoldierTransportation,    // הסעת חיילים בין בסיסים
+    ComplexLogisticsTransport, // שינוע לוגיסטי מורכב
+    MedicalSupport,          // תמיכה רפואית
+    EventCoordination,       // תיאום אירועים
+    EmergencyResponse,       // מענה למצבי חירום
+    BaseMaintenance,         // תחזוקה בבסיס
+    KitPreparation,          // הכנת ערכות לחיילים
+    SpecialEventSupport      // תמיכה באירועים מיוחדים
 }
 
 public enum AssignmentCompletionType

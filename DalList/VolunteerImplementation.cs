@@ -32,6 +32,13 @@ public class VolunteerImplementation : IVolunteer
 
     public Volunteer? Read(int id)
     {
+       
+        
+        if (DataSource.Volunteers.FirstOrDefault(a => a.Id == id) == null)
+        {
+            throw new KeyNotFoundException($"Call with ID {id} does not exist.");
+        }
+    
         foreach (var v in DataSource.Volunteers)
         {
             if (v.Id.Equals(id))
@@ -39,6 +46,7 @@ public class VolunteerImplementation : IVolunteer
                 return v;
             }
         }
+
         return null;
     }
 

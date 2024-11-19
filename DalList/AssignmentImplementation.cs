@@ -7,13 +7,9 @@ public class AssignmentImplementation : IAssignment
 {
     public void Create(Assignment item)
     {
-        if (DataSource.Assignments.Any(v => v.Id == item.Id))
-        {
-            throw new InvalidOperationException($"Assignment with ID {item.Id} already exists.");
-        }
-
-        item = item with { Id = Config.NextAssignmentId };
-        DataSource.Assignments.Add(item);
+        int id = Config.NextAssignmentId;
+        Assignment copy = item with { Id=id };
+        DataSource.Assignments.Add(copy);
     }
 
     public void Delete(int id)
@@ -33,6 +29,11 @@ public class AssignmentImplementation : IAssignment
 
     public Assignment? Read(int id)
     {
+        if (DataSource.Assignments.FirstOrDefault(a => a.Id == id) == null)
+        {
+            throw new KeyNotFoundException($"Assignment with ID {id} does not exist.");
+        }
+
         return DataSource.Assignments.FirstOrDefault(a => a.Id == id);
     }
 
