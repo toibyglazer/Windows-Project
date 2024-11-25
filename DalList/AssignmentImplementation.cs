@@ -17,7 +17,7 @@ public class AssignmentImplementation : IAssignment
         var item = DataSource.Assignments.FirstOrDefault(a => a.Id == id);
 
         if (item == null)
-            throw new KeyNotFoundException($"Assignment with ID {id} does not exist.");
+            throw new Exception($"Assignment with ID {id} does not exist.");
 
         DataSource.Assignments.Remove(item);
     }
@@ -31,7 +31,7 @@ public class AssignmentImplementation : IAssignment
     {
         if (DataSource.Assignments.FirstOrDefault(a => a.Id == id) == null)
         {
-            throw new KeyNotFoundException($"Assignment with ID {id} does not exist.");
+            throw new Exception($"Assignment with ID {id} does not exist.");
         }
 
         return DataSource.Assignments.FirstOrDefault(a => a.Id == id);
@@ -48,7 +48,7 @@ public class AssignmentImplementation : IAssignment
             var existing = DataSource.Assignments.FirstOrDefault(a => a.Id == item.Id);
 
             if (existing == null)
-                throw new KeyNotFoundException($"Assignment with ID {item.Id} does not exist.");
+                throw new Exception($"Assignment with ID {item.Id} does not exist.");
 
             // מחיקת האובייקט הקיים והוספת החדש
             DataSource.Assignments.Remove(existing);

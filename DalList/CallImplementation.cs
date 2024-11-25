@@ -23,7 +23,7 @@ public class CallImplementation : ICall
 
             if (existingCall == null)
             {
-                throw new InvalidOperationException($"Call with ID {id} not found.");
+                throw new Exception($"Call with ID {id} not found.");
             }
 
             DataSource.Calls.Remove(existingCall);
@@ -41,7 +41,7 @@ public class CallImplementation : ICall
     {
         if (DataSource.Calls.FirstOrDefault(a => a.Id == id) == null)
         {
-            throw new KeyNotFoundException($"Call with ID {id} does not exist.");
+            throw new Exception($"Call with ID {id} does not exist.");
         }
         return DataSource.Calls.FirstOrDefault(c => c.Id == id);
     }
@@ -58,7 +58,7 @@ public void Update(Call item)
 
             if (existingCall == null)
             {
-                throw new InvalidOperationException($"Call with ID {item.Id} not found.");
+                throw new Exception($"Call with ID {item.Id} not found.");
             }
 
             // מחיקת הקריאה הישנה והוספת החדשה

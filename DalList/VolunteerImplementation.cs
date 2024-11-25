@@ -9,7 +9,7 @@ public class VolunteerImplementation : IVolunteer
     {
         if (DataSource.Volunteers.Any(v => v.Id == item.Id) )
         {
-            throw new InvalidOperationException($"Volunteer with ID {item.Id} already exists.");
+            throw new Exception($"Volunteer with ID {item.Id} already exists.");
         }
 
         DataSource.Volunteers.Add( item );
@@ -20,7 +20,7 @@ public class VolunteerImplementation : IVolunteer
         var volunteer = DataSource.Volunteers.FirstOrDefault(v => v.Id == id);
         if (volunteer == null)
         {
-            throw new KeyNotFoundException($"Volunteer with ID {id} does not exist.");
+            throw new Exception($"Volunteer with ID {id} does not exist.");
         }
         DataSource.Volunteers.Remove( volunteer );
     }
@@ -36,7 +36,7 @@ public class VolunteerImplementation : IVolunteer
         
         if (DataSource.Volunteers.FirstOrDefault(a => a.Id == id) == null)
         {
-            throw new KeyNotFoundException($"Call with ID {id} does not exist.");
+            throw new Exception($"Call with ID {id} does not exist.");
         }
     
         foreach (var v in DataSource.Volunteers)
@@ -60,7 +60,7 @@ public class VolunteerImplementation : IVolunteer
         var volunteerIndex = DataSource.Volunteers.FindIndex(v => v.Id == item.Id);
         if (volunteerIndex == -1)
         {
-            throw new KeyNotFoundException($"Volunteer with ID {item.Id} does not exist.");
+            throw new Exception($"Volunteer with ID {item.Id} does not exist.");
         }
 
         DataSource.Volunteers[volunteerIndex] = item; 
