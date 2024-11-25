@@ -29,6 +29,8 @@ public record Call
     ///  Default constructor for initializing a new call with default values.
     /// </summary>
     public Call() : this(0, CallType.EquipmentDelivery, string.Empty, 0.0, 0.0, DateTime.Now) { }
+
+    public object EntryTime { get; set; }
 }
 
 
