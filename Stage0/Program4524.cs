@@ -13,7 +13,7 @@ partial class Program
     private static void Welcome4524()
     {
         Console.WriteLine("Enter your name: ");
-        string userName = Console.ReadLine();
+        string? userName = Console.ReadLine();
         Console.WriteLine("{0}, welcome to my first console application", userName);
     }
 }
