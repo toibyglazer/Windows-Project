@@ -325,8 +325,9 @@ public static class Initialization
     32.1701, 32.0730, 32.2662, 31.7800, 32.0853,
     32.1097, 31.8717, 31.6513, 32.2090, 32.1585,
     31.2518, 31.7719, 32.0924, 32.1099, 29.5581,
-    32.0735
-
+    32.0735, 29.5581, 33.0471, 31.9685, 32.0779,
+    32.3216, 31.7683, 31.2518, 32.7045, 31.9466,
+    32.1701
 };
         double[] longitudes = new[]
 {
@@ -339,13 +340,15 @@ public static class Initialization
     34.8510, 34.8322, 34.8574, 35.2825, 34.8270,
     34.8555, 35.2190, 34.8259, 34.8560, 34.7902,
     34.8046, 34.8193, 35.2227, 35.2683, 34.7740,
-    34.7722
+    34.7722, 34.5717, 35.2778, 35.5894, 34.6937,
+    34.7818, 34.7818, 35.3955, 34.8015, 34.8291,
+    34.7740
 };
-
+        /*Enum.GetValues(typeof(DO.CallType)).Length*/
         DO.CallType[] callTypes = new DO.CallType[Descriptions.Length];
-        for (int i = 0; i < callTypes.Length; i++)
+        for (int i = 0; i < Descriptions.Length; i++)
         {
-            callTypes[i] = (DO.CallType)s_rand.Next(Enum.GetValues(typeof(DO.CallType)).Length);
+            callTypes[i] = (DO.CallType)s_rand.Next(11);
         }
 
         DateTime start = new DateTime(s_dalConfig.Clock.Year - 2, 1, 1);
@@ -370,98 +373,84 @@ public static class Initialization
             s_dalCall?.Create(call);
         }
     }
-
     private static void createAssignment()
     {
-        List<Volunteer> volunteers = s_dalVolunteer!.ReadAll().ToList();
-        List<Call> calls = s_dalCall!.ReadAll().ToList();
-        int assignmentId = s_dalConfig!.NextAssignmentId;
 
+        int[] volunteerId = new int[]
+ {
+    123456789, 234567890, 345678901, 456789012,
+    567890123, 678901234, 789012345, 890123456,
+    901234567, 123098456, 234109567, 345210678,
+    456321789, 567432890, 678543901, 789654012,
+    890765123, 123890456, 234567890, 345678912,
+    456789123, 567890234, 678901345, 789012456,
+    890123567, 901234678, 123098789, 234109890,
+    345210901, 456321012, 567432123, 678543234,
+    789654345, 890765456, 123890567, 234567678,
+    345678789, 456789890, 567890901, 678901012,
+    789012123, 890123234, 901234345, 123098456,
+    234109567, 345210678, 456321789, 567432890,
+    678543901, 789654012
+ };
+        int assignmentId = s_dalConfig.NextAssignmentId;
 
-
-        List<Volunteer> shuffledVolunteers = volunteers.OrderBy(_ => s_rand.Next()).ToList();
-        int totalVolunteers = shuffledVolunteers.Count;
-
-
-        int noAssignmentCount = Math.Max(1, totalVolunteers / 5); // 20% have no assignments
-        int singleAssignmentCount = Math.Max(1, totalVolunteers / 3); // 30% have one assignment
-        int multipleAssignmentCount = totalVolunteers - noAssignmentCount - singleAssignmentCount; // Remaining have multiple assignments
-
-        int callIndex = 0; // Tracks available calls
-
-        for (int i = 0; i < totalVolunteers; i++)
+        for (int i = 0; i < 15; i++)
         {
-            Volunteer volunteer = shuffledVolunteers[i];
-            int assignmentsForThisVolunteer;
 
-            if (i < noAssignmentCount)
-            {
-                // Skip assignment for this volunteer
-                continue;
-            }
-            else if (i < noAssignmentCount + singleAssignmentCount)
-            {
-                assignmentsForThisVolunteer = 1; // One assignment
-            }
-            else
-            {
-                assignmentsForThisVolunteer = s_rand.Next(2, 5); 
-            }
-            for (int j = 0; j < assignmentsForThisVolunteer && callIndex < calls.Count; j++)
-            {
-                Call call = calls[callIndex++];
-                DateTime startTime = call.OpeningTime.AddHours(s_rand.Next(1, 24));
-                DateTime? endTime = null;
-                AssignmentCompletionType? endType = null;
+            Assignment a = new Assignment(
+            Id: assignmentId,
+            CallId: s_dalConfig.NextCallId,
+            VolunteerId: volunteerId[i],
+            EntryTime: s_dalConfig.Clock,
+            CompletionTime: null,
+            CompletionType: AssignmentCompletionType.Treated
+            );
+            s_dalAssignment?.Create(a);
+        }
 
-               
-                double outcomeChance = s_rand.NextDouble();
 
-                if (outcomeChance < 0.3)
-                {
-                    // Completed within call's deadline
-                    endTime = call.MaxCompletionTime.HasValue
-                        ? call.OpeningTime.AddHours(s_rand.Next(1, (int)(call.MaxCompletionTime.Value - startTime).TotalHours + 1))
-                        : startTime.AddHours(s_rand.Next(1, 72));
-                    endType = AssignmentCompletionType.Treated;
-                }
-                else if (outcomeChance < 0.5)
-                {
-                    // Self-canceled
-                    endTime = startTime.AddHours(s_rand.Next(1, 48));
-                    endType = AssignmentCompletionType.VolunteerCancelled;
-                }
-                else if (outcomeChance < 0.7)
-                {
-                    // Admin-canceled
-                    endTime = startTime.AddHours(s_rand.Next(1, 48));
-                    endType = AssignmentCompletionType.AdminCancelled;
-                }
-                else
-                {
-                    // Expired
-                    endType = AssignmentCompletionType.Expired;
-                }
+        for (int i = 15; i < 29; i++)
+        {
+            Assignment a = new Assignment(
+             Id: assignmentId,
+             CallId: s_dalConfig.NextCallId,
+             VolunteerId: volunteerId[i],
+             EntryTime: s_dalConfig.Clock,
+             CompletionTime: null,
+             CompletionType: AssignmentCompletionType.VolunteerCancelled
+             );
+            s_dalAssignment?.Create(a);
+        }
 
-                // Create the assignment
-                var assignment = new Assignment
-                (
-                    Id: assignmentId++,
-                    CallId: call.Id,
-                    VolunteerId: volunteer.Id,
-                    EntryTime: startTime,
-                    CompletionTime: endTime,
-                    CompletionType: endType
+        for (int i = 29; i < 40; i++)
+        {
 
-                );
+            Assignment a = new Assignment(
+             Id: assignmentId,
+             CallId: s_dalConfig.NextCallId,
+             VolunteerId: volunteerId[i],
+             EntryTime: s_dalConfig.Clock,
+             CompletionTime: null,
+             CompletionType: AssignmentCompletionType.AdminCancelled
+             );
+            s_dalAssignment?.Create(a);
 
-                // Save the assignment
-                s_dalAssignment!.Create(assignment);
-            }
+        }
+        for (int i = 40; i < 50; i++)
+        {
+            Assignment a = new Assignment(
+             Id: assignmentId,
+             CallId: s_dalConfig.NextCallId,
+             VolunteerId: volunteerId[i],
+             EntryTime: s_dalConfig.Clock,
+             CompletionTime: null,
+             CompletionType: AssignmentCompletionType.Expired
+             );
+            s_dalAssignment?.Create(a);
+
         }
     }
-
-    public static void Do(IVolunteer? dalVolunteer, ICall? dalCall, IAssignment? dalAssignment, IConfig? dalConfig) 
+    public static void Do(IVolunteer? dalVolunteer, ICall? dalCall, IAssignment? dalAssignment, IConfig? dalConfig)
     {
         s_dalVolunteer = dalVolunteer ?? throw new NullReferenceException("DAL object can not be null!");
         s_dalCall = dalCall ?? throw new NullReferenceException("DAL object can not be null!");
@@ -469,14 +458,13 @@ public static class Initialization
         s_dalConfig = dalConfig ?? throw new NullReferenceException("DAL object can not be null!");
 
 
-
-        Console.WriteLine("Reset Configuration values and Volunteer list values and Call list values and Assignment list values");
+        Console.WriteLine("Reset Configuration values and List values...");
         s_dalConfig.Reset();
         s_dalVolunteer.DeleteAll();
-        s_dalCall.DeleteAll();  
+        s_dalCall.DeleteAll();
         s_dalAssignment.DeleteAll();
 
-                                
+
         Console.WriteLine("Initializing Volunteer list");
         createVolunteer();
         Console.WriteLine("Initializing Call list");
@@ -485,4 +473,8 @@ public static class Initialization
         createAssignment();
     }
 
+
 }
+
+
+

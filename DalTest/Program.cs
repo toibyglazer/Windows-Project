@@ -271,13 +271,12 @@ namespace DalTest
                 Console.WriteLine($"Error: {ex.Message}");
             }
         }
-        public static Volunteer? ViewVolunteerById()
+        public static void ViewVolunteerById()
         {
             Console.WriteLine("Please enter the Volunteer ID:");
             if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("Invalid input. Please enter a valid numeric ID.");
-                return null;
             }
             try
             {
@@ -298,7 +297,7 @@ namespace DalTest
                     Console.WriteLine($"Distance Type: {volunteer.DistanceType}");
                 }
 
-                throw new Exception($"Volunteer with ID {id} not found.");
+               
             }
             catch (Exception ex)
             {
@@ -337,7 +336,20 @@ namespace DalTest
                 return;
             }
             Console.WriteLine("Current Volunteer details:");
-            Console.WriteLine($"ID: {volunteer.Id}, Name: {volunteer.FullName}, Phone: {volunteer.PhoneNumber}, Email: {volunteer.Email}, Role: {volunteer.Role}, Active: {volunteer.IsActive}");
+            Console.WriteLine($@"
+ID: {volunteer.Id}
+Full Name: {volunteer.FullName}
+Phone Number: {volunteer.PhoneNumber}
+Email: {volunteer.Email}
+Password: {volunteer.Password ?? "N/A"}
+Current Address: {volunteer.CurrentAddress ?? "N/A"}
+Latitude: {volunteer.Latitude?.ToString() ?? "N/A"}
+Longitude: {volunteer.Longitude?.ToString() ?? "N/A"}
+Role: {volunteer.Role}
+Active: {volunteer.IsActive}
+Max Distance: {volunteer.MaxDistance?.ToString() ?? "N/A"}
+Distance Type: {volunteer.DistanceType}
+");
             Console.WriteLine("Enter new details (press Enter to keep the current value):");
 
 
@@ -347,24 +359,58 @@ namespace DalTest
             {
                 volunteer = volunteer with { FullName = fullName };
             }
+
+
             Console.Write("Phone Number (current: " + volunteer.PhoneNumber + "): ");
             string? phoneNumber = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(phoneNumber))
             {
                 volunteer = volunteer with { PhoneNumber = phoneNumber };
             }
+
+
             Console.Write("Email (current: " + volunteer.Email + "): ");
             string? email = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(email))
             {
                 volunteer = volunteer with { Email = email };
             }
+
+            Console.Write("Password (current: " + (volunteer.Password ?? "N/A") + "): ");
+            string? password = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                volunteer = volunteer with { Password = password };
+            }
+
+            Console.Write("Current Address (current: " + (volunteer.CurrentAddress ?? "N/A") + "): ");
+            string? currentAddress = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(currentAddress))
+            {
+                volunteer = volunteer with { CurrentAddress = currentAddress };
+            }
+
+            Console.Write("Latitude (current: " + (volunteer.Latitude?.ToString() ?? "N/A") + "): ");
+            string? latitudeInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(latitudeInput) && double.TryParse(latitudeInput, out double newLatitude))
+            {
+                volunteer = volunteer with { Latitude = newLatitude };
+            }
+
+            Console.Write("Longitude (current: " + (volunteer.Longitude?.ToString() ?? "N/A") + "): ");
+            string? longitudeInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(longitudeInput) && double.TryParse(longitudeInput, out double newLongitude))
+            {
+                volunteer = volunteer with { Longitude = newLongitude };
+            }
+
             Console.Write("Role (Manager/Volunteer) (current: " + volunteer.Role + "): ");
             string? role = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(role) && Enum.TryParse(role, out VolunteerRole newRole))
             {
                 volunteer = volunteer with { Role = newRole };
             }
+
             Console.Write("Is Active (true/false) (current: " + volunteer.IsActive + "): ");
             string? isActive = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(isActive) && bool.TryParse(isActive, out bool newIsActive))
@@ -372,6 +418,19 @@ namespace DalTest
                 volunteer = volunteer with { IsActive = newIsActive };
             }
 
+            Console.Write("Max Distance (current: " + (volunteer.MaxDistance?.ToString() ?? "N/A") + "): ");
+            string? maxDistanceInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(maxDistanceInput) && double.TryParse(maxDistanceInput, out double newMaxDistance))
+            {
+                volunteer = volunteer with { MaxDistance = newMaxDistance };
+            }
+
+            Console.Write("Distance Type (Aerial/Ground) (current: " + volunteer.DistanceType + "): ");
+            string? distanceTypeInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(distanceTypeInput) && Enum.TryParse(distanceTypeInput, out DistanceType newDistanceType))
+            {
+                volunteer = volunteer with { DistanceType = newDistanceType };
+            }
 
             try
             {
@@ -485,14 +544,24 @@ namespace DalTest
 
 
             Console.Write("Enter Opening Time (yyyy-MM-dd HH:mm): ");
-            DateTime openingTime = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "yyyy-MM-dd HH:mm", null);
-
+            string? input = Console.ReadLine();
+            DateTime openingTime;
+            if (!DateTime.TryParse(input, out openingTime))
+            {
+                openingTime = DateTime.Now; 
+            }
 
             Console.Write("Enter Max Completion Time (yyyy-MM-dd HH:mm, press enter to skip): ");
-            string maxCompletionTimeInput = Console.ReadLine() ?? string.Empty;
-            DateTime? maxCompletionTime = string.IsNullOrEmpty(maxCompletionTimeInput) ? (DateTime?)null : DateTime.ParseExact(maxCompletionTimeInput, "yyyy-MM-dd HH:mm", null);
-
-
+            string? maxCompletionTimeInput = Console.ReadLine();
+            DateTime? maxCompletionTime = null;
+            if (!string.IsNullOrWhiteSpace(maxCompletionTimeInput) && DateTime.TryParse(maxCompletionTimeInput, out DateTime parsedTime))
+            {
+                maxCompletionTime = parsedTime;
+            }
+            else
+            {
+                maxCompletionTime = DateTime.Now.AddHours(2);
+            }
             Console.Write("Enter Description (optional): ");
             string description = Console.ReadLine() ?? string.Empty;
 
@@ -519,7 +588,6 @@ namespace DalTest
             if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("Invalid input. Please enter a numeric Call ID.");
-                return;
             }
 
             try
@@ -602,6 +670,10 @@ namespace DalTest
             string? maxCompletionInput = Console.ReadLine();
             var updatedMaxCompletionTime = DateTime.TryParse(maxCompletionInput, out DateTime newMaxCompletion) ? newMaxCompletion : call.MaxCompletionTime;
 
+            Console.Write("Opening Time (current: {0}): ", call.OpeningTime);
+            string? OpeningTime = Console.ReadLine();
+            var updatedOpeningTime = DateTime.TryParse(maxCompletionInput, out DateTime newOpeningTime) ? newOpeningTime : call.OpeningTime;
+
             Console.Write("Description (current: {0}): ", call.Description);
             string? updatedDescription = Console.ReadLine();
             updatedDescription = string.IsNullOrWhiteSpace(updatedDescription) ? call.Description : updatedDescription;
@@ -613,6 +685,7 @@ namespace DalTest
                 FullAddress = updatedAddress,
                 Latitude = updatedLatitude,
                 Longitude = updatedLongitude,
+                OpeningTime= updatedOpeningTime,
                 MaxCompletionTime = updatedMaxCompletionTime,
                 Description = updatedDescription
             };
@@ -717,21 +790,33 @@ namespace DalTest
 
 
                 Console.Write("Call ID: ");
-                int callId = int.Parse(Console.ReadLine() ?? throw new InvalidOperationException("Call ID is required."));
+                int callId = 0;
+                int.TryParse(Console.ReadLine(), out callId); 
 
                 Console.Write("Volunteer ID: ");
-                int volunteerId = int.Parse(Console.ReadLine() ?? throw new InvalidOperationException("Volunteer ID is required."));
-
+                int volunteerId = 0;
+                int.TryParse(Console.ReadLine(), out volunteerId);
 
                 Console.Write("Entry Time (yyyy-MM-dd HH:mm:ss): ");
-                DateTime entryTime = DateTime.Parse(Console.ReadLine() ?? throw new InvalidOperationException("Entry Time is required."));
-
+                DateTime entryTime = DateTime.MinValue;
+                DateTime.TryParse(Console.ReadLine(), out entryTime); 
 
                 Console.Write("Completion Time (optional, leave empty if not completed): ");
-                DateTime? completionTime = DateTime.TryParse(Console.ReadLine(), out var compTime) ? compTime : null;
+                DateTime? completionTime = null;
+                string completionTimeInput = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(completionTimeInput))
+                {
+                    DateTime.TryParse(completionTimeInput, out var compTime);
+                    completionTime = compTime;
+                }
 
                 Console.Write("Completion Type (1 for Treated, 2 for VolunteerCancelled, 3 for AdminCancelled, 4 for Expired): ");
-                AssignmentCompletionType? completionType = Enum.TryParse<AssignmentCompletionType>(Console.ReadLine(), out var parsedCompletionType) ? parsedCompletionType : null;
+                AssignmentCompletionType? completionType = null;
+                string completionTypeInput = Console.ReadLine();
+                if (Enum.TryParse<AssignmentCompletionType>(completionTypeInput, out var parsedCompletionType))
+                {
+                    completionType = parsedCompletionType; 
+                }
 
 
                 Assignment assignment = new Assignment(
@@ -781,6 +866,7 @@ namespace DalTest
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
+
         }
         public static void ViewAllAssignments()
         {
@@ -963,12 +1049,13 @@ namespace DalTest
             if (DateTime.TryParse(Console.ReadLine(), out DateTime newClock))
             {
                 s_dalConfig.Clock = newClock;
-                Console.WriteLine("Clock value updated.");
             }
             else
             {
-                Console.WriteLine("Invalid input. Please use the correct format.");
+                s_dalConfig.Clock = DateTime.MinValue;
+                Console.WriteLine("Default value set");
             }
+            Console.WriteLine("Clock value updated.");
         }
         public static void ShowConfigValue()
         {
@@ -1000,33 +1087,23 @@ namespace DalTest
         static void DisplayAllData()
         {
             Console.WriteLine("Displaying all data...");
+
             Console.WriteLine("Volunteers:");
+            ViewAllVolunteers();
+            Console.WriteLine();
 
-            var volunteers = s_dalVolunteer?.ReadAll() ?? new List<Volunteer>();
-            foreach (var volunteer in volunteers)
-            {
-                Console.WriteLine(volunteer);
-            }
+            Console.WriteLine("Calls:"); 
+            ViewAllCalls();
+            Console.WriteLine();
 
-            Console.WriteLine("Calls:");
-            var calls = s_dalCall?.ReadAll() ?? new List<Call>();
-            foreach (var call in calls)
-            {
-                Console.WriteLine(call);
-            }
-
-            Console.WriteLine("Assignments:");
-            var assignments = s_dalAssignment?.ReadAll() ?? new List<Assignment>();
-            foreach (var assignment in assignments)
-            {
-                Console.WriteLine(assignment);
-            }
+            Console.WriteLine("Assignments:");        
+            ViewAllAssignments();
+            Console.WriteLine();
         }
 
 
         public static void DisplayMainMenu()
-        {
-            Console.Clear();
+        { 
             Console.WriteLine("Main Menu:");
             Console.WriteLine("1. Manage Volunteers");
             Console.WriteLine("2. Manage Calls");
@@ -1036,7 +1113,6 @@ namespace DalTest
             Console.WriteLine("6. Reset Database");
             Console.WriteLine("7. Display All Data"); // הוספת האופציה להצגת כל הנתונים
             Console.WriteLine("0. Exit");
-            Console.Write("Enter your choice: ");
         }
         static void ManageVolunteersMenu()
         {
