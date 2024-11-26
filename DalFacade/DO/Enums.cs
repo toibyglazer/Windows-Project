@@ -14,7 +14,7 @@ public enum DistanceType
     Driving       // Driving distance (via roads)
 }
 
-// Enum for call types
+// Enum for call types 
 public enum CallType
 {
     FoodPreparation,         // הכנת אוכל
