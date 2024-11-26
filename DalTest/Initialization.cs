@@ -189,7 +189,8 @@ public static class Initialization
                 MaxDistance: maxDistances[i],
                 DistanceType: d
            );
-            s_dalVolunteer.Create(volunteer);
+
+            s_dalVolunteer?.Create(volunteer);
         }
     }
 
@@ -366,7 +367,7 @@ public static class Initialization
                    Description: Descriptions[i],
                    MaxCompletionTime: deadline
                );
-            s_dalCall.Create(call);
+            s_dalCall?.Create(call);
         }
     }
 
