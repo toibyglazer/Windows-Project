@@ -1,4 +1,7 @@
 ﻿namespace Dal;
+/// <summary>
+/// Static class managing system-wide configuration settings and ID generators.
+/// </summary>
 
 internal static class Config
 {
@@ -14,6 +17,9 @@ internal static class Config
     internal static TimeSpan RiskRangelock { get; set; }= TimeSpan.FromHours(2);
 
 
+    /// <summary>
+    /// Resets configuration settings to their default values.
+    /// </summary>
     internal static void Reset()
     {
         nextCallId = startCallId;

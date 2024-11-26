@@ -2,7 +2,17 @@
 using DalApi;
 using DO;
 using System.Collections.Generic;
-
+/// <summary>
+/// Implementation of IAssignment interface, providing operations for managing Assignment objects in the system.
+/// 
+/// Available methods:
+/// - Create(Assignment item): Adds a new Assignment object to the data source with a unique ID.
+/// - Delete(int id): Deletes an Assignment object from the data source by its ID.
+/// - DeleteAll(): Deletes all Assignment objects from the data source.
+/// - Read(int id): Retrieves a specific Assignment object by its ID.
+/// - ReadAll(): Retrieves all Assignment objects from the data source.
+/// - Update(Assignment item): Updates an existing Assignment object in the data source with new information.
+/// </summary>
 public class AssignmentImplementation : IAssignment
 {
     public void Create(Assignment item)

@@ -7,15 +7,20 @@ using System.Data;
 
 public static class Initialization
 {
-
-
+    /// <summary>
+    /// Static fields representing the Data Access Layer (DAL) interfaces for managing volunteers, calls, assignments, and configuration data,
+    /// as well as a shared Random instance for generating random data used throughout the application.
+    /// </summary>
     private static IVolunteer? s_dalVolunteer;
     private static ICall? s_dalCall;
     private static IAssignment? s_dalAssignment;
     private static IConfig? s_dalConfig;
     private static readonly Random s_rand = new();
 
-
+    /// <summary>
+    /// Initializes a list of volunteers with predefined data and saves them using the DAL (Data Access Layer) object.
+    /// The first volunteer is assigned as a Manager, and the rest are regular volunteers.
+    /// </summary>
     static private void createVolunteer()
     {
         string[] VolunteerNames = new[]
@@ -150,7 +155,7 @@ public static class Initialization
     30.0, 35.0, 40.0
 };
 
-
+        // Generate an ID and assign the first volunteer as the Manager.
         int firstId = s_rand.Next(200000000, 400000000);
         DistanceType firstDistanceType = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
         var firstVolunteer = new Volunteer
@@ -169,6 +174,7 @@ public static class Initialization
                 DistanceType: firstDistanceType
            );
 
+        // Iterate over the rest of the volunteers and assign them as regular volunteers.
         for (int i = 1; i < VolunteerNames.Length; i++)
         {
             int id = s_rand.Next(200000000, 400000000);
@@ -373,105 +379,127 @@ public static class Initialization
             s_dalCall?.Create(call);
         }
     }
+    /// <summary>
+    /// Creates and initializes a predefined set of Assignment objects with varying completion types.
+    /// Assignments are created for specific volunteer IDs, and the completion type is determined based on their index.
+    /// </summary>
     private static void createAssignment()
     {
-
+       
         int[] volunteerId = new int[]
- {
-    123456789, 234567890, 345678901, 456789012,
-    567890123, 678901234, 789012345, 890123456,
-    901234567, 123098456, 234109567, 345210678,
-    456321789, 567432890, 678543901, 789654012,
-    890765123, 123890456, 234567890, 345678912,
-    456789123, 567890234, 678901345, 789012456,
-    890123567, 901234678, 123098789, 234109890,
-    345210901, 456321012, 567432123, 678543234,
-    789654345, 890765456, 123890567, 234567678,
-    345678789, 456789890, 567890901, 678901012,
-    789012123, 890123234, 901234345, 123098456,
-    234109567, 345210678, 456321789, 567432890,
-    678543901, 789654012
- };
+        {
+        123456789, 234567890, 345678901, 456789012,
+        567890123, 678901234, 789012345, 890123456,
+        901234567, 123098456, 234109567, 345210678,
+        456321789, 567432890, 678543901, 789654012,
+        890765123, 123890456, 234567890, 345678912,
+        456789123, 567890234, 678901345, 789012456,
+        890123567, 901234678, 123098789, 234109890,
+        345210901, 456321012, 567432123, 678543234,
+        789654345, 890765456, 123890567, 234567678,
+        345678789, 456789890, 567890901, 678901012,
+        789012123, 890123234, 901234345, 123098456,
+        234109567, 345210678, 456321789, 567432890,
+        678543901, 789654012
+        };
+
+        // Get the next available assignment ID.
         int assignmentId = s_dalConfig.NextAssignmentId;
 
+        // Create assignments with CompletionType.Treated for the first 15 volunteers.
         for (int i = 0; i < 15; i++)
         {
-
             Assignment a = new Assignment(
-            Id: assignmentId,
-            CallId: s_dalConfig.NextCallId,
-            VolunteerId: volunteerId[i],
-            EntryTime: s_dalConfig.Clock,
-            CompletionTime: null,
-            CompletionType: AssignmentCompletionType.Treated
+                Id: assignmentId,
+                CallId: s_dalConfig.NextCallId,
+                VolunteerId: volunteerId[i],
+                EntryTime: s_dalConfig.Clock,
+                CompletionTime: null,
+                CompletionType: AssignmentCompletionType.Treated
             );
             s_dalAssignment?.Create(a);
         }
 
-
+        // Create assignments with CompletionType.VolunteerCancelled for the next set of volunteers.
         for (int i = 15; i < 29; i++)
         {
             Assignment a = new Assignment(
-             Id: assignmentId,
-             CallId: s_dalConfig.NextCallId,
-             VolunteerId: volunteerId[i],
-             EntryTime: s_dalConfig.Clock,
-             CompletionTime: null,
-             CompletionType: AssignmentCompletionType.VolunteerCancelled
-             );
+                Id: assignmentId,
+                CallId: s_dalConfig.NextCallId,
+                VolunteerId: volunteerId[i],
+                EntryTime: s_dalConfig.Clock,
+                CompletionTime: null,
+                CompletionType: AssignmentCompletionType.VolunteerCancelled
+            );
             s_dalAssignment?.Create(a);
         }
 
+        // Create assignments with CompletionType.AdminCancelled for the next set of volunteers.
         for (int i = 29; i < 40; i++)
         {
-
             Assignment a = new Assignment(
-             Id: assignmentId,
-             CallId: s_dalConfig.NextCallId,
-             VolunteerId: volunteerId[i],
-             EntryTime: s_dalConfig.Clock,
-             CompletionTime: null,
-             CompletionType: AssignmentCompletionType.AdminCancelled
-             );
+                Id: assignmentId,
+                CallId: s_dalConfig.NextCallId,
+                VolunteerId: volunteerId[i],
+                EntryTime: s_dalConfig.Clock,
+                CompletionTime: null,
+                CompletionType: AssignmentCompletionType.AdminCancelled
+            );
             s_dalAssignment?.Create(a);
-
         }
+
+        // Create assignments with CompletionType.Expired for the remaining volunteers.
         for (int i = 40; i < 50; i++)
         {
             Assignment a = new Assignment(
-             Id: assignmentId,
-             CallId: s_dalConfig.NextCallId,
-             VolunteerId: volunteerId[i],
-             EntryTime: s_dalConfig.Clock,
-             CompletionTime: null,
-             CompletionType: AssignmentCompletionType.Expired
-             );
+                Id: assignmentId,
+                CallId: s_dalConfig.NextCallId,
+                VolunteerId: volunteerId[i],
+                EntryTime: s_dalConfig.Clock,
+                CompletionTime: null,
+                CompletionType: AssignmentCompletionType.Expired
+            );
             s_dalAssignment?.Create(a);
-
         }
     }
+
+    /// <summary>
+    /// Initializes and configures the DAL (Data Access Layer) objects, 
+    /// resets configuration and clears existing data, then populates lists for Volunteers, Calls, and Assignments.
+    /// Throws exceptions if any DAL object is null.
+    /// </summary>
+    /// <param name="dalVolunteer">The data access object for Volunteers.</param>
+    /// <param name="dalCall">The data access object for Calls.</param>
+    /// <param name="dalAssignment">The data access object for Assignments.</param>
+    /// <param name="dalConfig">The data access object for Configuration.</param>
     public static void Do(IVolunteer? dalVolunteer, ICall? dalCall, IAssignment? dalAssignment, IConfig? dalConfig)
     {
+        // Ensure all DAL objects are initialized; throw exceptions for null references.
         s_dalVolunteer = dalVolunteer ?? throw new NullReferenceException("DAL object can not be null!");
         s_dalCall = dalCall ?? throw new NullReferenceException("DAL object can not be null!");
         s_dalAssignment = dalAssignment ?? throw new NullReferenceException("DAL object can not be null!");
         s_dalConfig = dalConfig ?? throw new NullReferenceException("DAL object can not be null!");
 
-
+        // Reset configuration values and clear all data in Volunteers, Calls, and Assignments lists.
         Console.WriteLine("Reset Configuration values and List values...");
         s_dalConfig.Reset();
-        s_dalVolunteer.DeleteAll();
-        s_dalCall.DeleteAll();
+        s_dalVolunteer.DeleteAll(); 
+        s_dalCall.DeleteAll();     
         s_dalAssignment.DeleteAll();
 
-
+        // Populate the Volunteers list with initial data.
         Console.WriteLine("Initializing Volunteer list");
         createVolunteer();
+
+        // Populate the Calls list with initial data.
         Console.WriteLine("Initializing Call list");
         createCall();
+
+        // Populate the Assignments list with initial data.
         Console.WriteLine("Initializing Assignment list");
         createAssignment();
     }
+
 
 
 }
