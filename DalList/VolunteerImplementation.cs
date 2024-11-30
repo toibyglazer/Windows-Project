@@ -14,7 +14,7 @@ using System.Collections.Generic;
 /// - ReadAll(): Retrieves a list of all Volunteers from the data source.
 /// - Update(Volunteer item): Updates an existing Volunteer in the data source. Throws an exception if the volunteer does not exist.
 /// </summary>
-public class VolunteerImplementation : IVolunteer
+internal class VolunteerImplementation : IVolunteer
 {
     public void Create(Volunteer item)
     {
@@ -58,8 +58,9 @@ public class VolunteerImplementation : IVolunteer
         return null;
     }
     public List<Volunteer> ReadAll()
-    { 
-       return new List<Volunteer> (DataSource.Volunteers);    
+    {
+
+        return new List<Volunteer> (DataSource.Volunteers);    
     }
     public void Update(Volunteer item)
     {

@@ -9,8 +9,8 @@ namespace DalApi;
 public interface ICrud<T> where T : class
 {
     void Create(T item); 
-    T? Read(int id); 
-    List<T> ReadAll(); 
+    T? Read(int id);
+    IEnumerable<T> ReadAll(Func<T, bool>? filter = null); // stage 2
     void Update(T item);
     void Delete(int id); 
     void DeleteAll(); 

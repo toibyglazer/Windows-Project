@@ -13,7 +13,7 @@ using System.Collections.Generic;
 /// - ReadAll(): Retrieves all Assignment objects from the data source.
 /// - Update(Assignment item): Updates an existing Assignment object in the data source with new information.
 /// </summary>
-public class AssignmentImplementation : IAssignment
+internal class AssignmentImplementation : IAssignment
 {
     public void Create(Assignment item)
     {

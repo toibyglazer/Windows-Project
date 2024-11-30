@@ -15,7 +15,7 @@ using System.Xml;
 /// - ReadAll(): Retrieves all Call objects from the data source.
 /// - Update(Call item): Updates an existing Call object in the data source with new information.
 /// </summary>
-public class CallImplementation : ICall
+internal class CallImplementation : ICall
 {
     public void Create(Call item)
     {

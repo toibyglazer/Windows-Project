@@ -74,10 +74,7 @@ namespace DalTest
     internal class Program
     {
         // Static instances for managing application data and configuration.
-        private static IVolunteer? s_dalVolunteer = new VolunteerImplementation();
-        private static ICall? s_dalCall = new CallImplementation();
-        private static IAssignment? s_dalAssignment = new AssignmentImplementation();
-        private static IConfig? s_dalConfig = new ConfigImplementation();
+        static readonly IDal s_dal = new DalList(); //stage 2
 
         /// <summary>
         /// Entry point of the application.
@@ -317,7 +314,7 @@ namespace DalTest
                 );
 
                 // Add the volunteer to the database.
-                s_dalVolunteer?.Create(volunteer);
+                s_dal.Volunteer?.Create(volunteer);
                 Console.WriteLine("Volunteer added successfully!");
             }
             catch (Exception ex)
@@ -343,7 +340,7 @@ namespace DalTest
             try
             {
                 // Retrieve the volunteer by ID.
-                var volunteer = s_dalVolunteer?.Read(id);
+                var volunteer = s_dal.Volunteer?.Read(id);
 
                 // Check if the volunteer exists and display their details.
                 if (volunteer != null)
@@ -378,7 +375,7 @@ namespace DalTest
         public static void ViewAllVolunteers()
         {
             // Retrieve all volunteers from the database.
-            var volunteers = s_dalVolunteer?.ReadAll();
+            var volunteers = s_dal.Volunteer?.ReadAll();
 
             // Check if there are any volunteers to display.
             if (volunteers == null || volunteers.Count == 0)
@@ -408,7 +405,7 @@ namespace DalTest
             }
 
             // Attempt to retrieve the volunteer by ID.
-            var volunteer = s_dalVolunteer?.Read(id);
+            var volunteer = s_dal.Volunteer?.Read(id);
             if (volunteer == null)
             {
                 Console.WriteLine($"No volunteer found with ID {id}.");
@@ -515,7 +512,7 @@ Distance Type: {volunteer.DistanceType}
             // Attempt to save the updated volunteer details.
             try
             {
-                s_dalVolunteer.Update(volunteer);
+                s_dal.Volunteer?.Update(volunteer);
                 Console.WriteLine("Volunteer details updated successfully.");
             }
             catch (Exception ex)
@@ -538,7 +535,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempt to delete the volunteer by ID.
-                s_dalVolunteer?.Delete(id);
+                s_dal.Volunteer?.Delete(id);
                 Console.WriteLine($"Volunteer with ID {id} was successfully deleted.");
             }
             catch (Exception ex)
@@ -556,7 +553,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempt to delete all volunteers.
-                s_dalVolunteer?.DeleteAll();
+                s_dal.Volunteer?.DeleteAll();
                 Console.WriteLine("All volunteers have been successfully deleted.");
             }
             catch (Exception ex)
@@ -682,7 +679,7 @@ Distance Type: {volunteer.DistanceType}
             );
 
             // Add the call to the data access layer (DAL).
-            s_dalCall?.Create(newCall);
+            s_dal.Call?.Create(newCall);
 
             // Confirm success to the user.
             Console.WriteLine("Call added successfully!");
@@ -702,7 +699,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Retrieve the call details from the data access layer (DAL).
-                Call? call = s_dalCall.Read(id);
+                Call? call = s_dal.Call.Read(id);
                 if (call != null)
                 {
                     // Display call details if found.
@@ -732,7 +729,7 @@ Distance Type: {volunteer.DistanceType}
         public static void ViewAllCalls()
         {
             // Retrieve all calls from the data access layer (DAL).
-            var calls = s_dalCall?.ReadAll();
+            var calls = s_dal.Call?.ReadAll();
 
             // Check if any calls exist in the system.
             if (calls == null || calls.Count == 0)
@@ -761,7 +758,7 @@ Distance Type: {volunteer.DistanceType}
             }
 
             // Retrieve the call details from the data access layer (DAL).
-            var call = s_dalCall?.Read(id);
+            var call = s_dal.Call?.Read(id);
             if (call == null)
             {
                 Console.WriteLine($"Call with ID {id} not found.");
@@ -822,7 +819,7 @@ Distance Type: {volunteer.DistanceType}
             };
 
             // Save the updated call details to the data access layer (DAL).
-            s_dalCall?.Update(updatedCall);
+            s_dal.Call?.Update(updatedCall);
             Console.WriteLine("Call updated successfully.");
         }
         /// <summary>
@@ -842,7 +839,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempts to delete the call with the specified ID.
-                s_dalCall?.Delete(id);
+                s_dal.Call?.Delete(id);
                 Console.WriteLine($"Call with ID {id} was successfully deleted.");
             }
             catch (Exception ex)
@@ -859,7 +856,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempts to delete all calls.
-                s_dalCall?.DeleteAll();
+                s_dal.Call?.DeleteAll();
                 Console.WriteLine("All Calls have been successfully deleted.");
             }
             catch (Exception ex)
@@ -985,7 +982,7 @@ Distance Type: {volunteer.DistanceType}
                 );
 
                 // Saves the new assignment using the data access layer.
-                s_dalAssignment?.Create(assignment);
+                s_dal.Assignment?.Create(assignment);
                 Console.WriteLine("Assignment added successfully!");
             }
             catch (Exception ex)
@@ -1012,7 +1009,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempt to read the assignment from the system by ID
-                Assignment? assignment = s_dalAssignment?.Read(id);
+                Assignment? assignment = s_dal.Assignment?.Read(id);
                 if (assignment != null) // Check if the assignment exists
                 {
                     // Display assignment details
@@ -1042,7 +1039,7 @@ Distance Type: {volunteer.DistanceType}
         public static void ViewAllAssignments()
         {
             // Fetch all assignments from the system
-            var assignments = s_dalAssignment?.ReadAll();
+            var assignments = s_dal.Assignment?.ReadAll();
 
             if (assignments == null || assignments.Count == 0) // Check if the list is empty
             {
@@ -1071,7 +1068,7 @@ Distance Type: {volunteer.DistanceType}
             }
 
             // Attempt to retrieve the existing assignment
-            var assignment = s_dalAssignment?.Read(id);
+            var assignment = s_dal.Assignment?.Read(id);
             if (assignment == null) // If no assignment is found
             {
                 Console.WriteLine($"Assignment with ID {id} not found.");
@@ -1116,7 +1113,7 @@ Distance Type: {volunteer.DistanceType}
             };
 
             // Update the assignment in the system
-            s_dalAssignment?.Update(updatedAssignment);
+            s_dal.Assignment?.Update(updatedAssignment);
             Console.WriteLine("Assignment updated successfully.");
         }
 
@@ -1135,7 +1132,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempt to delete the assignment
-                s_dalAssignment?.Delete(id);
+                s_dal.Assignment?.Delete(id);
                 Console.WriteLine($"Assignment with ID {id} was successfully deleted.");
             }
             catch (Exception ex) // Catch and handle any exceptions
@@ -1153,7 +1150,7 @@ Distance Type: {volunteer.DistanceType}
             try
             {
                 // Attempt to delete all assignments
-                s_dalAssignment?.DeleteAll();
+                s_dal.Assignment?.DeleteAll();
                 Console.WriteLine("All Assignments have been successfully deleted.");
             }
             catch (Exception ex) // Handle errors that may occur during deletion
@@ -1191,43 +1188,43 @@ Distance Type: {volunteer.DistanceType}
                 {
                     case ConfigMenuOption.AdvanceByMinute:
                         // Advance the clock by 1 minute
-                        s_dalConfig.Clock = s_dalConfig.Clock.AddMinutes(1);
+                        s_dal.Config.Clock = s_dal.Config.Clock.AddMinutes(1);
                         Console.WriteLine("The system clock has been advanced by 1 minute.");
                         break;
 
                     case ConfigMenuOption.AdvanceByHour:
                         // Advance the clock by 1 hour
-                        s_dalConfig.Clock = s_dalConfig.Clock.AddHours(1);
+                        s_dal.Config.Clock = s_dal.Config.Clock.AddHours(1);
                         Console.WriteLine("The system clock has been advanced by 1 hour.");
                         break;
 
                     case ConfigMenuOption.AdvanceByDay:
                         // Advance the clock by 1 day
-                        s_dalConfig.Clock = s_dalConfig.Clock.AddDays(1);
+                        s_dal.Config.Clock = s_dal.Config.Clock.AddDays(1);
                         Console.WriteLine("The system clock has been advanced by 1 day.");
                         break;
 
                     case ConfigMenuOption.AdvanceByWeek:
                         // Advance the clock by 1 week
-                        s_dalConfig.Clock = s_dalConfig.Clock.AddDays(7);
+                        s_dal.Config.Clock = s_dal.Config.Clock.AddDays(7);
                         Console.WriteLine("The system clock has been advanced by 1 week.");
                         break;
 
                     case ConfigMenuOption.AdvanceByMonth:
                         // Advance the clock by 1 month
-                        s_dalConfig.Clock = s_dalConfig.Clock.AddMonths(1);
+                        s_dal.Config.Clock = s_dal.Config.Clock.AddMonths(1);
                         Console.WriteLine("The system clock has been advanced by 1 month.");
                         break;
 
                     case ConfigMenuOption.AdvanceByYear:
                         // Advance the clock by 1 year
-                        s_dalConfig.Clock = s_dalConfig.Clock.AddYears(1);
+                        s_dal.Config.Clock = s_dal.Config.Clock.AddYears(1);
                         Console.WriteLine("The system clock has been advanced by 1 year.");
                         break;
 
                     case ConfigMenuOption.ShowCurrentClock:
                         // Display the current system clock
-                        Console.WriteLine($"Current system clock: {s_dalConfig.Clock}");
+                        Console.WriteLine($"Current system clock: {s_dal.Config.Clock}");
                         break;
 
                     case ConfigMenuOption.SetConfigValue:
@@ -1242,7 +1239,7 @@ Distance Type: {volunteer.DistanceType}
 
                     case ConfigMenuOption.ResetConfig:
                         // Reset all configuration values to their defaults
-                        s_dalConfig?.Reset();
+                        s_dal.Config?.Reset();
                         Console.WriteLine("All configuration values have been reset.");
                         break;
 
@@ -1271,11 +1268,11 @@ Distance Type: {volunteer.DistanceType}
             // Parse the user input into a DateTime value
             if (DateTime.TryParse(Console.ReadLine(), out DateTime newClock))
             {
-                s_dalConfig.Clock = newClock; // Update the clock if input is valid
+                s_dal.Config.Clock = newClock; // Update the clock if input is valid
             }
             else
             {
-                s_dalConfig.Clock = DateTime.MinValue; // Set default value if input is invalid
+                s_dal.Config.Clock = DateTime.MinValue; // Set default value if input is invalid
                 Console.WriteLine("Default value set");
             }
             Console.WriteLine("Clock value updated.");
@@ -1287,10 +1284,10 @@ Distance Type: {volunteer.DistanceType}
             /// Outputs the system clock, risk range lock, and next ID values for calls and assignments.
             /// </summary>
             Console.WriteLine("\n--- Current Configuration Values ---");
-            Console.WriteLine($"1. Clock: {s_dalConfig.Clock}"); // Display current clock value
-            Console.WriteLine($"2. Risk Range Lock: {s_dalConfig.RiskRangelock}"); // Display risk range lock value
-            Console.WriteLine($"3. Next Call ID: {s_dalConfig.NextCallId}"); // Display the next call ID
-            Console.WriteLine($"4. Next Assignment ID: {s_dalConfig.NextAssignmentId}"); // Display the next assignment ID
+            Console.WriteLine($"1. Clock: {s_dal.Config.Clock}"); // Display current clock value
+            Console.WriteLine($"2. Risk Range Lock: {s_dal.Config.RiskRangelock}"); // Display risk range lock value
+            Console.WriteLine($"3. Next Call ID: {s_dal.Config.NextCallId}"); // Display the next call ID
+            Console.WriteLine($"4. Next Assignment ID: {s_dal.Config.NextAssignmentId}"); // Display the next assignment ID
         }
 
 
@@ -1302,7 +1299,7 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         static void InitializeDatabase()
         {
-            Initialization.Do(s_dalVolunteer, s_dalCall, s_dalAssignment, s_dalConfig); // Perform the initialization process
+            Initialization.Do(s_dal); // Perform the initialization process
             Console.WriteLine("Database initialized successfully."); // Notify user of successful initialization
         }
 
@@ -1312,10 +1309,10 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         static void ResetDatabase()
         {
-            s_dalVolunteer?.DeleteAll(); // Delete all volunteer data
-            s_dalCall?.DeleteAll();      // Delete all call data
-            s_dalAssignment?.DeleteAll(); // Delete all assignment data
-            s_dalConfig?.Reset();        // Reset configuration values
+            s_dal.Volunteer?.DeleteAll(); // Delete all volunteer data
+            s_dal.Call?.DeleteAll();      // Delete all call data
+            s_dal.Assignment?.DeleteAll(); // Delete all assignment data
+            s_dal.Config?.Reset();        // Reset configuration values
             Console.WriteLine("Database reset successfully."); // Notify user of successful reset
         }
 
