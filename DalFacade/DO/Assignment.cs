@@ -28,7 +28,7 @@ public record Assignment
     /// <summary>
     /// Default constructor
     /// </summary>
-    public Assignment(int Id, int CallId) : this(0, 0, 0, DateTime.Now) { }
+    public Assignment() : this(0, 0, 0, DateTime.Now) { }
 }
 
 

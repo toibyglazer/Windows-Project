@@ -30,7 +30,7 @@ public record Call
     /// </summary>
     public Call() : this(0, CallType.EquipmentDelivery, string.Empty, 0.0, 0.0, DateTime.Now) { }
 
-    public object EntryTime { get; set; }
+    public object? EntryTime { get; set; }
 }
 
 

@@ -18,7 +18,7 @@ internal class AssignmentImplementation : IAssignment
     public void Create(Assignment item)
     {
         int id = Config.NextAssignmentId;
-        Assignment copy = item with { Id=id };
+        Assignment copy = item with { Id = id };
         DataSource.Assignments.Add(copy);
     }
 
@@ -27,13 +27,15 @@ internal class AssignmentImplementation : IAssignment
         var item = DataSource.Assignments.FirstOrDefault(a => a.Id == id);
 
         if (item == null)
-            throw new Exception($"Assignment with ID {id} does not exist.");
+            throw new DalDoesNotExistException($"Assignment with ID {id} does not exist.");
 
         DataSource.Assignments.Remove(item);
     }
 
     public void DeleteAll()
     {
+        if (DataSource.Assignments.Count == 0)
+           Console.WriteLine("Warning: The Assignments list is already empty.");
         DataSource.Assignments.Clear();
     }
 
@@ -41,16 +43,23 @@ internal class AssignmentImplementation : IAssignment
     {
         if (DataSource.Assignments.FirstOrDefault(a => a.Id == id) == null)
         {
-            throw new Exception($"Assignment with ID {id} does not exist.");
+            throw new DalDoesNotExistException($"Assignment with ID {id} does not exist.");
         }
 
         return DataSource.Assignments.FirstOrDefault(a => a.Id == id);
     }
 
-    public List<Assignment> ReadAll()
+    public IEnumerable<Assignment> ReadAll(Func<Assignment, bool>? filter = null)
     {
-        return new List<Assignment>(DataSource.Assignments);
+          return filter != null
+            ? from item in DataSource.Assignments
+              where filter(item)
+              select item
+            : from item in DataSource.Assignments
+              select item;
     }
+      
+    
 
     public void Update(Assignment item)
     {
@@ -58,11 +67,16 @@ internal class AssignmentImplementation : IAssignment
             var existing = DataSource.Assignments.FirstOrDefault(a => a.Id == item.Id);
 
             if (existing == null)
-                throw new Exception($"Assignment with ID {item.Id} does not exist.");
+                throw new DalDoesNotExistException($"Assignment with ID {item.Id} does not exist.");
 
             // מחיקת האובייקט הקיים והוספת החדש
             DataSource.Assignments.Remove(existing);
             DataSource.Assignments.Add(item);
         
+    }
+
+    public Assignment? Read(Func<Assignment, bool> filter)
+    {
+        return DataSource.Assignments.FirstOrDefault(v => filter(v));
     }
 }

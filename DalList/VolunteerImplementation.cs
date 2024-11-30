@@ -18,35 +18,37 @@ internal class VolunteerImplementation : IVolunteer
 {
     public void Create(Volunteer item)
     {
-        if (DataSource.Volunteers.Any(v => v.Id == item.Id) )
+        if (DataSource.Volunteers.Any(v => v.Id == item.Id))
         {
-            throw new Exception($"Volunteer with ID {item.Id} already exists.");
+            throw new DalAlreadyExistsException($"Volunteer with ID {item.Id} already exists.");
         }
 
-        DataSource.Volunteers.Add( item );
+        DataSource.Volunteers.Add(item);
     }
     public void Delete(int id)
     {
         var volunteer = DataSource.Volunteers.FirstOrDefault(v => v.Id == id);
         if (volunteer == null)
         {
-            throw new Exception($"Volunteer with ID {id} does not exist.");
+            throw new DalDoesNotExistException($"Volunteer with ID {id} does not exist.");
         }
-        DataSource.Volunteers.Remove( volunteer );
+        DataSource.Volunteers.Remove(volunteer);
     }
     public void DeleteAll()
     {
+        if (DataSource.Volunteers.Count == 0)
+           Console.WriteLine("Warning: The Volunteers list is already empty.");
         DataSource.Volunteers.Clear();
     }
     public Volunteer? Read(int id)
     {
-       
-        
+
+
         if (DataSource.Volunteers.FirstOrDefault(a => a.Id == id) == null)
         {
-            throw new Exception($"Call with ID {id} does not exist.");
+            throw new DalDoesNotExistException($"Call with ID {id} does not exist.");
         }
-    
+
         foreach (var v in DataSource.Volunteers)
         {
             if (v.Id.Equals(id))
@@ -57,20 +59,28 @@ internal class VolunteerImplementation : IVolunteer
 
         return null;
     }
-    public List<Volunteer> ReadAll()
+    public IEnumerable<Volunteer> ReadAll(Func<Volunteer, bool>? filter = null)
     {
-
-        return new List<Volunteer> (DataSource.Volunteers);    
+        return filter != null
+        ? from item in DataSource.Volunteers
+          where filter(item)
+          select item
+        : from item in DataSource.Volunteers
+          select item;
     }
     public void Update(Volunteer item)
     {
         var volunteerIndex = DataSource.Volunteers.FindIndex(v => v.Id == item.Id);
         if (volunteerIndex == -1)
         {
-            throw new Exception($"Volunteer with ID {item.Id} does not exist.");
+            throw new DalDoesNotExistException($"Volunteer with ID {item.Id} does not exist.");
         }
 
-        DataSource.Volunteers[volunteerIndex] = item; 
+        DataSource.Volunteers[volunteerIndex] = item;
+    }
+    public Volunteer? Read(Func<Volunteer, bool> filter)
+    {
+        return DataSource.Volunteers.FirstOrDefault(v => filter(v));
     }
 }
 

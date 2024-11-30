@@ -92,11 +92,19 @@ namespace DalTest
                     exit = HandleUserInput(); // Process user input and determine if the application should exit.
                 }
             }
-            catch (Exception ex)
+            catch (DalAlreadyExistsException ex)
             {
                 // Handle any unexpected exceptions that occur during execution.
                 Console.WriteLine($"An error occurred: {ex}");
             }
+            catch (DalDoesNotExistException ex)
+            {
+                // Handle any unexpected exceptions that occur during execution.
+                Console.WriteLine($"An error occurred: {ex}");
+            }
+           
+
+
         }
         /// <summary>
         /// Processes the user's main menu selection.
@@ -149,11 +157,18 @@ namespace DalTest
                     }
                 }
             }
-            catch (Exception ex)
+            catch (DalAlreadyExistsException ex)
             {
                 // Handle any errors that occur while processing the user's input.
                 Console.WriteLine($"Error handling input: {ex.Message}");
             }
+            catch (DalDoesNotExistException ex)
+            {
+                // Handle any errors that occur while processing the user's input.
+                Console.WriteLine($"Error handling input: {ex.Message}");
+            }
+            
+
             return false; // Continue the main loop if no exit condition was met.
         }
         /// <summary>
@@ -186,7 +201,6 @@ namespace DalTest
         /// </summary>
         static void ManageVolunteer()
         {
-            VolunteerMenuOption choice;
 
             while (true)
             {
@@ -195,7 +209,7 @@ namespace DalTest
                 string? input = Console.ReadLine();
 
                 // Attempt to parse the input to the corresponding enum value.
-                if (!Enum.TryParse(input, out choice) || !Enum.IsDefined(typeof(VolunteerMenuOption), choice))
+                if (!Enum.TryParse(input, out VolunteerMenuOption choice) || !Enum.IsDefined(typeof(VolunteerMenuOption), choice))
                 {
                     Console.WriteLine("Invalid input. Please enter a valid option from the menu.");
                     continue; // Prompt the user again for a valid input.
@@ -317,7 +331,7 @@ namespace DalTest
                 s_dal.Volunteer?.Create(volunteer);
                 Console.WriteLine("Volunteer added successfully!");
             }
-            catch (Exception ex)
+            catch (DalAlreadyExistsException ex)
             {
                 // Handle and display any errors that occur during the process.
                 Console.WriteLine($"Error: {ex.Message}");
@@ -363,9 +377,9 @@ namespace DalTest
                     Console.WriteLine("Volunteer not found.");
                 }
             }
-            catch (Exception ex)
+            catch (DalDoesNotExistException ex)
             {
-                throw new Exception($"An error occurred while retrieving the volunteer: {ex.Message}");
+                Console.WriteLine($"An error occurred while retrieving the volunteer: {ex.Message}");
             }
         }
 
@@ -378,7 +392,7 @@ namespace DalTest
             var volunteers = s_dal.Volunteer?.ReadAll();
 
             // Check if there are any volunteers to display.
-            if (volunteers == null || volunteers.Count == 0)
+            if (volunteers == null || volunteers.Count() == 0)
             {
                 Console.WriteLine("No volunteers found.");
                 return;
@@ -404,6 +418,8 @@ namespace DalTest
                 return;
             }
 
+            try 
+            { 
             // Attempt to retrieve the volunteer by ID.
             var volunteer = s_dal.Volunteer?.Read(id);
             if (volunteer == null)
@@ -510,12 +526,12 @@ Distance Type: {volunteer.DistanceType}
             }
 
             // Attempt to save the updated volunteer details.
-            try
-            {
+            
+            
                 s_dal.Volunteer?.Update(volunteer);
                 Console.WriteLine("Volunteer details updated successfully.");
             }
-            catch (Exception ex)
+            catch (DalDoesNotExistException ex)
             {
                 Console.WriteLine($"Failed to update volunteer details: {ex.Message}");
             }
@@ -538,7 +554,7 @@ Distance Type: {volunteer.DistanceType}
                 s_dal.Volunteer?.Delete(id);
                 Console.WriteLine($"Volunteer with ID {id} was successfully deleted.");
             }
-            catch (Exception ex)
+            catch (DalDoesNotExistException ex)
             {
                 // Handle errors during deletion.
                 Console.WriteLine($"Could not delete volunteer: {ex.Message}");
@@ -550,17 +566,12 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         public static void DeleteAllVolunteers()
         {
-            try
-            {
+            
+            
                 // Attempt to delete all volunteers.
                 s_dal.Volunteer?.DeleteAll();
                 Console.WriteLine("All volunteers have been successfully deleted.");
-            }
-            catch (Exception ex)
-            {
-                // Handle errors during bulk deletion.
-                Console.WriteLine($"An error occurred while deleting all volunteers: {ex.Message}");
-            }
+          
         }
 
 
@@ -571,14 +582,14 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         static void ManageCall()
         {
-            CallMenuOptions choice;
+          
 
             while (true)
             {
                 ManageCallsMenu();
 
                 Console.Write("Enter your choice: ");
-                if (!Enum.TryParse(Console.ReadLine(), out choice) || !Enum.IsDefined(typeof(CallMenuOptions), choice))
+                if (!Enum.TryParse(Console.ReadLine(), out CallMenuOptions choice) || !Enum.IsDefined(typeof(CallMenuOptions), choice))
                 {
                     Console.WriteLine("Invalid input. Please enter a valid option.");
                     continue;
@@ -643,8 +654,7 @@ Distance Type: {volunteer.DistanceType}
             // Collect the opening time, defaulting to the current time if invalid.
             Console.Write("Enter Opening Time (yyyy-MM-dd HH:mm): ");
             string? input = Console.ReadLine();
-            DateTime openingTime;
-            if (!DateTime.TryParse(input, out openingTime))
+            if (!DateTime.TryParse(input, out DateTime openingTime))
             {
                 openingTime = DateTime.Now; // Default opening time.
             }
@@ -717,7 +727,7 @@ Distance Type: {volunteer.DistanceType}
                     Console.WriteLine($"Call with ID {id} does not exist.");
                 }
             }
-            catch (Exception ex)
+            catch (DalDoesNotExistException ex)
             {
                 // Handle and display any errors that occur.
                 Console.WriteLine($"An error occurred: {ex.Message}");
@@ -732,7 +742,7 @@ Distance Type: {volunteer.DistanceType}
             var calls = s_dal.Call?.ReadAll();
 
             // Check if any calls exist in the system.
-            if (calls == null || calls.Count == 0)
+            if (calls == null || calls.Count() == 0)
             {
                 Console.WriteLine("No calls found.");
                 return;
@@ -756,71 +766,77 @@ Distance Type: {volunteer.DistanceType}
                 Console.WriteLine("Invalid input. Please enter a valid numeric ID.");
                 return;
             }
-
-            // Retrieve the call details from the data access layer (DAL).
-            var call = s_dal.Call?.Read(id);
-            if (call == null)
+            try
             {
-                Console.WriteLine($"Call with ID {id} not found.");
-                return;
+                // Retrieve the call details from the data access layer (DAL).
+                var call = s_dal.Call?.Read(id);
+                if (call == null)
+                {
+                    Console.WriteLine($"Call with ID {id} not found.");
+                    return;
+                }
+
+                // Display existing details of the call for reference.
+                Console.WriteLine("Existing Call Details:");
+                Console.WriteLine($"ID: {call.Id}\nType: {call.Type}\nAddress: {call.FullAddress}\nLatitude: {call.Latitude}\nLongitude: {call.Longitude}\nOpening Time: {call.OpeningTime}\nMax Completion Time: {(call.MaxCompletionTime.HasValue ? call.MaxCompletionTime.Value.ToString() : "N/A")}\nDescription: {(string.IsNullOrEmpty(call.Description) ? "N/A" : call.Description)}");
+
+                Console.WriteLine("Enter updated details. Press Enter to skip any field and retain the current value.");
+
+                // Collect updated call type, if provided.
+                Console.Write("Type (current: {0}): ", call.Type);
+                string? typeInput = Console.ReadLine();
+                var updatedType = Enum.TryParse(typeInput, out CallType newType) ? newType : call.Type;
+
+                // Collect updated address, if provided.
+                Console.Write("Full Address (current: {0}): ", call.FullAddress);
+                string? updatedAddress = Console.ReadLine();
+                updatedAddress = string.IsNullOrWhiteSpace(updatedAddress) ? call.FullAddress : updatedAddress;
+
+                // Collect updated latitude, if provided.
+                Console.Write("Latitude (current: {0}): ", call.Latitude);
+                string? latitudeInput = Console.ReadLine();
+                var updatedLatitude = double.TryParse(latitudeInput, out double newLatitude) ? newLatitude : call.Latitude;
+
+                // Collect updated longitude, if provided.
+                Console.Write("Longitude (current: {0}): ", call.Longitude);
+                string? longitudeInput = Console.ReadLine();
+                var updatedLongitude = double.TryParse(longitudeInput, out double newLongitude) ? newLongitude : call.Longitude;
+
+                // Collect updated max completion time, if provided.
+                Console.Write("Max Completion Time (current: {0}): ", call.MaxCompletionTime.HasValue ? call.MaxCompletionTime.ToString() : "N/A");
+                string? maxCompletionInput = Console.ReadLine();
+                var updatedMaxCompletionTime = DateTime.TryParse(maxCompletionInput, out DateTime newMaxCompletion) ? newMaxCompletion : call.MaxCompletionTime;
+
+                // Collect updated opening time, if provided.
+                Console.Write("Opening Time (current: {0}): ", call.OpeningTime);
+                string? OpeningTime = Console.ReadLine();
+                var updatedOpeningTime = DateTime.TryParse(OpeningTime, out DateTime newOpeningTime) ? newOpeningTime : call.OpeningTime;
+
+                // Collect updated description, if provided.
+                Console.Write("Description (current: {0}): ", call.Description);
+                string? updatedDescription = Console.ReadLine();
+                updatedDescription = string.IsNullOrWhiteSpace(updatedDescription) ? call.Description : updatedDescription;
+
+                // Create a new updated Call object with modified details.
+                var updatedCall = call with
+                {
+                    Type = updatedType,
+                    FullAddress = updatedAddress,
+                    Latitude = updatedLatitude,
+                    Longitude = updatedLongitude,
+                    OpeningTime = updatedOpeningTime,
+                    MaxCompletionTime = updatedMaxCompletionTime,
+                    Description = updatedDescription
+                };
+
+                // Save the updated call details to the data access layer (DAL).
+                s_dal.Call?.Update(updatedCall);
+                Console.WriteLine("Call updated successfully.");
             }
-
-            // Display existing details of the call for reference.
-            Console.WriteLine("Existing Call Details:");
-            Console.WriteLine($"ID: {call.Id}\nType: {call.Type}\nAddress: {call.FullAddress}\nLatitude: {call.Latitude}\nLongitude: {call.Longitude}\nOpening Time: {call.OpeningTime}\nMax Completion Time: {(call.MaxCompletionTime.HasValue ? call.MaxCompletionTime.Value.ToString() : "N/A")}\nDescription: {(string.IsNullOrEmpty(call.Description) ? "N/A" : call.Description)}");
-
-            Console.WriteLine("Enter updated details. Press Enter to skip any field and retain the current value.");
-
-            // Collect updated call type, if provided.
-            Console.Write("Type (current: {0}): ", call.Type);
-            string? typeInput = Console.ReadLine();
-            var updatedType = Enum.TryParse(typeInput, out CallType newType) ? newType : call.Type;
-
-            // Collect updated address, if provided.
-            Console.Write("Full Address (current: {0}): ", call.FullAddress);
-            string? updatedAddress = Console.ReadLine();
-            updatedAddress = string.IsNullOrWhiteSpace(updatedAddress) ? call.FullAddress : updatedAddress;
-
-            // Collect updated latitude, if provided.
-            Console.Write("Latitude (current: {0}): ", call.Latitude);
-            string? latitudeInput = Console.ReadLine();
-            var updatedLatitude = double.TryParse(latitudeInput, out double newLatitude) ? newLatitude : call.Latitude;
-
-            // Collect updated longitude, if provided.
-            Console.Write("Longitude (current: {0}): ", call.Longitude);
-            string? longitudeInput = Console.ReadLine();
-            var updatedLongitude = double.TryParse(longitudeInput, out double newLongitude) ? newLongitude : call.Longitude;
-
-            // Collect updated max completion time, if provided.
-            Console.Write("Max Completion Time (current: {0}): ", call.MaxCompletionTime.HasValue ? call.MaxCompletionTime.ToString() : "N/A");
-            string? maxCompletionInput = Console.ReadLine();
-            var updatedMaxCompletionTime = DateTime.TryParse(maxCompletionInput, out DateTime newMaxCompletion) ? newMaxCompletion : call.MaxCompletionTime;
-
-            // Collect updated opening time, if provided.
-            Console.Write("Opening Time (current: {0}): ", call.OpeningTime);
-            string? OpeningTime = Console.ReadLine();
-            var updatedOpeningTime = DateTime.TryParse(OpeningTime, out DateTime newOpeningTime) ? newOpeningTime : call.OpeningTime;
-
-            // Collect updated description, if provided.
-            Console.Write("Description (current: {0}): ", call.Description);
-            string? updatedDescription = Console.ReadLine();
-            updatedDescription = string.IsNullOrWhiteSpace(updatedDescription) ? call.Description : updatedDescription;
-
-            // Create a new updated Call object with modified details.
-            var updatedCall = call with
+            catch(DalDoesNotExistException ex)
             {
-                Type = updatedType,
-                FullAddress = updatedAddress,
-                Latitude = updatedLatitude,
-                Longitude = updatedLongitude,
-                OpeningTime = updatedOpeningTime,
-                MaxCompletionTime = updatedMaxCompletionTime,
-                Description = updatedDescription
-            };
-
-            // Save the updated call details to the data access layer (DAL).
-            s_dal.Call?.Update(updatedCall);
-            Console.WriteLine("Call updated successfully.");
+                Console.WriteLine(ex.Message);
+            }
         }
         /// <summary>
         ///  // Deletes a specific call from the system based on its ID.
@@ -842,7 +858,7 @@ Distance Type: {volunteer.DistanceType}
                 s_dal.Call?.Delete(id);
                 Console.WriteLine($"Call with ID {id} was successfully deleted.");
             }
-            catch (Exception ex)
+            catch (DalDoesNotExistException ex)
             {
                 // Handles any errors during the deletion process.
                 Console.WriteLine($"Could not delete Call: {ex.Message}");
@@ -853,17 +869,14 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         public static void DeleteAllCalls()
         {
-            try
-            {
+           
+           
                 // Attempts to delete all calls.
                 s_dal.Call?.DeleteAll();
                 Console.WriteLine("All Calls have been successfully deleted.");
-            }
-            catch (Exception ex)
-            {
-                // Handles any errors during the deletion process.
-                Console.WriteLine($"An error occurred while deleting all Calls: {ex.Message}");
-            }
+
+            
+           
         }
 
 
@@ -874,7 +887,7 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         static void ManageAssignment()
         {
-            AssignmentMenuOption choice;
+  
 
             while (true)
             {
@@ -884,7 +897,7 @@ Distance Type: {volunteer.DistanceType}
                 string? input = Console.ReadLine();
 
                 // Validates user input against the available menu options.
-                if (!Enum.TryParse(input, out choice) || !Enum.IsDefined(typeof(AssignmentMenuOption), choice))
+                if (!Enum.TryParse(input, out AssignmentMenuOption choice) || !Enum.IsDefined(typeof(AssignmentMenuOption), choice))
                 {
                     Console.WriteLine("Invalid input. Please enter a valid option from the menu.");
                     continue;
@@ -933,19 +946,17 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         private static void AddAssignment()
         {
-            try
-            {
+            
+          
                 Console.WriteLine("Enter Assignment Details:");
 
                 // Reads the call ID associated with the assignment.
                 Console.Write("Call ID: ");
-                int callId = 0;
-                int.TryParse(Console.ReadLine(), out callId);
+                int.TryParse(Console.ReadLine(), out int callId);
 
                 // Reads the volunteer ID assigned to the call.
                 Console.Write("Volunteer ID: ");
-                int volunteerId = 0;
-                int.TryParse(Console.ReadLine(), out volunteerId);
+                int.TryParse(Console.ReadLine(), out int volunteerId);
 
                 // Reads the entry time when the assignment began.
                 Console.Write("Entry Time (yyyy-MM-dd HH:mm:ss): ");
@@ -955,7 +966,7 @@ Distance Type: {volunteer.DistanceType}
                 // Reads the optional completion time if the assignment has been completed.
                 Console.Write("Completion Time (optional, leave empty if not completed): ");
                 DateTime? completionTime = null;
-                string completionTimeInput = Console.ReadLine();
+                string? completionTimeInput = Console.ReadLine();
                 if (!string.IsNullOrWhiteSpace(completionTimeInput))
                 {
                     DateTime.TryParse(completionTimeInput, out var compTime);
@@ -965,7 +976,7 @@ Distance Type: {volunteer.DistanceType}
                 // Reads the completion type for the assignment.
                 Console.Write("Completion Type (1 for Treated, 2 for VolunteerCancelled, 3 for AdminCancelled, 4 for Expired): ");
                 AssignmentCompletionType? completionType = null;
-                string completionTypeInput = Console.ReadLine();
+                string? completionTypeInput = Console.ReadLine();
                 if (Enum.TryParse<AssignmentCompletionType>(completionTypeInput, out var parsedCompletionType))
                 {
                     completionType = parsedCompletionType;
@@ -984,12 +995,8 @@ Distance Type: {volunteer.DistanceType}
                 // Saves the new assignment using the data access layer.
                 s_dal.Assignment?.Create(assignment);
                 Console.WriteLine("Assignment added successfully!");
-            }
-            catch (Exception ex)
-            {
-                // Handles any errors that occur during the assignment creation.
-                Console.WriteLine($"Error: {ex.Message}");
-            }
+            
+           
         }
 
         /// <summary>
@@ -1026,7 +1033,7 @@ Distance Type: {volunteer.DistanceType}
                     Console.WriteLine($"Assignment with ID {id} does not exist.");
                 }
             }
-            catch (Exception ex) // Catch and display any unexpected errors
+            catch (DalDoesNotExistException ex) // Catch and display any unexpected errors
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
@@ -1041,7 +1048,7 @@ Distance Type: {volunteer.DistanceType}
             // Fetch all assignments from the system
             var assignments = s_dal.Assignment?.ReadAll();
 
-            if (assignments == null || assignments.Count == 0) // Check if the list is empty
+            if (assignments == null || assignments.Count() == 0) // Check if the list is empty
             {
                 Console.WriteLine("No assignments found.");
                 return;
@@ -1068,7 +1075,12 @@ Distance Type: {volunteer.DistanceType}
             }
 
             // Attempt to retrieve the existing assignment
-            var assignment = s_dal.Assignment?.Read(id);
+            try
+            {
+                var assignment = s_dal.Assignment?.Read(id);
+            
+           
+
             if (assignment == null) // If no assignment is found
             {
                 Console.WriteLine($"Assignment with ID {id} not found.");
@@ -1111,10 +1123,17 @@ Distance Type: {volunteer.DistanceType}
                 CompletionTime = updatedCompletionTime,
                 CompletionType = updatedCompletionType
             };
-
-            // Update the assignment in the system
-            s_dal.Assignment?.Update(updatedAssignment);
-            Console.WriteLine("Assignment updated successfully.");
+            
+            
+                // Update the assignment in the system
+                s_dal.Assignment?.Update(updatedAssignment);
+                Console.WriteLine("Assignment updated successfully.");
+            }
+            catch (DalDoesNotExistException ex)
+            {
+                Console.WriteLine($"Could not update Assignment: {ex.Message}");
+            }
+           
         }
 
         /// <summary>
@@ -1135,7 +1154,7 @@ Distance Type: {volunteer.DistanceType}
                 s_dal.Assignment?.Delete(id);
                 Console.WriteLine($"Assignment with ID {id} was successfully deleted.");
             }
-            catch (Exception ex) // Catch and handle any exceptions
+            catch (DalDoesNotExistException ex) // Catch and handle any exceptions
             {
                 Console.WriteLine($"Could not delete Assignment: {ex.Message}");
             }
@@ -1147,16 +1166,14 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         public static void DeleteAllAssignments()
         {
-            try
-            {
+
+            
+            
                 // Attempt to delete all assignments
                 s_dal.Assignment?.DeleteAll();
                 Console.WriteLine("All Assignments have been successfully deleted.");
-            }
-            catch (Exception ex) // Handle errors that may occur during deletion
-            {
-                Console.WriteLine($"An error occurred while deleting all Assignments: {ex.Message}");
-            }
+            
+            
         }
 
 
@@ -1309,6 +1326,7 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         static void ResetDatabase()
         {
+
             s_dal.Volunteer?.DeleteAll(); // Delete all volunteer data
             s_dal.Call?.DeleteAll();      // Delete all call data
             s_dal.Assignment?.DeleteAll(); // Delete all assignment data

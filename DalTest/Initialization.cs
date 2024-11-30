@@ -7,10 +7,7 @@ using System.Data;
 
 public static class Initialization
 {
-    /// <summary>
-    /// Static fields representing the Data Access Layer (DAL) interfaces for managing volunteers, calls, assignments, and configuration data,
-    /// as well as a shared Random instance for generating random data used throughout the application.
-    /// </summary>
+    
     private static IDal? s_dal;
     private static readonly Random s_rand = new();
 
@@ -356,11 +353,11 @@ public static class Initialization
             callTypes[i] = (DO.CallType)s_rand.Next(11);
         }
 
-        DateTime start = new DateTime(s_dal.Config.Clock.Year - 2, 1, 1);
+        DateTime start = new(s_dal.Config.Clock.Year - 2, 1, 1);
 
         for (int i = 0; i < Descriptions.Length; i++)
         {
-            var startTime = start.AddDays(-s_rand.Next(1, 30));
+            DateTime startTime = start.AddDays(-s_rand.Next(1, 30));
             DateTime? deadline = s_rand.NextDouble() < 0.5 ? (DateTime?)startTime.AddHours(s_rand.Next(1, 72)) : null;
 
             int callId = s_dal.Config.NextCallId;
@@ -483,14 +480,11 @@ public static class Initialization
         Console.WriteLine("Reset Configuration values and List values...");
         s_dal.ResetDB();//stage 2
 
-
-        // Populate the Volunteers list with initial data.
+       
         createVolunteer();
 
-        // Populate the Calls list with initial data.
         createCall();
-
-        // Populate the Assignments list with initial data.
+ 
         createAssignment();
     }
 
