@@ -11,7 +11,7 @@ public enum DistanceType
 {
     Aerial,       // Aerial (straight-line) distance
     Walking,      // Walking distance (via paths)
-    Driving       // Driving distance (via roads)
+    Driving       // Driving distance (via roads )
 }
 
 // Enum for call types 
