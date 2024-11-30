@@ -173,6 +173,7 @@ public static class Initialization
                 MaxDistance: maxDistances[0],
                 DistanceType: firstDistanceType
            );
+        s_dalVolunteer?.Create(firstVolunteer);
 
         // Iterate over the rest of the volunteers and assign them as regular volunteers.
         for (int i = 1; i < VolunteerNames.Length; i++)
