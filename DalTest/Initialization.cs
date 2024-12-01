@@ -12,7 +12,7 @@ public static class Initialization
     private static readonly Random s_rand = new();
 
     /// <summary>
-    /// Initializes a list of volunteers with predefined data and saves them using the DAL (Data Access Layer) object.
+    /// Initializes  a list of volunteers with predefined data and saves them using the DAL (Data Access Layer) object.
     /// The first volunteer is assigned as a Manager, and the rest are regular volunteers.
     /// </summary>
     static private void createVolunteer()
