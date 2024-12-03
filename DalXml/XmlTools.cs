@@ -113,18 +113,45 @@ static class XMLTools
         root.Element(elemName)?.SetValue((elemVal).ToString());
         XMLTools.SaveListToXMLElement(root, xmlFileName);
     }
+
+    /// <summary>
+    /// Added this method to handle <see cref="TimeSpan"/> values as they were required in the program,
+    /// but were not included at this provided helper file.
+    /// </summary>
+    
+    /// <summary>
+    /// Retrieves a <see cref="TimeSpan"/> value from the specified XML element.
+    /// Throws a <see cref="FormatException"/> if the value cannot be parsed.
+    /// </summary>
+    /// <param name="xmlFileName">The XML file to load the element from.</param>
+    /// <param name="elemName">The name of the element containing the TimeSpan value.</param>
+    /// <returns>A <see cref="TimeSpan"/> value.</returns>
     public static TimeSpan GetConfigRiskRange(string xmlFileName, string elemName)
     {
         XElement root = XMLTools.LoadListFromXMLElement(xmlFileName);
         TimeSpan dt = root.ToTimeSpanNullable(elemName) ?? throw new FormatException($"can't convert:  {xmlFileName}, {elemName}");
         return dt;
     }
+
+    /// <summary>
+    /// Sets an integer value for the specified element in the given XML file.
+    /// </summary>
+    /// <param name="xmlFileName">The XML file to modify.</param>
+    /// <param name="elemName">The name of the element to set the value for.</param>
+    /// <param name="elemVal">The integer value to set.</param>
     public static void SetConfigIntTimeSpan(string xmlFileName, string elemName, int elemVal)
     {
         XElement root = XMLTools.LoadListFromXMLElement(xmlFileName);
         root.Element(elemName)?.SetValue((elemVal).ToString());
         XMLTools.SaveListToXMLElement(root, xmlFileName);
     }
+
+    /// <summary>
+    /// Sets a <see cref="TimeSpan"/> value for the specified element in the given XML file.
+    /// </summary>
+    /// <param name="xmlFileName">The XML file to modify.</param>
+    /// <param name="elemName">The name of the element to set the value for.</param>
+    /// <param name="elemVal">The <see cref="TimeSpan"/> value to set.</param>
     public static void SetConfigTimeSpan(string xmlFileName, string elemName, TimeSpan elemVal)
     {
         XElement root = XMLTools.LoadListFromXMLElement(xmlFileName);
@@ -142,6 +169,14 @@ static class XMLTools
         double.TryParse((string?)element.Element(name), out var result) ? (double?)result : null;
     public static int? ToIntNullable(this XElement element, string name) =>
         int.TryParse((string?)element.Element(name), out var result) ? (int?)result : null;
+
+    /// <summary>
+    /// Tries to parse the value of a child element as a nullable <see cref="TimeSpan"/>.
+    /// Returns null if parsing fails.
+    /// </summary>
+    /// <param name="element">The parent <see cref="XElement"/>.</param>
+    /// <param name="name">The name of the child element to parse.</param>
+    /// <returns>A nullable <see cref="TimeSpan"/> or null.</returns>
     public static TimeSpan? ToTimeSpanNullable(this XElement element, string name) =>
        TimeSpan.TryParse((string?)element.Element(name), out var result) ? (TimeSpan?)result : null;
     #endregion
