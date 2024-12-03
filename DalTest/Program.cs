@@ -74,7 +74,9 @@ namespace DalTest
     internal class Program
     {
         // Static instances for managing application data and configuration.
-        static readonly IDal s_dal = new DalList(); //stage 2
+        //static readonly IDal s_dal = new DalList(); //stage 2
+
+        static readonly IDal s_dal = new DalXml(); //stage 3
 
         /// <summary>
         /// Entry point of the application.
@@ -638,7 +640,11 @@ Distance Type: {volunteer.DistanceType}
             }
 
             // Read and parse the user's selection of call type.
-            int typeChoice = int.Parse(Console.ReadLine() ?? "0");
+            if (!int.TryParse(Console.ReadLine(), out int typeChoice))
+            {
+                typeChoice = 0; 
+            }
+
             CallType type = (CallType)typeChoice;
 
             // Collect the full address from the user.
@@ -647,9 +653,16 @@ Distance Type: {volunteer.DistanceType}
 
             // Collect geographical coordinates from the user.
             Console.Write("Enter Latitude: ");
-            double latitude = double.Parse(Console.ReadLine() ?? "0");
+            if (!double.TryParse(Console.ReadLine(), out double latitude))
+            {
+                latitude = 0; 
+            }
+
             Console.Write("Enter Longitude: ");
-            double longitude = double.Parse(Console.ReadLine() ?? "0");
+            if (!double.TryParse(Console.ReadLine(), out double longitude))
+            {
+                longitude = 0; 
+            }
 
             // Collect the opening time, defaulting to the current time if invalid.
             Console.Write("Enter Opening Time (yyyy-MM-dd HH:mm): ");
@@ -1117,6 +1130,7 @@ Distance Type: {volunteer.DistanceType}
             // Create a new Assignment object with updated values
             var updatedAssignment = assignment with
             {
+                Id = assignment.Id,
                 CallId = updatedCallId,
                 VolunteerId = updatedVolunteerId,
                 EntryTime = updatedEntryTime,
@@ -1365,7 +1379,7 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         public static void DisplayMainMenu()
         { 
-            Console.WriteLine("Main Menu:");
+            Console.WriteLine("\n--- Main Menu ---");
             Console.WriteLine("1. Manage Volunteers");
             Console.WriteLine("2. Manage Calls");
             Console.WriteLine("3. Manage Assigments");
@@ -1377,7 +1391,7 @@ Distance Type: {volunteer.DistanceType}
         }
         static void ManageVolunteersMenu()
         {
-            Console.WriteLine("Manage Volunteers Menu:");
+            Console.WriteLine("\n--- Manage Volunteers Menu ---");
             Console.WriteLine("1. Add Volunteer");
             Console.WriteLine("2. View Volunteer by ID");
             Console.WriteLine("3. View All Volunteers");
@@ -1390,7 +1404,7 @@ Distance Type: {volunteer.DistanceType}
         static void ManageCallsMenu()
         {
            
-            Console.WriteLine("Manage Calls Menu:");
+            Console.WriteLine("\n--- Manage Calls Menu ---");
             Console.WriteLine("1. Add Call");
             Console.WriteLine("2. View Call by ID");
             Console.WriteLine("3. View All Calls");
@@ -1402,7 +1416,7 @@ Distance Type: {volunteer.DistanceType}
         static void ManageAssignmentsMenu()
         {
            
-            Console.WriteLine("Manage Assignments Menu:");
+            Console.WriteLine("\n--- Manage Assignments Menu ---");
             Console.WriteLine("1. Add Assignment");
             Console.WriteLine("2. View Assignment by ID");
             Console.WriteLine("3. View All Assignments");

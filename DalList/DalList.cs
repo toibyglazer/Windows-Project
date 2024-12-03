@@ -38,7 +38,5 @@ sealed public class DalList : IDal
         Call.DeleteAll();
         Assignment.DeleteAll();
         Config.Reset();
-
-
     }
 }

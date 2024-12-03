@@ -360,7 +360,7 @@ public static class Initialization
             DateTime startTime = start.AddDays(-s_rand.Next(1, 30));
             DateTime? deadline = s_rand.NextDouble() < 0.5 ? (DateTime?)startTime.AddHours(s_rand.Next(1, 72)) : null;
 
-            int callId = s_dal.Config.NextCallId;
+            int callId = 1;
             var call = new Call
                (
                    Id: callId,
@@ -408,7 +408,7 @@ public static class Initialization
         {
             Assignment a = new Assignment(
                 Id: assignmentId,
-                CallId: s_dal.Config.NextCallId,
+                CallId: 1,
                 VolunteerId: volunteerId[i],
                 EntryTime: s_dal.Config.Clock,
                 CompletionTime: null,
@@ -423,7 +423,7 @@ public static class Initialization
         {
             Assignment a = new Assignment(
                 Id: assignmentId,
-                CallId: s_dal.Config.NextCallId,
+                CallId: 1,
                 VolunteerId: volunteerId[i],
                 EntryTime: s_dal.Config.Clock,
                 CompletionTime: null,
@@ -437,7 +437,7 @@ public static class Initialization
         {
             Assignment a = new Assignment(
                 Id: assignmentId,
-                CallId: s_dal.Config.NextCallId,
+                CallId: 1,
                 VolunteerId: volunteerId[i],
                 EntryTime: s_dal.Config.Clock,
                 CompletionTime: null,
@@ -451,7 +451,7 @@ public static class Initialization
         {
             Assignment a = new Assignment(
                 Id: assignmentId,
-                CallId: s_dal.Config.NextCallId,
+                CallId: 1,
                 VolunteerId: volunteerId[i],
                 EntryTime: s_dal.Config.Clock,
                 CompletionTime: null,
