@@ -1379,14 +1379,14 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         public static void DisplayMainMenu()
         { 
-            Console.WriteLine("\n--- Main Menu ---");
+            Console.WriteLine("--- Main Menu ---");
             Console.WriteLine("1. Manage Volunteers");
             Console.WriteLine("2. Manage Calls");
             Console.WriteLine("3. Manage Assigments");
             Console.WriteLine("4. Manage Configurations");
             Console.WriteLine("5. Initialize Database");
             Console.WriteLine("6. Reset Database");
-            Console.WriteLine("7. Display All Data"); // הוספת האופציה להצגת כל הנתונים
+            Console.WriteLine("7. Display All Data"); 
             Console.WriteLine("0. Exit");
         }
         static void ManageVolunteersMenu()

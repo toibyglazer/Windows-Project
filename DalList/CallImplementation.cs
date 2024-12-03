@@ -37,9 +37,9 @@ internal class CallImplementation : ICall
         DataSource.Calls.Remove(existingCall);
     }
     public void DeleteAll()
-    {
-        if (DataSource.Calls.Count == 0)
-           Console.WriteLine("Warning: The Calls list is already empty.");
+   {
+    //    if (DataSource.Calls.Count == 0)
+    //       Console.WriteLine("Warning: The Calls list is already empty.");
     
         DataSource.Calls.Clear();
     }

@@ -36,8 +36,7 @@ internal class VolunteerImplementation : IVolunteer
     }
     public void DeleteAll()
     {
-        if (DataSource.Volunteers.Count == 0)
-           Console.WriteLine("Warning: The Volunteers list is already empty.");
+        
         DataSource.Volunteers.Clear();
     }
     public Volunteer? Read(int id)

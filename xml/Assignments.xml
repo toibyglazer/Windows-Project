@@ -400,4 +400,28 @@
     <CompletionTime />
     <CompletionType>Expired</CompletionType>
   </Assignment>
+  <Assignment>
+    <Id>53</Id>
+    <CallId>1234567</CallId>
+    <VolunteerId>123456788</VolunteerId>
+    <EntryTime>0001-01-01T00:00:00</EntryTime>
+    <CompletionTime>0001-01-01T00:00:00</CompletionTime>
+    <CompletionType />
+  </Assignment>
+  <Assignment>
+    <Id>55</Id>
+    <CallId>23</CallId>
+    <VolunteerId>0</VolunteerId>
+    <EntryTime>0001-01-01T00:00:00</EntryTime>
+    <CompletionTime />
+    <CompletionType />
+  </Assignment>
+  <Assignment>
+    <Id>57</Id>
+    <CallId>1234</CallId>
+    <VolunteerId>0</VolunteerId>
+    <EntryTime>0001-01-01T00:00:00</EntryTime>
+    <CompletionTime />
+    <CompletionType />
+  </Assignment>
 </ArrayOfAssignment>

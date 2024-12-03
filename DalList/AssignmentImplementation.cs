@@ -34,8 +34,8 @@ internal class AssignmentImplementation : IAssignment
 
     public void DeleteAll()
     {
-        if (DataSource.Assignments.Count == 0)
-           Console.WriteLine("Warning: The Assignments list is already empty.");
+        //if (DataSource.Assignments.Count == 0)
+        //   Console.WriteLine("Warning: The Assignments list is already empty.");
         DataSource.Assignments.Clear();
     }
 
