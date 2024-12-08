@@ -73,10 +73,10 @@ namespace DalTest
 
     internal class Program
     {
-        // Static instances for managing application data and configuration.
-        //static readonly IDal s_dal = new DalList(); //stage 2
 
-        static readonly IDal s_dal = new DalXml(); //stage 3
+        //static readonly IDal s_dal = new DalList(); //stage 2
+        //static readonly IDal s_dal = new DalXml(); //stage 3
+        static readonly IDal s_dal = Factory.Get; //stage 4
 
         /// <summary>
         /// Entry point of the application.
@@ -1330,7 +1330,9 @@ Distance Type: {volunteer.DistanceType}
         /// </summary>
         static void InitializeDatabase()
         {
-            Initialization.Do(s_dal); // Perform the initialization process
+            //Initialization.Do(s_dal); //stage 2
+            Initialization.Do(); //stage 4
+
             Console.WriteLine("Database initialized successfully."); // Notify user of successful initialization
         }
 

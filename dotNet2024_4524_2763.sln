@@ -21,8 +21,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{A1A82934-DDDB-45B7-8D50-16A5FF8C117D}"
 	ProjectSection(SolutionItems) = preProject
 		xml\Assignments.xml = xml\Assignments.xml
-		xml\data-config.xml = xml\data-config.xml
 		xml\Calls.xml = xml\Calls.xml
+		xml\dal-config.xml = xml\dal-config.xml
+		xml\data-config.xml = xml\data-config.xml
 		xml\Volunteers.xml = xml\Volunteers.xml
 	EndProjectSection
 EndProject

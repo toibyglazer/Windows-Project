@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfVolunteer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Volunteer>
-    <Id>314853586</Id>
+    <Id>208638660</Id>
     <FullName>David Levi</FullName>
     <PhoneNumber>052-1234567</PhoneNumber>
     <Email>david.levi@gmail.com</Email>
@@ -15,7 +15,7 @@
     <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>245726216</Id>
+    <Id>262734909</Id>
     <FullName>Rachel Cohen</FullName>
     <PhoneNumber>054-2345678</PhoneNumber>
     <Email>rachel.cohen@gmail.com</Email>
@@ -26,10 +26,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>2</MaxDistance>
-    <DistanceType>Driving</DistanceType>
+    <DistanceType>Aerial</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>290160205</Id>
+    <Id>329838642</Id>
     <FullName>Moshe Mizrahi</FullName>
     <PhoneNumber>050-3456789</PhoneNumber>
     <Email>moshe.mizrahi@gmail.com</Email>
@@ -40,10 +40,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>3</MaxDistance>
-    <DistanceType>Driving</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>243974019</Id>
+    <Id>312670017</Id>
     <FullName>Tamar Kaplan</FullName>
     <PhoneNumber>052-4567890</PhoneNumber>
     <Email>tamar.kaplan@gmail.com</Email>
@@ -54,10 +54,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>4.5</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>231109459</Id>
+    <Id>213618774</Id>
     <FullName>Yosef Goldstein</FullName>
     <PhoneNumber>054-5678901</PhoneNumber>
     <Email>yosef.goldstein@gmail.com</Email>
@@ -71,7 +71,7 @@
     <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>381417455</Id>
+    <Id>284985973</Id>
     <FullName>Esther Ben-Shimon</FullName>
     <PhoneNumber>050-6789012</PhoneNumber>
     <Email>esther.benshimon@gmail.com</Email>
@@ -82,10 +82,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>6</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>217776151</Id>
+    <Id>281664992</Id>
     <FullName>Avi Rosenberg</FullName>
     <PhoneNumber>052-7890123</PhoneNumber>
     <Email>avi.rosenberg@gmail.com</Email>
@@ -96,10 +96,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>7.5</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>304516883</Id>
+    <Id>353821258</Id>
     <FullName>Hila Sharabi</FullName>
     <PhoneNumber>054-8901234</PhoneNumber>
     <Email>hila.sharabi@gmail.com</Email>
@@ -113,7 +113,7 @@
     <DistanceType>Aerial</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>291524191</Id>
+    <Id>319541485</Id>
     <FullName>Noam Azulai</FullName>
     <PhoneNumber>050-9012345</PhoneNumber>
     <Email>noam.azulai@gmail.com</Email>
@@ -124,10 +124,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>10</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>217699968</Id>
+    <Id>301759933</Id>
     <FullName>Yael Peretz</FullName>
     <PhoneNumber>052-0123456</PhoneNumber>
     <Email>yael.peretz@gmail.com</Email>
@@ -138,10 +138,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>12.5</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Aerial</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>265135054</Id>
+    <Id>396305451</Id>
     <FullName>Eli Barak</FullName>
     <PhoneNumber>054-1234567</PhoneNumber>
     <Email>eli.barak@gmail.com</Email>
@@ -152,10 +152,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>15</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>233526516</Id>
+    <Id>379343755</Id>
     <FullName>Michal Nave</FullName>
     <PhoneNumber>050-2345678</PhoneNumber>
     <Email>michal.nave@gmail.com</Email>
@@ -166,10 +166,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>18</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>303982134</Id>
+    <Id>337703739</Id>
     <FullName>Shai Elbaz</FullName>
     <PhoneNumber>052-3456789</PhoneNumber>
     <Email>shai.elbaz@gmail.com</Email>
@@ -180,10 +180,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>20</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>371510611</Id>
+    <Id>344393809</Id>
     <FullName>Dana Regev</FullName>
     <PhoneNumber>054-4567890</PhoneNumber>
     <Email>dana.regev@gmail.com</Email>
@@ -194,10 +194,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>22.5</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>266404953</Id>
+    <Id>243129679</Id>
     <FullName>Nadav Shamir</FullName>
     <PhoneNumber>050-5678901</PhoneNumber>
     <Email>nadav.shamir@gmail.com</Email>
@@ -208,10 +208,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>25</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>301948682</Id>
+    <Id>322845196</Id>
     <FullName>Orly Yitzhak</FullName>
     <PhoneNumber>052-6789012</PhoneNumber>
     <Email>orly.yitzhak@gmail.com</Email>
@@ -222,10 +222,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>30</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>268875968</Id>
+    <Id>286774689</Id>
     <FullName>Daniel Vaknin</FullName>
     <PhoneNumber>054-7890123</PhoneNumber>
     <Email>daniel.vaknin@gmail.com</Email>
@@ -236,10 +236,10 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>35</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
-    <Id>215984849</Id>
+    <Id>367075484</Id>
     <FullName>Adi Kadosh</FullName>
     <PhoneNumber>050-8901234</PhoneNumber>
     <Email>adi.kadosh@gmail.com</Email>
@@ -250,6 +250,6 @@
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>40</MaxDistance>
-    <DistanceType>Driving</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
 </ArrayOfVolunteer>

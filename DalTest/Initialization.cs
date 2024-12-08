@@ -470,10 +470,12 @@ public static class Initialization
     /// <param name="dalCall">The data access object for Calls.</param>
     /// <param name="dalAssignment">The data access object for Assignments.</param>
     /// <param name="dalConfig">The data access object for Configuration.</param>
-    public static void Do(IDal dal)
+    //public static void Do(IDal dal) //stage 2
+    public static void Do() //stage 4
     {
         // Ensure all DAL objects are initialized; throw exceptions for null references.
-        s_dal = dal ?? throw new NullReferenceException("DAL object can not be null!"); // stage 2
+        // s_dal = dal ?? throw new NullReferenceException("DAL object can not be null!");  stage 2
+        s_dal = DalApi.Factory.Get; //stage 4
 
 
         // Reset configuration values and clear all data in Volunteers, Calls, and Assignments lists.
