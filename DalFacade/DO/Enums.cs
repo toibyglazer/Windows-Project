@@ -27,7 +27,8 @@ public enum CallType
     EmergencyResponse,       // מענה למצבי חירום
     BaseMaintenance,         // תחזוקה בבסיס
     KitPreparation,          // הכנת ערכות לחיילים
-    SpecialEventSupport      // תמיכה באירועים מיוחדים
+    SpecialEventSupport ,     // תמיכה באירועים מיוחדים
+    None
 }
 
 public enum AssignmentCompletionType

@@ -20,11 +20,11 @@ public record Assignment
     int Id,
     int CallId,
     int VolunteerId,
-    DateTime EntryTime,
-    DateTime? CompletionTime = null,
-    AssignmentCompletionType? CompletionType = null
+    DateTime EntryTime,//זמן כניסה לטיפול
+    DateTime? CompletionTime = null,//זמן סיום הטיפול בפועל
+    AssignmentCompletionType? CompletionType = null//סוג סיום הטיפול
 )
-{
+{   
     /// <summary>
     /// Default constructor
     /// </summary>
