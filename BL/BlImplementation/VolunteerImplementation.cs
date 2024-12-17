@@ -22,8 +22,6 @@ internal class VolunteerImplementation : IVolunteer
     {
         throw new NotImplementedException();
     }
-
-
     public BO.Volunteer GetVolunteerDetails(int volunteerId)
     {
         try
@@ -133,9 +131,12 @@ internal class VolunteerImplementation : IVolunteer
 
         if (DOvolunteer.Role != (DO.VolunteerRole)volunteer.Role)
             throw new BO.BlAccessDeniedException("You are not allowed to change your role.");
+
+
+        Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
+
        
 
-        
 
 
 

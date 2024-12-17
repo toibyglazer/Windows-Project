@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-namespace DalApi;
+﻿namespace DalApi;
 
 /// <summary>
 /// Interface for managing global configuration settings in the system.

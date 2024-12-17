@@ -2,19 +2,20 @@
 using DalApi;
 using System.Linq;
 using System.Text.RegularExpressions;
-namespace Helpers;
-
-
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Data;
+using BlApi;
+using DO;
 
+namespace Helpers;
 internal static class VolunteerManager
 {
     private static IDal s_dal = Factory.Get; //stage 4
 
-
+    #region Calculations for call closure types
     private static int CountAssignmentsByType(int volunteerId, DO.AssignmentCompletionType completionType)
     {
         return s_dal.Assignment.ReadAll()
@@ -28,6 +29,8 @@ internal static class VolunteerManager
 
     public static int GetTotalExpiredCalls(int volunteerId) =>
         CountAssignmentsByType(volunteerId, DO.AssignmentCompletionType.Expired);
+    #endregion
+
 
     public static int? GetActiveCallId(int volunteerId)
     {
@@ -53,7 +56,6 @@ internal static class VolunteerManager
         }
         return (BO.CallType)call.Type;
     }
-
     public static BO.VolunteerInList ConvertToBOVolunteerInList(DO.Volunteer volunteer)
     {
         return new BO.VolunteerInList
@@ -68,6 +70,31 @@ internal static class VolunteerManager
             Type = GetOpenCallType(volunteer.Id)
         };
     }
+    public static DO.Volunteer ConvertToDOVolunteer(BO.Volunteer volunteer)
+    {
+        //בתוך הפונקציה המזמנת של עדכון לזמן את הפונקציה הזאת עם BO 
+        //להכניס לתוך DOVOLUNTEER
+        //ואז לזמן את המתודה עדכון עם _SDAL
+        //צריך לעדכן את הקווי אורך ורוחב ולהכניס אותם ברשימה של ההחזרה פה בפונקציה
+        return new DO.Volunteer
+        {
+            Id= volunteer.Id,
+            FullName= volunteer.FullName,
+            PhoneNumber= volunteer.PhoneNumber,
+            Email= volunteer.Email,
+            Password = volunteer.Password,
+            CurrentAddress= volunteer.CurrentAddress,
+            Role= (DO.VolunteerRole)volunteer.Role,
+            IsActive= volunteer.IsActive,
+            MaxDistance= volunteer.MaxDistance,
+            DistanceType= (DO.DistanceType)volunteer.DistanceType
+        };
+    }
+
+
+
+
+    #region Creating Call in progress
     public static int GetActiveAssignmentId(int volunteerId)
     {
         var activeAssignment = s_dal.Assignment.ReadAll()
@@ -83,17 +110,15 @@ internal static class VolunteerManager
 
         return activeAssignment.EntryTime;
     }
-
-    //מחזירה מרחק בהתאם לסוג המרחק אוויר
     public static double CalculateDistance(double? lat1, double? lon1, double lat2, double lon2, BO.DistanceType distanceType)
     {
 
         if (lat1 == null || lon1 == null)
-            return 0; // ערך ברירת מחדל למרחק במקרה של ערכים חסרים
+            return 0;
 
         double distance = HaversineDistance(lat1, lon1, lat2, lon2);
 
-      
+
         return distanceType switch
         {
             BO.DistanceType.Aerial => distance,
@@ -103,8 +128,6 @@ internal static class VolunteerManager
         };
     }
 
-
-    //פונקציית עזר לחישוב מרחק
     private static double HaversineDistance(double? lat1, double? lon1, double lat2, double lon2)
     {
         const int R = 6371;
@@ -126,33 +149,16 @@ internal static class VolunteerManager
 
         return R * c;
     }
-
-    //חישוב זמן הגעה לפי סוג המרחק אווירי נסיעה הליכה
-    public static TimeSpan CalculateTime(double distance, BO.DistanceType distanceType)
-    {
-        // מהירויות ממוצעות בקמ"ש
-        double speed = distanceType switch
-        {
-            BO.DistanceType.Aerial => 800,   // מהירות טיסה (קמ"ש)
-            BO.DistanceType.Walking => 5,   // מהירות הליכה (קמ"ש)
-            BO.DistanceType.Driving => 50,  // מהירות נסיעה (קמ"ש)
-            _ => 5
-        };
-
-        double timeInHours = distance / speed; // זמן בשעות
-        return TimeSpan.FromHours(timeInHours);
-    }
-
     public static ActiveCallStatus DetermineCallStatus(DateTime? maxCompletionTime)
     {
         if (maxCompletionTime.HasValue)
         {
-            DateTime currentTime = s_dal.Config.Clock;  // הזמן הנוכחי לפי הגדרת הקונפיגורציה.
+            DateTime currentTime = s_dal.Config.Clock;
             DateTime maxCompletionDate = maxCompletionTime.Value;
 
             TimeSpan timeRemaining = maxCompletionDate - currentTime;
 
-            // אם הזמן שנותר קטן או שווה לטווח הסיכון - קריאה בסיכון
+
             if (timeRemaining <= s_dal.Config.RiskRangelock)
             {
                 return ActiveCallStatus.AtRisk;
@@ -164,36 +170,51 @@ internal static class VolunteerManager
         }
         else
         {
-            // אם אין תאריך סיום מוגדר, אין הגבלת זמן, ולכן נשאר InProgress
             return ActiveCallStatus.InProgress;
         }
     }
 
+    #endregion
 
 
-    
-    
-        public static void ValidateId(int id)
-        {
-            if (id <= 0)
-                throw new InvalidIdException("ID must be a positive number.");
-            if (!IsValidIsraeliId(id))
-                throw new InvalidIdException("ID is not valid.");
-        }
 
-        public static void ValidateFullName(string fullName)
-        {
-            if (string.IsNullOrWhiteSpace(fullName))
-                throw new InvalidFullNameException("Full name cannot be empty.");
-        }
 
-        public static void ValidatePhoneNumber(string phoneNumber)
-        {
-            if (string.IsNullOrWhiteSpace(phoneNumber))
-                throw new InvalidPhoneNumberException("Phone number cannot be empty.");
-            if (!Regex.IsMatch(phoneNumber, @"^0\d{9}$"))
-                throw new InvalidPhoneNumberException("Phone number must start with 0 and have 10 digits.");
-        }
+
+
+    public static void ValidateVolunteerData(BO.Volunteer volunteer)
+    {
+        ValidateId(volunteer.Id);
+        ValidateFullName(volunteer.FullName);
+        ValidatePhoneNumber(volunteer.PhoneNumber);
+        ValidateEmail(volunteer.Email);
+        ValidatePassword(volunteer.Password);
+        ValidateAddress(volunteer.CurrentAddress);
+        TryParseAndValidateRole(volunteer.Role.ToString());
+        ValidateMaxDistance(volunteer.MaxDistance);
+        ValidateDistanceType(volunteer.DistanceType.ToString());
+    }
+
+    public static void ValidateId(int id)
+    {
+        if (id <= 0)
+            throw new InvalidIdException("ID must be a positive number.");
+        if (!IsValidIsraeliId(id))
+            throw new InvalidIdException("ID is not valid.");
+    }
+
+    public static void ValidateFullName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new InvalidFullNameException("Full name cannot be empty.");
+    }
+
+    public static void ValidatePhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            throw new InvalidPhoneNumberException("Phone number cannot be empty.");
+        if (!Regex.IsMatch(phoneNumber, @"^0\d{9}$"))
+            throw new InvalidPhoneNumberException("Phone number must start with 0 and have 10 digits.");
+    }
     public static void ValidateEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
@@ -201,13 +222,29 @@ internal static class VolunteerManager
         if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             throw new InvalidEmailException("Email is not valid.");
     }
-    
+
+  
+    public static void ValidatePassword(string? password)
+    {
+        if (string.IsNullOrEmpty(password))
+            throw new PasswordValidationException("Password cannot be empty or null.");
+        if (password.Length < 8)
+            throw new PasswordValidationException("Password must be at least 8 characters long.");
+        if (!Regex.IsMatch(password, "[A-Z]"))
+            throw new PasswordValidationException("Password must contain at least one uppercase letter (A-Z).");
+        if (!Regex.IsMatch(password, "[a-z]"))
+            throw new PasswordValidationException("Password must contain at least one lowercase letter (a-z).");
+        if (!Regex.IsMatch(password, "\\d"))
+            throw new PasswordValidationException("Password must contain at least one numeric digit (0-9).");
+        if (!Regex.IsMatch(password, "[!@#$%^&*(),.?\":{}|<>]"))
+            throw new PasswordValidationException("Password must contain at least one special character (e.g., !@#$%^&*).");
+    }
     public static void ValidateAddress(string? address)
     {
         if (string.IsNullOrWhiteSpace(address))
             return;  // No address provided, it's valid as null.
 
-       
+
         var parts = address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 3)
             throw new AddressValidationException("Address must include Street, City, and Country");
@@ -219,143 +256,57 @@ internal static class VolunteerManager
         if (street.Length < 2 || city.Length < 2 || country.Length < 2)
             throw new AddressValidationException("Each part of the address must be at least 2 characters long");
 
-       
-        if (!GeocodingService.CheckAddressExists(address))
+
+        if (!GeocodingService.VerifyAddressExists(address))
             throw new AddressValidationException("Address does not exist in reality");
     }
-
-
-
     public static void ValidateLatitudeLongitude(double? latitude, double? longitude)
-        {
-            if (latitude.HasValue && (latitude < -90 || latitude > 90))
-                throw new InvalidCoordinatesException("Latitude must be between -90 and 90.");
-            if (longitude.HasValue && (longitude < -180 || longitude > 180))
-                throw new InvalidCoordinatesException("Longitude must be between -180 and 180.");
-        }
-
-
-        public static void ValidatePassword(string? password)
-        {
-            if (!string.IsNullOrEmpty(password) && password.Length < 6)
-                throw new InvalidPasswordException("Password must have at least 6 characters.");
-        }
-
-        public static void ValidateMaxDistance(double? maxDistance)
-        {
-            if (maxDistance.HasValue && maxDistance <= 0)
-                throw new InvalidMaxDistanceException("Max distance must be a positive number.");
-        }
-
-        public static void ValidateRole(VolunteerRole role)
-        {
-            if (!Enum.IsDefined(typeof(VolunteerRole), role))
-                throw new InvalidRoleException("Role is not valid.");
-        }
-
-        public static void ValidateIsActive(bool isActive)
-        {
-            // אין צורך בבדיקה כי זה שדה בוליאני
-        }
-
-        // פונקציות עזר פשוטות:
-        private static bool IsValidIsraeliId(int id)
-        {
-            // לוגיקה פשוטה לבדיקה, לדוגמה חישוב ספרת ביקורת.
-            string idString = id.ToString("D9");
-            int sum = 0;
-            for (int i = 0; i < 9; i++)
-            {
-                int digit = int.Parse(idString[i].ToString());
-                if (i % 2 == 1)
-                    digit *= 2;
-                if (digit > 9)
-                    digit -= 9;
-                sum += digit;
-            }
-            return sum % 10 == 0;
-        }
-
-        private static bool IsRealAddress(string address)
-        {
-            // סימולציה של בדיקה פשוטה. ניתן להרחיב עם ממשקי API.
-            return address.Length > 5;
-        }
-}
-
-
-
-
-public class GeoCoordinates
-{
-    public double? Latitude { get; set; }
-    public double? Longitude { get; set; }
-}
-
-
-public static class GeocodingService
-{
-    public static GeoCoordinates CallOpenStreetMapApi(string address)
     {
-        try
-        {
-            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={Uri.EscapeDataString(address)}";
-
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "C# App");
-
-                // מבצע קריאה סינכרונית
-                var response = client.GetStringAsync(url).Result;
-
-                var jsonArray = JArray.Parse(response);
-
-                if (jsonArray.Count > 0)
-                {
-                    var location = jsonArray[0];
-                    return new GeoCoordinates
-                    {
-                        Latitude = (double)location["lat"],
-                        Longitude = (double)location["lon"]
-                    };
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to get geolocation: {ex.Message}");
-        }
-
-        return null;
+        if (latitude.HasValue && (latitude < -90 || latitude > 90))
+            throw new InvalidCoordinatesException("Latitude must be between -90 and 90.");
+        if (longitude.HasValue && (longitude < -180 || longitude > 180))
+            throw new InvalidCoordinatesException("Longitude must be between -180 and 180.");
     }
-    private static readonly HttpClient httpClient = new HttpClient();
-
-    public static bool CheckAddressExists(string address)
+    public static void TryParseAndValidateRole(string roleString)
     {
-        try
-        {
-            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={Uri.EscapeDataString(address)}";
-
-            httpClient.DefaultRequestHeaders.Clear();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
-
-            // שליחה סינכרונית של הבקשה
-            var response = httpClient.GetStringAsync(url).Result;
-
-            var jsonArray = JArray.Parse(response);
-
-            // אם יש תוצאה כלשהי, הכתובת קיימת
-            return jsonArray.Count > 0;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to check address existence: {ex.Message}");
-            return false;
-        }
+        if (!Enum.TryParse(roleString, true, out BO.VolunteerRole role))
+            throw new InvalidRoleException($"Invalid role string: {roleString}");
+    }
+    public static void ValidateMaxDistance(double? maxDistance)
+    {
+        if (maxDistance.HasValue && maxDistance <= 0)
+            throw new InvalidMaxDistanceException("Max distance must be a positive number.");
     }
 
-
-
+    public static void ValidateDistanceType(string input)
+    {
+        if (!Enum.TryParse(input, true, out BO.DistanceType distanceType))
+        {
+            throw new InvalidDistanceTypeException($"Invalid input '{input}' for DistanceType.");
+        }
+    }
+    private static bool IsValidIsraeliId(int id)
+    {
+        string idString = id.ToString("D9");
+        int sum = 0;
+        for (int i = 0; i < 9; i++)
+        {
+            int digit = int.Parse(idString[i].ToString());
+            if (i % 2 == 1)
+                digit *= 2;
+            if (digit > 9)
+                digit -= 9;
+            sum += digit;
+        }
+        return sum % 10 == 0;
+    }
+ 
 }
+
+
+
+
+
+
 
 

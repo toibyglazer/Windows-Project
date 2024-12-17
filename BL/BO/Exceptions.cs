@@ -83,3 +83,19 @@ public class AddressValidationException : Exception
 {
     public AddressValidationException(string message) : base(message) { }
 }
+
+[Serializable]
+public class PasswordValidationException : Exception
+{
+    public PasswordValidationException(string? message) : base(message) { }
+    public PasswordValidationException(string message, Exception innerException)
+                : base(message, innerException) { }
+}
+
+    [Serializable]
+public class InvalidDistanceTypeException : Exception
+{
+    public InvalidDistanceTypeException(string? message) : base(message) { }
+    public InvalidDistanceTypeException(string message, Exception innerException)
+                : base(message, innerException) { }
+}
