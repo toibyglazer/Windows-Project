@@ -20,9 +20,9 @@ internal class VolunteerImplementation : IVolunteer
         // Load the current list of volunteers from the XML file
         List<Volunteer> volunteers = XMLTools.LoadListFromXMLSerializer<Volunteer>(Config.s_volunteers_xml);
 
-        // Check if a volunteer with the same ID already exists
         if (volunteers.Any(v => v.Id == item.Id))
-                throw new DalDoesNotExistException($"volunteer with ID={item.Id} does Not exist");
+            throw new DalAlreadyExistsException($"Volunteer with ID={item.Id} already exists.");
+
 
         // Add the new volunteer to the list and save it back to the XML file
         volunteers.Add(item);

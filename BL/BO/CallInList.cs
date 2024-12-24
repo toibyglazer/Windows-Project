@@ -11,6 +11,9 @@ public class CallInList
     public string? LastVolunteer { get; set; }
     public TimeSpan? TotalCompletionTime { get; set; }
     public int TotalAssignments { get; set; }
+    public CallStatus Status { get; set; }
+
+
     public override string ToString() => this.ToStringProperty();
 
 }

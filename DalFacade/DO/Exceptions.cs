@@ -1,6 +1,5 @@
 ﻿namespace DO;
 
-
 /// <summary>
 /// An exception will be thrown when we want to add an element that already exists in the list.
 /// </summary>
@@ -17,7 +16,6 @@ public class DalAlreadyExistsException : Exception
 public class DalDoesNotExistException : Exception
 {
     public DalDoesNotExistException(string? message) : base(message) { }
-
 }
 
 /// <summary>
@@ -27,18 +25,11 @@ public class DalDoesNotExistException : Exception
 public class DalDalDeletionImpossible : Exception
 {
     public DalDalDeletionImpossible(string? message) : base(message) { }
-
 }
 
+[Serializable]
 public class DalXMLFileLoadCreateException : Exception
 {
     public DalXMLFileLoadCreateException(string? message) : base(message) { }
-
 }
-
-
-
-
-
-
 

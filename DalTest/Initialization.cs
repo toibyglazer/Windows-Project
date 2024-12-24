@@ -7,7 +7,7 @@ using System.Data;
 
 public static class Initialization
 {
-    
+
     private static IDal? s_dal;
     private static readonly Random s_rand = new();
 
@@ -59,27 +59,18 @@ public static class Initialization
     "daniel.vaknin@gmail.com",
     "adi.kadosh@gmail.com"
 };
-        string[] addresses = new string[]
-{
-    "123 Herzl Street, Tel Aviv",
-    "45 Dizengoff Street, Haifa",
-    "89 Ben Yehuda Street, Jerusalem",
-    "12 Kaplan Avenue, Rishon Lezion",
-    "77 Goldstein Boulevard, Ashdod",
-    "34 Shimon Street, Petah Tikva",
-    "56 Rosenberg Lane, Netanya",
-    "22 Sharabi Road, Be'er Sheva",
-    "98 Azulai Street, Holon",
-    "15 Peretz Square, Kiryat Gat",
-    "11 Barak Alley, Eilat",
-    "67 Nave Promenade, Rehovot",
-    "39 Elbaz Avenue, Modi'in",
-    "28 Regev Street, Herzliya",
-    "74 Shamir Circle, Ramat Gan",
-    "18 Yitzhak Boulevard, Hadera",
-    "52 Vaknin Road, Ashkelon",
-    "26 Kadosh Lane, Nahariya"
-};
+        string[] addresses = new[]
+        {
+        "123 Herzl Street, Tel Aviv", "45 Dizengoff Street, Haifa",
+        "89 Ben Yehuda Street, Jerusalem", "12 Kaplan Avenue, Rishon Lezion",
+        "77 Goldstein Boulevard, Ashdod", "34 Shimon Street, Petah Tikva",
+        "56 Rosenberg Lane, Netanya", "22 Sharabi Road, Be'er Sheva",
+        "98 Azulai Street, Holon", "15 Peretz Square, Kiryat Gat",
+        "11 Barak Alley, Eilat", "67 Nave Promenade, Rehovot",
+        "39 Elbaz Avenue, Modi'in", "28 Regev Street, Herzliya",
+        "74 Shamir Circle, Ramat Gan", "18 Yitzhak Boulevard, Hadera",
+        "52 Vaknin Road, Ashkelon", "26 Kadosh Lane, Nahariya"
+         };
         string[] passwords = new string[]
 {
     "D@v1dL3v!2024",
@@ -194,6 +185,7 @@ public static class Initialization
             s_dal!.Volunteer.Create(volunteer); //stage 2
 
         }
+
     }
 
     static private void createCall()
@@ -382,7 +374,7 @@ public static class Initialization
     /// </summary>
     private static void createAssignment()
     {
-       
+
         int[] volunteerId = new int[]
         {
         123456789, 234567890, 345678901, 456789012,
@@ -483,11 +475,11 @@ public static class Initialization
         Console.WriteLine("Reset Configuration values and List values...");
         s_dal.ResetDB();//stage 2
 
-       
+
         createVolunteer();
 
         createCall();
- 
+
         createAssignment();
     }
 

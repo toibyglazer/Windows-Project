@@ -115,3 +115,25 @@ public enum TimeUnit
     MONTH,
     YEAR
 }
+public enum CallInListField
+{ 
+    AssignmentId,
+    CallId,
+    CallType,
+    OpenTime,
+    RemainingTime,
+    LastVolunteerName,
+    CompletionTime,
+    Status,
+    TotalAllocations
+}
+public enum OpenCallInListField
+{
+    Id,                     // שדה מזהה הקריאה
+    Type,                   // סוג הקריאה
+    Description,            // תיאור הקריאה
+    FullAddress,            // כתובת מלאה
+    OpeningTime,            // זמן פתיחת הקריאה
+    MaxCompletionTime,      // זמן סיום מקסימלי
+    DistanceToActiveCall    // מרחק לקריאה פעילה
+}

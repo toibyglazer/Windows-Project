@@ -3,6 +3,9 @@ using BlApi;
 using BO;
 using System.Collections.Generic;
 using System.Data;
+using BCrypt.Net;
+
+
 
 internal class VolunteerImplementation : IVolunteer
 {
@@ -11,25 +14,36 @@ internal class VolunteerImplementation : IVolunteer
     public BO.VolunteerRole Login(int username, string password)
     {
         DO.Volunteer volunteer = _dal.Volunteer.Read(username)
-            ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {username} does not exist.");
+               ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {username} does not exist.");
 
-        if(password != volunteer.Password)
+        bool isPasswordValid = BCrypt.Verify(password, volunteer.Password);
+        if (!isPasswordValid)
+        {
             throw new BO.BlInvalidPasswordException($"Invalid password for Volunteer with ID {username}.");
-
+        }
         return (BO.VolunteerRole)volunteer.Role;
     }
     public void AddVolunteer(BO.Volunteer volunteer)
     {
-        throw new NotImplementedException();
+        Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
+        DO.Volunteer DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteer(volunteer);
+
+        try
+        {
+            _dal.Volunteer.Create(DOvolunteer);
+        }
+
+        catch (DO.DalAlreadyExistsException ex)
+        {
+            throw new BO.BlAlreadyExistsException($"Volunteer retrieval failed: {ex.Message}");
+        }
     }
     public BO.Volunteer GetVolunteerDetails(int volunteerId)
     {
         try
         {
-            
             DO.Volunteer volunteer = _dal.Volunteer.Read(volunteerId)
-                ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
-
+             ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
             int? activeCallId = Helpers.VolunteerManager.GetActiveCallId(volunteerId);
 
             BO.CallInProgress? callInProgress = null;
@@ -37,23 +51,10 @@ internal class VolunteerImplementation : IVolunteer
             {
                 try
                 {
-              
                     DO.Call? activeCall = _dal.Call.Read(activeCallId.Value)
                         ?? throw new BO.BlDoesNotExistException($"Call with ID {activeCallId.Value} does not exist.");
 
-                    callInProgress = new BO.CallInProgress
-                    {
-                        Id = Helpers.VolunteerManager.GetActiveAssignmentId(volunteerId),
-                        CallId = activeCallId.Value,
-                        Type = (BO.CallType)activeCall.Type,
-                        FullAddress = activeCall.FullAddress,
-                        OpeningTime = activeCall.OpeningTime,
-                        MaxCompletionTime = activeCall.MaxCompletionTime,
-                        EntryTime = Helpers.VolunteerManager.GetActiveCallEntryTime(volunteerId),
-                        DistanceToActiveCall = Helpers.VolunteerManager
-                            .CalculateDistance(volunteer.Latitude, volunteer.Longitude, activeCall.Latitude, activeCall.Longitude, (BO.DistanceType)volunteer.DistanceType),
-                        activeCallStatus = Helpers.VolunteerManager.DetermineCallStatus(activeCall.MaxCompletionTime)
-                    };
+                    callInProgress = Helpers.VolunteerManager.CreateCallInProgress(volunteer, activeCall, activeCallId.Value, volunteerId);
                 }
                 catch (DO.DalDoesNotExistException ex)
                 {
@@ -61,37 +62,13 @@ internal class VolunteerImplementation : IVolunteer
                 }
             }
 
-            return new BO.Volunteer
-            {
-                Id = volunteer.Id,
-                FullName = volunteer.FullName,
-                PhoneNumber = volunteer.PhoneNumber,
-                Email = volunteer.Email,
-                Password = volunteer.Password,
-                CurrentAddress = volunteer.CurrentAddress,
-                Latitude = volunteer.Latitude,
-                Longitude = volunteer.Longitude,
-                Role = (BO.VolunteerRole)volunteer.Role,
-                IsActive = volunteer.IsActive,
-                MaxDistance = volunteer.MaxDistance,
-                DistanceType = (BO.DistanceType)volunteer.DistanceType,
-                TotalHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteer.Id),
-                TotalCancelledCalls = Helpers.VolunteerManager.GetTotalCancelledCalls(volunteer.Id),
-                TotalExpiredCalls = Helpers.VolunteerManager.GetTotalExpiredCalls(volunteer.Id),
-                ActiveCall = callInProgress
-            };
+            return Helpers.VolunteerManager.CreateVolunteer(volunteer, callInProgress);
         }
         catch (DO.DalDoesNotExistException ex)
         {
             throw new BO.BlDoesNotExistException($"Volunteer retrieval failed: {ex.Message}", ex);
         }
-        catch (Exception ex)
-        {
-            throw new BO.BlInternalLogicException($"An internal error occurred: {ex.Message}", ex);
-        }
     }
-
-
     public IEnumerable<BO.VolunteerInList> GetVolunteersList(bool? isActiveFilter = null, BO.VolunteerSortField? sortField = null)
     {
         IEnumerable<DO.Volunteer> volunteers = _dal.Volunteer.ReadAll();
@@ -116,10 +93,6 @@ internal class VolunteerImplementation : IVolunteer
 
         return BOvolunteer;
     }
-
-
-
-   
     public void UpdateVolunteer(int volunteerId, BO.Volunteer volunteer)
     {
 
@@ -134,11 +107,41 @@ internal class VolunteerImplementation : IVolunteer
 
 
         Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
+        DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteer(volunteer);
 
+        try
+        {
+            _dal.Volunteer.Update(DOvolunteer);
+        }
        
-
-
-
-
+        catch (DO.DalDoesNotExistException ex)
+        {
+            throw new BO.BlDoesNotExistException($"Volunteer retrieval failed: {ex.Message}", ex);
+        }
     }
+    public void DeleteVolunteer(int volunteerId)
+    {
+       
+        DO.Volunteer DOvolunteer = _dal.Volunteer.Read(volunteerId)
+            ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
+
+        try
+        {
+            bool hasHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteerId) > 0;
+            bool hasActiveCall = Helpers.VolunteerManager.GetActiveCallId(volunteerId) != null;
+
+            if (!hasHandledCalls && !hasActiveCall)
+                _dal.Volunteer.Delete(volunteerId);
+            
+            else
+                throw new BO.BlVolunteerCannotBeDeletedException(
+                    $"Cannot delete volunteer with ID {volunteerId}: The volunteer has handled at least one call in the past.");
+        }
+        catch (DO.DalDoesNotExistException ex)
+        {
+            
+            throw new BO.BlDoesNotExistException($"Volunteer retrieval failed: {ex.Message}", ex);
+        }
+    }
+
 }

@@ -23,7 +23,7 @@ public record Volunteer
     string FullName,
     string PhoneNumber,
     string Email,
-    string? Password = null,
+    string Password = null,
     string? CurrentAddress = null,
     double? Latitude = null,
     double? Longitude = null,

@@ -1,19 +1,13 @@
-﻿using BO;
+﻿using Bl;
+using BO;
 using DalApi;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using System.Data;
-using BlApi;
-using DO;
-
 namespace Helpers;
+using BCrypt.Net;
 internal static class VolunteerManager
 {
-    private static IDal s_dal = Factory.Get; //stage 4
+    private static IDal s_dal = DalApi.Factory.Get; //stage 4
 
     #region Calculations for call closure types
     private static int CountAssignmentsByType(int volunteerId, DO.AssignmentCompletionType completionType)
@@ -30,7 +24,6 @@ internal static class VolunteerManager
     public static int GetTotalExpiredCalls(int volunteerId) =>
         CountAssignmentsByType(volunteerId, DO.AssignmentCompletionType.Expired);
     #endregion
-
 
     public static int? GetActiveCallId(int volunteerId)
     {
@@ -56,6 +49,45 @@ internal static class VolunteerManager
         }
         return (BO.CallType)call.Type;
     }
+    public static BO.CallInProgress CreateCallInProgress(DO.Volunteer volunteer, DO.Call activeCall, int activeCallId, int volunteerId)
+    {
+        return new BO.CallInProgress
+        {
+            Id = Helpers.VolunteerManager.GetActiveAssignmentId(volunteerId),
+            CallId = activeCallId,
+            Type = (BO.CallType)activeCall.Type,
+            FullAddress = activeCall.FullAddress,
+            OpeningTime = activeCall.OpeningTime,
+            MaxCompletionTime = activeCall.MaxCompletionTime,
+            EntryTime = Helpers.VolunteerManager.GetActiveCallEntryTime(volunteerId),
+            DistanceToActiveCall = Helpers.VolunteerManager
+                .CalculateDistance(volunteer.Latitude, volunteer.Longitude, activeCall.Latitude, activeCall.Longitude, (BO.DistanceType)volunteer.DistanceType),
+            activeCallStatus = Helpers.VolunteerManager.DetermineCallStatus(activeCall.MaxCompletionTime)
+        };
+    }
+    public static BO.Volunteer CreateVolunteer(DO.Volunteer volunteer, BO.CallInProgress? callInProgress)
+    {
+        return new BO.Volunteer
+        {
+            Id = volunteer.Id,
+            FullName = volunteer.FullName,
+            PhoneNumber = volunteer.PhoneNumber,
+            Email = volunteer.Email,
+            
+            CurrentAddress = volunteer.CurrentAddress,
+            Latitude = volunteer.Latitude,
+            Longitude = volunteer.Longitude,
+            Role = (BO.VolunteerRole)volunteer.Role,
+            IsActive = volunteer.IsActive,
+            MaxDistance = volunteer.MaxDistance,
+            DistanceType = (BO.DistanceType)volunteer.DistanceType,
+            TotalHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteer.Id),
+            TotalCancelledCalls = Helpers.VolunteerManager.GetTotalCancelledCalls(volunteer.Id),
+            TotalExpiredCalls = Helpers.VolunteerManager.GetTotalExpiredCalls(volunteer.Id),
+            ActiveCall = callInProgress
+        };
+    }
+    #region Conversions
     public static BO.VolunteerInList ConvertToBOVolunteerInList(DO.Volunteer volunteer)
     {
         return new BO.VolunteerInList
@@ -72,27 +104,28 @@ internal static class VolunteerManager
     }
     public static DO.Volunteer ConvertToDOVolunteer(BO.Volunteer volunteer)
     {
-        //בתוך הפונקציה המזמנת של עדכון לזמן את הפונקציה הזאת עם BO 
-        //להכניס לתוך DOVOLUNTEER
-        //ואז לזמן את המתודה עדכון עם _SDAL
-        //צריך לעדכן את הקווי אורך ורוחב ולהכניס אותם ברשימה של ההחזרה פה בפונקציה
+        GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
+        double longitude = geoCoordinates.Longitude;
+        double latitude= geoCoordinates.Latitude;
+
+        var password = BCrypt.HashPassword(volunteer.Password);
         return new DO.Volunteer
         {
-            Id= volunteer.Id,
-            FullName= volunteer.FullName,
-            PhoneNumber= volunteer.PhoneNumber,
-            Email= volunteer.Email,
-            Password = volunteer.Password,
-            CurrentAddress= volunteer.CurrentAddress,
-            Role= (DO.VolunteerRole)volunteer.Role,
-            IsActive= volunteer.IsActive,
-            MaxDistance= volunteer.MaxDistance,
-            DistanceType= (DO.DistanceType)volunteer.DistanceType
+            Id = volunteer.Id,
+            FullName = volunteer.FullName,
+            PhoneNumber = volunteer.PhoneNumber,
+            Email = volunteer.Email,
+            Password = password,
+            CurrentAddress = volunteer.CurrentAddress,
+            Latitude = latitude,
+            Longitude = longitude,
+            Role = (DO.VolunteerRole)volunteer.Role,
+            IsActive = volunteer.IsActive,
+            MaxDistance = volunteer.MaxDistance,
+            DistanceType = (DO.DistanceType)volunteer.DistanceType
         };
     }
-
-
-
+    #endregion
 
     #region Creating Call in progress
     public static int GetActiveAssignmentId(int volunteerId)
@@ -176,24 +209,45 @@ internal static class VolunteerManager
 
     #endregion
 
-
-
-
-
-
+    #region Validate BO Volunteer Data
     public static void ValidateVolunteerData(BO.Volunteer volunteer)
     {
-        ValidateId(volunteer.Id);
-        ValidateFullName(volunteer.FullName);
-        ValidatePhoneNumber(volunteer.PhoneNumber);
-        ValidateEmail(volunteer.Email);
-        ValidatePassword(volunteer.Password);
-        ValidateAddress(volunteer.CurrentAddress);
-        TryParseAndValidateRole(volunteer.Role.ToString());
-        ValidateMaxDistance(volunteer.MaxDistance);
-        ValidateDistanceType(volunteer.DistanceType.ToString());
-    }
+        try
+        {
+            ValidateId(volunteer.Id);
+            ValidateFullName(volunteer.FullName);
+            ValidatePhoneNumber(volunteer.PhoneNumber);
+            ValidateEmail(volunteer.Email);
+            ValidatePassword(volunteer.Password);
+            ValidateAddress(volunteer.CurrentAddress);
+            TryParseAndValidateRole(volunteer.Role.ToString());
+            ValidateMaxDistance(volunteer.MaxDistance);
+            ValidateDistanceType(volunteer.DistanceType.ToString());
+        }
 
+        catch (Exception ex)
+        {
+            throw HandleValidationException(ex);
+        }
+
+    }
+    private static Exception HandleValidationException(Exception ex)
+    {
+        return ex switch
+        {
+            InvalidIdException => new InvalidIdException($"ID Validation Error: {ex.Message}"),
+            InvalidFullNameException => new InvalidFullNameException($"Full Name Validation Error: {ex.Message}"),
+            InvalidPhoneNumberException => new InvalidPhoneNumberException($"Phone Number Validation Error: {ex.Message}"),
+            InvalidEmailException => new InvalidEmailException($"Email Validation Error: {ex.Message}"),
+            PasswordValidationException => new PasswordValidationException($"Password Validation Error: {ex.Message}"),
+            AddressValidationException => new AddressValidationException($"Address Validation Error: {ex.Message}"),
+            InvalidCoordinatesException => new InvalidCoordinatesException($"Coordinates Validation Error: {ex.Message}"),
+            InvalidRoleException => new InvalidRoleException($"Role Validation Error: {ex.Message}"),
+            InvalidMaxDistanceException => new InvalidMaxDistanceException($"Max Distance Validation Error: {ex.Message}"),
+            InvalidDistanceTypeException => new InvalidDistanceTypeException($"Distance Type Validation Error: {ex.Message}"),
+            _ => new Exception($"Unexpected Error: {ex.Message}", ex),
+        };
+    }
     public static void ValidateId(int id)
     {
         if (id <= 0)
@@ -201,13 +255,26 @@ internal static class VolunteerManager
         if (!IsValidIsraeliId(id))
             throw new InvalidIdException("ID is not valid.");
     }
-
+    private static bool IsValidIsraeliId(int id)
+    {
+        string idString = id.ToString("D9");
+        int sum = 0;
+        for (int i = 0; i < 9; i++)
+        {
+            int digit = int.Parse(idString[i].ToString());
+            if (i % 2 == 1)
+                digit *= 2;
+            if (digit > 9)
+                digit -= 9;
+            sum += digit;
+        }
+        return sum % 10 == 0;
+    }
     public static void ValidateFullName(string fullName)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new InvalidFullNameException("Full name cannot be empty.");
     }
-
     public static void ValidatePhoneNumber(string phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -222,8 +289,6 @@ internal static class VolunteerManager
         if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             throw new InvalidEmailException("Email is not valid.");
     }
-
-  
     public static void ValidatePassword(string? password)
     {
         if (string.IsNullOrEmpty(password))
@@ -277,7 +342,6 @@ internal static class VolunteerManager
         if (maxDistance.HasValue && maxDistance <= 0)
             throw new InvalidMaxDistanceException("Max distance must be a positive number.");
     }
-
     public static void ValidateDistanceType(string input)
     {
         if (!Enum.TryParse(input, true, out BO.DistanceType distanceType))
@@ -285,23 +349,10 @@ internal static class VolunteerManager
             throw new InvalidDistanceTypeException($"Invalid input '{input}' for DistanceType.");
         }
     }
-    private static bool IsValidIsraeliId(int id)
-    {
-        string idString = id.ToString("D9");
-        int sum = 0;
-        for (int i = 0; i < 9; i++)
-        {
-            int digit = int.Parse(idString[i].ToString());
-            if (i % 2 == 1)
-                digit *= 2;
-            if (digit > 9)
-                digit -= 9;
-            sum += digit;
-        }
-        return sum % 10 == 0;
-    }
- 
+
+    #endregion
 }
+
 
 
 

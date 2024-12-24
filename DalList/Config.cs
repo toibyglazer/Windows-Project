@@ -3,7 +3,7 @@
 /// Static class managing system-wide configuration settings and ID generators.
 /// </summary>
 
-internal static class Config
+public static class Config
 {
     internal const int startCallId = 1;
     private static int nextCallId = startCallId;

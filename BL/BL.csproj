@@ -10,20 +10,21 @@
 	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 	<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
 	<RootNamespace />
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-	<PropertyGroup>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
 
- <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
-	
+
+
+ 
   <ItemGroup>
     <ProjectReference Include="..\DalFacade\DalFacade.csproj" />
     <ProjectReference Include="..\DalList\DalList.csproj" />
     <ProjectReference Include="..\DalTest\DalTest.csproj" />
     <ProjectReference Include="..\DalXml\DalXml.csproj" />
+	
   </ItemGroup>
 	
 

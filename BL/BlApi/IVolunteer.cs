@@ -6,6 +6,7 @@ public interface IVolunteer
     IEnumerable<BO.VolunteerInList> GetVolunteersList(bool? isActiveFilter = null, BO.VolunteerSortField? sortField = null);
     BO.Volunteer GetVolunteerDetails(int volunteerId);
     void UpdateVolunteer(int volunteerId, BO.Volunteer volunteer);
+    void DeleteVolunteer(int volunteerId);
     void AddVolunteer(BO.Volunteer volunteer);
 
 }

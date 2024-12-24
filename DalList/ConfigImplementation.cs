@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// Implementation of the IConfig interface, managing configuration values such as system clock, IDs, and risk range lock.
 /// </summary>
-internal class ConfigImplementation : IConfig
+public class ConfigImplementation : IConfig
 {
     public DateTime Clock 
     {

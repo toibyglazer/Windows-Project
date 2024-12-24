@@ -2,7 +2,7 @@
 public interface ICall
 {
     int[] GetCallStatusesCount();
-    IEnumerable<BO.CallInList> GetCalls(BO.CallInListFilterField? filterField = null, object? filterValue = null, BO.CallInListSortField? sortField = null);
+    IEnumerable<BO.CallInList> GetCalls(BO.CallInListField? filterField = null, object? filterValue = null, BO.CallInListField? sortField = null);
     BO.Call GetCallDetailsById(int callId);
 
     void UpdateCallDetails(BO.Call call);
