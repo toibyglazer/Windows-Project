@@ -9,16 +9,25 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Collections;
 namespace Helpers;
+/// <summary>
+/// Represents geographical coordinates with latitude and longitude.
+/// </summary>
 public class GeoCoordinates
 {
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
+    public double Latitude { get; set; }  
+    public double Longitude { get; set; } 
+
+    // Override ToString method to present coordinates in a readable format
     public override string ToString() => $"Latitude: {Latitude}, Longitude: {Longitude}";
 }
-
 public static class Tools
 {
+    // Creating an HttpClient object for all API calls
     private static readonly HttpClient httpClient = new HttpClient();
+
+    /// <summary>
+    /// Converts the properties of an object to a formatted string.
+    /// </summary>
     public static string ToStringProperty<T>(this T t, int indentLevel = 0)
     {
         if (t == null)
@@ -63,7 +72,8 @@ public static class Tools
     /// <summary>
     /// Gets the coordinates of a location by its address using OpenStreetMap API.
     /// </summary>
-   
+    /// <param name="address">The address to get coordinates for.</param>
+    /// <returns>GeoCoordinates object with latitude and longitude.</returns>
     public static GeoCoordinates CallOpenStreetMapApi(string address)
     {
         try
@@ -100,7 +110,8 @@ public static class Tools
     /// <summary>
     /// Verifies if an address exists in OpenStreetMap systems.
     /// </summary>
-    /// 
+    /// <param name="address">The address to verify.</param>
+    /// <returns>True if address exists, otherwise throws an exception.</returns>
     public static bool VerifyAddressExists(string address)
     {
         var url = $"https://nominatim.openstreetmap.org/search?format=xml&q={Uri.EscapeDataString(address)}";
@@ -123,34 +134,51 @@ public static class Tools
     }
     #endregion
 
+
     #region Route Calculator OpenStreetMap
+    /// <summary>
+    /// Gets the walking route distance between two geographical coordinates.
+    /// This method uses the OpenStreetMap API to fetch the walking route distance between two points.
+    /// </summary>
+    /// <param name="lat1">The latitude of the first point.</param>
+    /// <param name="lon1">The longitude of the first point.</param>
+    /// <param name="lat2">The latitude of the second point.</param>
+    /// <param name="lon2">The longitude of the second point.</param>
+    /// <returns>The walking route distance in kilometers.</returns>
     public static double GetWalkingRouteDistance(double lat1, double lon1, double lat2, double lon2)
     {
+        // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
         string url = $"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
 
-
+        // Create an instance of HttpClient to make the web request
         using (HttpClient client = new HttpClient())
         {
+            // Send a GET request to the API
             HttpResponseMessage response = client.GetAsync(url).Result;
 
+            // Check if the response was successful
             if (!response.IsSuccessStatusCode)
             {
+                // Throw an exception if the request was unsuccessful
                 throw new Exception($"Error fetching route distance. Status code: {response.StatusCode}");
             }
 
+            // Read the response content as a string
             string json = response.Content.ReadAsStringAsync().Result;
 
-            // Parse JSON response
+            // Parse the JSON response to extract the distance in meters
             using (JsonDocument jsonDoc = JsonDocument.Parse(json))
             {
                 var distanceMeters = jsonDoc.RootElement.GetProperty("routes")[0].GetProperty("distance").GetDouble();
-                return distanceMeters / 1000.0; // Convert to kilometers
+                // Convert distance from meters to kilometers and return it
+                return distanceMeters / 1000.0;
             }
         }
     }
 
     /// <summary>
-    /// Gets the driving route distance between two points.
+    /// Gets the driving route distance between two geographical coordinates.
+    /// This method uses the OpenStreetMap API to fetch the driving route distance between two points.
     /// </summary>
     /// <param name="lat1">The latitude of the first point.</param>
     /// <param name="lon1">The longitude of the first point.</param>
@@ -159,93 +187,146 @@ public static class Tools
     /// <returns>The driving route distance in kilometers.</returns>
     public static double GetDrivingRouteDistance(double lat1, double lon1, double lat2, double lon2)
     {
+        // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
         string url = $"https://routing.openstreetmap.de/routed-car/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
 
+        // Create an instance of HttpClient to make the web request
         using (HttpClient client = new HttpClient())
         {
+            // Send a GET request to the API
             HttpResponseMessage response = client.GetAsync(url).Result;
 
+            // Check if the response was successful
             if (!response.IsSuccessStatusCode)
             {
+                // Throw an exception if the request was unsuccessful
                 throw new Exception($"Error fetching route distance. Status code: {response.StatusCode}");
             }
 
+            // Read the response content as a string
             string json = response.Content.ReadAsStringAsync().Result;
 
-            // Parse JSON response
+            // Parse the JSON response to extract the distance in meters
             using (JsonDocument jsonDoc = JsonDocument.Parse(json))
             {
                 var distanceMeters = jsonDoc.RootElement.GetProperty("routes")[0].GetProperty("distance").GetDouble();
-                return distanceMeters / 1000.0; // Convert to kilometers
+                // Convert distance from meters to kilometers and return it
+                return distanceMeters / 1000.0;
             }
         }
     }
     #endregion
 
+
     #region Password Hashing and Verification Management Using PBKDF2
+    /// <summary>
+    /// This class provides methods for securely hashing and verifying passwords using PBKDF2.
+    /// We have chosen to implement a strong hashing algorithm with salt, 
+    /// which prevents the original password from being recovered or exposed.
+    /// This additional feature is a bonus that we added ourselves for added security.
+    /// </summary>
     public static class PasswordHasher
     {
-
+        /// <summary>
+        /// Hashes the given password using PBKDF2 with a randomly generated salt.
+        /// The PBKDF2 algorithm is designed to slow down brute-force attacks and make password cracking much harder.
+        /// </summary>
+        /// <param name="password">The password to hash.</param>
+        /// <returns>The hashed password as a base64 encoded string, with salt and hash separated by a colon.</returns>
         public static string HashPassword(string password)
         {
-
+            // Generate a random salt of 16 bytes
             byte[] salt = GenerateSalt(16);
+
+            // Set the number of iterations for PBKDF2 to increase hashing difficulty
             int iterations = 10000;
 
+            // Hash the password using PBKDF2 with the given salt and number of iterations
             using (var rfc2898 = new Rfc2898DeriveBytes(password, salt, iterations))
             {
-                byte[] hash = rfc2898.GetBytes(32);
-                return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
+                // Get the hash and return it as a base64 encoded string
+                byte[] hash = rfc2898.GetBytes(32); // Generate 32-byte hash
+                return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash); // Combine salt and hash
             }
         }
 
-        // Function to verify a password against a stored hash
+        /// <summary>
+        /// Verifies if the given password matches the stored hash.
+        /// This method splits the stored hash into salt and hash, then compares the computed hash for the given password.
+        /// It uses a constant-time comparison to prevent timing attacks.
+        /// </summary>
+        /// <param name="password">The password to verify.</param>
+        /// <param name="storedHash">The stored hash (salt + hash) to compare against.</param>
+        /// <returns>True if the password matches the stored hash, otherwise false.</returns>
         public static bool VerifyPassword(string password, string storedHash)
         {
-
+            // Split the stored hash into salt and actual hash
             string[] parts = storedHash.Split(':');
             if (parts.Length != 2) return false;
 
             byte[] salt = Convert.FromBase64String(parts[0]);
             byte[] storedHashBytes = Convert.FromBase64String(parts[1]);
+
+            // Set the number of iterations for PBKDF2 to match the original hashing process
             int iterations = 10000;
+
+            // Hash the password using the same salt and iterations
             using (var rfc2898 = new Rfc2898DeriveBytes(password, salt, iterations))
             {
+                // Generate the computed hash
                 byte[] computedHash = rfc2898.GetBytes(32);
+
+                // Use constant-time comparison to prevent timing attacks
                 return CryptographicOperations.FixedTimeEquals(computedHash, storedHashBytes);
             }
         }
+
+        /// <summary>
+        /// Checks if the provided password is already hashed.
+        /// This method verifies that the password string is in the correct format (salt:hash).
+        /// </summary>
+        /// <param name="password">The password to check.</param>
+        /// <returns>True if the password is already hashed, otherwise false.</returns>
         public static bool IsHashed(string password)
         {
             if (string.IsNullOrEmpty(password))
                 return false;
 
+            // Split the password string into salt and hash components
             var parts = password.Split(':');
             if (parts.Length != 2)
                 return false;
 
             try
             {
-                
+                // Try to convert both parts (salt and hash) from base64
                 Convert.FromBase64String(parts[0]); // salt
                 Convert.FromBase64String(parts[1]); // hash
                 return true;
             }
             catch (FormatException)
             {
+                // If conversion fails, the format is invalid
                 return false;
             }
         }
 
-
-        // Private function to generate a random salt
+        /// <summary>
+        /// Generates a random salt of the specified size to be used for hashing.
+        /// This is a private helper function to ensure randomness and security.
+        /// </summary>
+        /// <param name="size">The size of the salt in bytes.</param>
+        /// <returns>A byte array containing the generated salt.</returns>
         private static byte[] GenerateSalt(int size)
         {
             byte[] salt = new byte[size];
+
+            // Use a cryptographically secure random number generator to generate the salt
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
             }
+
             return salt;
         }
     }

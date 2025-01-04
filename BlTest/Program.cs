@@ -59,35 +59,47 @@ namespace BlTest
         // Static field for accessing logical interfaces through the BL layer
         static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
 
+        /// <summary>
+        /// Main entry point of the application.
+        /// Loops until the user chooses to exit, displaying the main menu and handling input.
+        /// </summary>
         static void Main(string[] args)
         {
             try
             {
                 bool exit = false;
 
+                // Keep displaying the main menu until the user chooses to exit
                 while (!exit)
                 {
                     DisplayMainMenu();
-                    exit = HandleUserInput();
+                    exit = HandleUserInput(); // Process the user's choice
                 }
             }
             catch (BO.BlAlreadyExistsException ex)
             {
-                Console.WriteLine($"An error occurred: {ex}");
+                Console.WriteLine($"An error occurred: {ex}"); // Handle specific exception
             }
             catch (BO.BlDoesNotExistException ex)
             {
-                Console.WriteLine($"An error occurred: {ex}");
+                Console.WriteLine($"An error occurred: {ex}"); // Handle another exception
             }
         }
+
+        /// <summary>
+        /// Handles the user's input and performs actions based on the selected menu option.
+        /// </summary>
+        /// <returns>Returns true if the user chooses to exit, otherwise false.</returns>
         static bool HandleUserInput()
         {
             try
             {
+                // Get user's menu choice
                 MainMenuOptions? selectedOption = GetUserMenuChoice();
 
                 if (selectedOption.HasValue)
                 {
+                    // Execute the corresponding menu option
                     switch (selectedOption)
                     {
                         case MainMenuOptions.ManageVolunteer:
@@ -100,39 +112,43 @@ namespace BlTest
                             HandleAdminMenu();
                             break;
                         case MainMenuOptions.Exit:
-                            return true;
+                            return true; // Exit the loop
                         default:
-                            Console.WriteLine("Invalid option. Please try again.");
+                            Console.WriteLine("Invalid option. Please try again."); // Handle invalid option
                             break;
                     }
                 }
-
             }
-
             catch (BO.BlAlreadyExistsException ex)
             {
-                Console.WriteLine($"Error handling input: {ex.Message}");
+                Console.WriteLine($"Error handling input: {ex.Message}"); // Handle exception
             }
             catch (BO.BlDoesNotExistException ex)
             {
-                Console.WriteLine($"Error handling input: {ex.Message}");
+                Console.WriteLine($"Error handling input: {ex.Message}"); // Handle another exception
             }
-            return false;
+            return false; // Return false to continue the loop
         }
+
+        /// <summary>
+        /// Prompts the user for input and returns the corresponding menu option.
+        /// </summary>
+        /// <returns>The selected menu option, or null if the input is invalid.</returns>
         static MainMenuOptions? GetUserMenuChoice()
         {
             Console.Write("Enter your choice: ");
             string? input = Console.ReadLine();
 
+            // Try to parse the user's input to the menu option enum
             if (Enum.TryParse(input, out MainMenuOptions selectedOption))
             {
-                return selectedOption; // Return the parsed option if successful.
+                return selectedOption; // Return the parsed option if successful
             }
             else
             {
-                // Notify the user if the input was invalid.
+                // Notify the user if the input was invalid
                 Console.WriteLine("Invalid input, please enter a valid number.");
-                return null; // Return null to indicate invalid input.
+                return null; // Return null to indicate invalid input
             }
         }
 
@@ -268,7 +284,6 @@ namespace BlTest
             }
             Console.WriteLine("Too many failed attempts. Your account is now locked.");
         }
-      
         public static void TestGetVolunteersList()
         {
             Console.WriteLine("\n---Retrieve Volunteers List---");
@@ -1879,6 +1894,7 @@ namespace BlTest
         }
 
 
+
         /// <summary>
         /// Displays the main menu with options for managing volunteers, calls, assignments, configurations, and more.
         /// </summary>
@@ -1894,7 +1910,6 @@ namespace BlTest
             Console.WriteLine("║ 0. Exit                   ║");
             Console.WriteLine("╚═══════════════════════════╝");
         }
-
         private static void DisplayVolunteerMenu()
         {
             Console.WriteLine("\n----- Volunteer Management Menu -----");
