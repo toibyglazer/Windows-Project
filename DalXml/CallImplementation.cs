@@ -14,6 +14,7 @@ namespace Dal;
 /// </summary>
 internal class CallImplementation : ICall
 {
+    private static readonly object lockObj = new object();
     /// <summary>
     /// Adds a new `Call` entity to the XML storage.
     /// Generates a unique ID for the new `Call` and saves it.
@@ -47,7 +48,11 @@ internal class CallImplementation : ICall
     /// </summary>
     public void DeleteAll()
     {
-        XMLTools.SaveListToXMLSerializer(new List<Call>(), Config.s_calls_xml);
+        lock (lockObj)
+        {
+            XMLTools.SaveListToXMLSerializer(new List<Call>(), Config.s_calls_xml);
+        }
+           
     }
 
     /// <summary>

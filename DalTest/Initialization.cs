@@ -4,20 +4,27 @@ using DO;
 using Dal;
 using Microsoft.VisualBasic;
 using System.Data;
+using System.Security.Cryptography;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.IO;
 
 public static class Initialization
 {
 
     private static IDal? s_dal;
     private static readonly Random s_rand = new();
-
+    private static readonly object _lock = new object();
     /// <summary>
     /// Initializes  a list of volunteers with predefined data and saves them using the DAL (Data Access Layer) object.
     /// The first volunteer is assigned as a Manager, and the rest are regular volunteers.
     /// </summary>
     static private void createVolunteer()
     {
-        string[] VolunteerNames = new[]
+       
+            string[] VolunteerNames = new[]
 {
     "David Levi",
     "Rachel Cohen",
@@ -60,17 +67,28 @@ public static class Initialization
     "adi.kadosh@gmail.com"
 };
         string[] addresses = new[]
-        {
-        "123 Herzl Street, Tel Aviv", "45 Dizengoff Street, Haifa",
-        "89 Ben Yehuda Street, Jerusalem", "12 Kaplan Avenue, Rishon Lezion",
-        "77 Goldstein Boulevard, Ashdod", "34 Shimon Street, Petah Tikva",
-        "56 Rosenberg Lane, Netanya", "22 Sharabi Road, Be'er Sheva",
-        "98 Azulai Street, Holon", "15 Peretz Square, Kiryat Gat",
-        "11 Barak Alley, Eilat", "67 Nave Promenade, Rehovot",
-        "39 Elbaz Avenue, Modi'in", "28 Regev Street, Herzliya",
-        "74 Shamir Circle, Ramat Gan", "18 Yitzhak Boulevard, Hadera",
-        "52 Vaknin Road, Ashkelon", "26 Kadosh Lane, Nahariya"
-         };
+{
+    "10 Bograshov, Tel Aviv, Israel",
+    "1 Allenby, Tel Aviv-Yafo, Israel",
+    "34 Herzl, Haifa, Israel",
+   "12 Kaplan, Rishon Lezion, Israel",
+    "56 Ben Yehuda, Jerusalem, Israel",
+    "45 Ben Gurion Avenue, Ashdod, Israel",
+    "9 King David, Tel Aviv, Israel",
+    "77 Rothschild Boulevard, Tel Aviv-Yafo, Israel",
+    "58 Jaffa, Jerusalem, Israel",
+    "21 Yehuda Halevi, Tel Aviv, Israel",
+    "68 David Ben Gurion, Herzliya, Israel",
+    "33 Jabotinsky, Bat Yam, Israel",
+    "12 Dubnov, Haifa, Israel",
+    "88 Shazar, Ramat Gan, Israel",
+    "17 Sokolov, Petah Tikva, Israel",
+    "44 Yigal Alon, Tel Aviv, Israel",
+    "76 Nahalat Binyamin, Tel Aviv, Israel",
+    "22 Rambam, Be'er Sheva, Israel",
+    "15 HaNassi, Netanya, Israel",
+    "50 Ibn Gvirol, Tel Aviv, Israel"
+};
         string[] passwords = new string[]
 {
     "D@v1dL3v!2024",
@@ -141,15 +159,22 @@ public static class Initialization
 };
 
         // Generate an ID and assign the first volunteer as the Manager.
-        int firstId = s_rand.Next(200000000, 400000000);
+        int[] volunteerIds = new int[]
+  {
+    735927006, 985810993, 553026436, 614562379,
+    912011889, 680412384, 434477790, 705204873,
+    901234567, 294703103, 255335531, 345210678,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671
+  };
         DistanceType firstDistanceType = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
         var firstVolunteer = new Volunteer
             (
-                Id: firstId,
+                Id: volunteerIds[0],
                 FullName: VolunteerNames[0],
                 PhoneNumber: phoneNumbers[0],
                 Email: VolunteerEmails[0],
-                Password: passwords[0],
+                Password: PasswordHasher.HashPassword(passwords[0]),
                 CurrentAddress: addresses[0],
                 Latitude: latitudes[0],
                 Longitude: longitudes[0],
@@ -160,37 +185,40 @@ public static class Initialization
            );
         s_dal!.Volunteer.Create(firstVolunteer); //stage 2
 
-        // Iterate over the rest of the volunteers and assign them as regular volunteers.
-        for (int i = 1; i < VolunteerNames.Length; i++)
-        {
-            int id = s_rand.Next(200000000, 400000000);
-            DistanceType d = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
+            // Iterate over the rest of the volunteers and assign them as regular volunteers.
+            for (int i = 1; i < VolunteerNames.Length; i++)
+            {
 
-            var volunteer = new Volunteer
-            (
-                Id: id,
-                FullName: VolunteerNames[i],
-                PhoneNumber: phoneNumbers[i],
-                Email: VolunteerEmails[i],
-                Password: passwords[i],
-                CurrentAddress: addresses[i],
-                Latitude: latitudes[i],
-                Longitude: longitudes[i],
-                Role: VolunteerRole.Volunteer,
-                IsActive: true,
-                MaxDistance: maxDistances[i],
-                DistanceType: d
-           );
+                DistanceType d = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
 
-            s_dal!.Volunteer.Create(volunteer); //stage 2
+                var volunteer = new Volunteer
+                (
+                    Id: volunteerIds[i],
+                    FullName: VolunteerNames[i],
+                    PhoneNumber: phoneNumbers[i],
+                    Email: VolunteerEmails[i],
+                    Password: PasswordHasher.HashPassword(passwords[i]),
+                    CurrentAddress: addresses[i],
+                    Latitude: latitudes[i],
+                    Longitude: longitudes[i],
+                    Role: VolunteerRole.Volunteer,
+                    IsActive: true,
+                    MaxDistance: maxDistances[i],
+                    DistanceType: d
+               );
 
-        }
-
+                s_dal!.Volunteer.Create(volunteer); //stage 2
+              
+            }
+        
     }
 
     static private void createCall()
     {
-        string[] Descriptions = new[]
+       
+
+        
+            string[] Descriptions = new[]
         {
              "Food delivery for a family",
     "Transporting medical supplies",
@@ -250,64 +278,65 @@ public static class Initialization
     "Setting up temporary shelters"
 
         };
-        string[] Addresses = new[]{
-    "1 Herzl Street, Tel Aviv",
-    "12 Ben Gurion Boulevard, Haifa",
-    "5 Jaffa Street, Jerusalem",
-    "10 Weizmann Street, Kfar Saba",
-    "8 Rabin Avenue, Be'er Sheva",
-    "20 Rothschild Boulevard, Tel Aviv",
-    "15 Gaza Street, Jerusalem",
-    "9 Independence Street, Ashdod",
-    "3 Ga'aton Boulevard, Nahariya",
-    "17 Jabotinsky Street, Ramat Gan",
-    "4 Jerusalem Boulevard, Holon",
-    "11 HaNasi Street, Ra'anana",
-    "2 Yehudit Boulevard, Petah Tikva",
-    "8 Bialik Street, Ramat HaSharon",
-    "6 HaShalom Avenue, Giv'atayim",
-    "18 Allenby Street, Tel Aviv",
-    "13 Eilat Boulevard, Ashkelon",
-    "7 Zionism Street, Afula",
-    "22 HaHativot Avenue, Kiryat Shmona",
-    "25 Herzl Boulevard, Netanya",
-    "50 Dizengoff Street, Tel Aviv",
-    "30 HaNevi'im Street, Jerusalem",
-    "14 Ben Zvi Boulevard, Be'er Sheva",
-    "9 HaGefen Street, Karmiel",
-    "19 Rabin Boulevard, Modi'in",
-    "3 HaYam Road, Haifa",
-    "10 Freedom Boulevard, Eilat",
-    "5 Galilee Street, Safed",
-    "12 Rothschild Road, Rishon LeZion",
-    "6 Wolfson Street, Herzliya",
-    "28 Jabotinsky Boulevard, Petah Tikva",
-    "1 HaNamal Street, Acre",
-    "7 Freedom Boulevard, Tiberias",
-    "18 Menachem Begin Road, Tel Aviv",
-    "4 Sokolov Street, Holon",
-    "8 HaNesi'im Street, Nes Ziona",
-    "3 Independence Boulevard, Ashdod",
-    "12 HaRimon Street, Beit Shemesh",
-    "10 Bialik Boulevard, Kfar Saba",
-    "9 Baruch Spinoza Street, Kiryat Motzkin",
-    "6 Hillel Street, Jerusalem",
-    "20 HaShalom Avenue, Giv'atayim",
-    "15 HaNarkis Street, Yavne",
-    "8 HaPerahim Boulevard, Or Akiva",
-    "7 HaBanim Street, Ramat HaSharon",
-    "13 Golani Brigade Road, Beit She'an",
-    "5 HaTamar Boulevard, Ashkelon",
-    "10 HaShalom Street, Ofakim",
-    "11 Golda Meir Boulevard, Tel Aviv",
-    "3 Palmach Street, Kiryat Shmona",
-    "17 Shalom Aleichem Street, Be'er Sheva",
-    "11 Menachem Begin Street, Petah Tikva",
-    "2 HaLachish Street, Holon",
-    "22 HaHalev Street, Tel Aviv",
-    "3 HaLev HaShani Street, Herzliya",
-    "8 HaMizrach Street, Eilat"
+        string[] Addresses = new[] {
+    "1 Herzl, Tel Aviv, Israel",
+    "15 HaNassi, Haifa, Israel",
+    "5 Jaffa, Jerusalem, Israel",
+    "10 Weizmann, Kfar Saba, Israel",
+    "9 Begin, Be'er Sheva, Israel",
+    "20 Rothschild Boulevard, Tel Aviv, Israel",
+    "9 HaYehudim, Jerusalem, Israel",
+    "9 Independence, Ashdod, Israel",
+    "5 HaGefen, Nahariya, Israel",
+    "17 Jabotinsky, Ramat Gan, Israel",
+    "4 Jerusalem, Holon, Israel",
+    "11 HaNasi, Ra'anana, Israel",
+    "1 HaAtzmaut, Petah Tikva, Israel",
+    "8 Bialik, Ramat HaSharon, Israel",
+    "5 HaNasi, Ra'anana, Israel",
+    "18 Allenby, Tel Aviv, Israel",
+    "13 Eilat Boulevard, Ashkelon, Israel",
+    "9 HaYarden, Afula, Israel",
+    "12 Ben Gurion, Haifa, Israel",
+    "25 Herzl, Netanya, Israel",
+    "50 Dizengoff, Tel Aviv, Israel",
+    "30 HaNeviim, Jerusalem, Israel",
+    "14 Ben Zvi, Be'er Sheva, Israel",
+    "9 HaGefen, Karmiel, Israel",
+    "19 Rabin, Modi'in, Israel",
+    "3 HaYam, Haifa, Israel",
+    "24 , Tel Aviv-Yafo,  Israel",
+    "5 Galilee, Safed, Israel",
+    "12 Rothschild Road, Rishon LeZion, Israel",
+    "6 Wolfson, Herzliya, Israel",
+    "28 Jabotinsky, Petah Tikva, Israel",
+    "17 Rothschild Boulevard, Tel Aviv, Israel",
+    "5 Ben Gurion, Haifa, Israel",
+    "18 Menachem Begin, Tel Aviv, Israel",
+    "4 Sokolov, Holon, Israel",
+    "12 Haatzmaut, Ramat Gan, Israel",
+    "20 Herzl, Be'er Sheva, Israel",
+    "12 HaRimon, Beit Shemesh, Israel",
+    "10 Bialik, Kfar Saba, Israel",
+    "15 David Ben Gurion, Petah Tikva, Israel",
+    "6 Hillel, Jerusalem, Israel",
+    "20 HaShalom, Givatayim, Israel",
+    "15 HaNarkis, Yavne, Israel",
+    "14 Jabotinsky, Rishon Lezion, Israel",
+    "7 HaBanim, Ramat HaSharon, Israel",
+    "22 King David, Jerusalem, Israel",
+    "5 HaTamar, Ashkelon, Israel",
+    "18 HaAtzmaut, Kiryat Gat, Israel",
+    "11 Golda Meir, Tel Aviv, Israel",
+    "7 HaGalil, Safed, Israel",
+    "17 Shalom Aleichem, Be'er Sheva, Israel",
+    "11 Menachem Begin, Petah Tikva, Israel",
+    "5 HaPlada, Ashkelon, Israel",
+    "18 Ibn Gabirol, Tel Aviv, Israel",
+    "12 Arlozorov, Herzliya, Israel",
+    "5 HaTmarim, Eilat, Israel"
 };
+
         double[] latitudes = new[]
 {
     32.0853, 32.7940, 31.7683, 32.1097, 31.2518,
@@ -346,27 +375,28 @@ public static class Initialization
         }
 
         DateTime start = new(s_dal.Config.Clock.Year - 2, 1, 1);
+        int[] callIds = Enumerable.Range(56, 112).ToArray();
+            for (int i = 0; i < Descriptions.Length; i++)
+            {
+                DateTime startTime = start.AddDays(-s_rand.Next(1, 30));
+                DateTime? deadline = s_rand.NextDouble() < 0.5 ? (DateTime?)startTime.AddHours(s_rand.Next(1, 72)) : null;
 
-        for (int i = 0; i < Descriptions.Length; i++)
-        {
-            DateTime startTime = start.AddDays(-s_rand.Next(1, 30));
-            DateTime? deadline = s_rand.NextDouble() < 0.5 ? (DateTime?)startTime.AddHours(s_rand.Next(1, 72)) : null;
 
-            int callId = 1;
-            var call = new Call
-               (
-                   Id: callId,
-                   Type: callTypes[i],
-                   FullAddress: Addresses[i],
-                   Latitude: latitudes[i],
-                   Longitude: longitudes[i],
-                   OpeningTime: startTime,
-                   Description: Descriptions[i],
-                   MaxCompletionTime: deadline
-               );
-            s_dal!.Call.Create(call); //stage 2
-
-        }
+                var call = new Call
+                   (
+                       Id: callIds[i],
+                       Type: callTypes[i],
+                       FullAddress: Addresses[i],
+                       Latitude: latitudes[i],
+                       Longitude: longitudes[i],
+                       OpeningTime: startTime,
+                       Description: Descriptions[i],
+                       MaxCompletionTime: deadline
+                   );
+                s_dal!.Call.Create(call); //stage 2
+               
+            }
+        
     }
     /// <summary>
     /// Creates and initializes a predefined set of Assignment objects with varying completion types.
@@ -375,84 +405,169 @@ public static class Initialization
     private static void createAssignment()
     {
 
-        int[] volunteerId = new int[]
-        {
-        123456789, 234567890, 345678901, 456789012,
-        567890123, 678901234, 789012345, 890123456,
-        901234567, 123098456, 234109567, 345210678,
-        456321789, 567432890, 678543901, 789654012,
-        890765123, 123890456, 234567890, 345678912,
-        456789123, 567890234, 678901345, 789012456,
-        890123567, 901234678, 123098789, 234109890,
-        345210901, 456321012, 567432123, 678543234,
-        789654345, 890765456, 123890567, 234567678,
-        345678789, 456789890, 567890901, 678901012,
-        789012123, 890123234, 901234345, 123098456,
-        234109567, 345210678, 456321789, 567432890,
-        678543901, 789654012
-        };
 
+
+            int[] callIds = Enumerable.Range(1, 56).ToArray();
+        int[] volunteerIds = new int[]
+{
+    735927006, 985810993, 553026436, 614562379,
+    912011889, 680412384, 434477790, 705204873,
+    901234567, 294703103, 255335531, 345210678,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 735927006, 985810993,
+    912011889, 680412384, 434477790, 705204873,
+    901234567, 294703103, 255335531, 345210678,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 553026436, 614562379,
+    912011889, 680412384, 434477790, 705204873,
+    901234567, 294703103, 255335531, 345210678,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 553026436, 614562379,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 735927006, 985810993,
+    912011889, 680412384, 434477790, 705204873,
+    901234567, 294703103, 255335531, 345210678,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 553026436, 614562379,
+    374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 735927006, 985810993,
+     735927006, 985810993, 553026436, 614562379,
+     374306371, 523220655, 678543901, 281041475,
+    489627356, 154553671, 553026436, 614562379,
+    374306371, 523220655, 678543901, 281041475,
+    912011889, 680412384, 434477790, 705204873,
+    901234567, 294703103, 255335531, 345210678
+};
+        DateTime[] completionTimes = new DateTime[]
+       {
+            new DateTime(2024, 12, 30, 8, 0, 0),
+            new DateTime(2024, 12, 30, 9, 15, 0),
+            new DateTime(2024, 12, 30, 10, 30, 0),
+            new DateTime(2024, 12, 30, 11, 45, 0),
+            new DateTime(2024, 12, 30, 13, 0, 0),
+            new DateTime(2024, 12, 30, 14, 15, 0),
+            new DateTime(2024, 12, 30, 15, 30, 0),
+            new DateTime(2024, 12, 30, 16, 45, 0),
+            new DateTime(2024, 12, 30, 18, 0, 0),
+            new DateTime(2024, 12, 30, 19, 15, 0),
+            new DateTime(2024, 12, 30, 20, 30, 0),
+            new DateTime(2024, 12, 30, 21, 45, 0),
+            new DateTime(2024, 12, 30, 23, 0, 0),
+            new DateTime(2024, 12, 31, 0, 15, 0),
+            new DateTime(2024, 12, 31, 1, 30, 0),
+            new DateTime(2024, 12, 31, 2, 45, 0),
+            new DateTime(2024, 12, 31, 4, 0, 0),
+            new DateTime(2024, 12, 31, 5, 15, 0),
+            new DateTime(2024, 12, 31, 6, 30, 0),
+            new DateTime(2024, 12, 31, 7, 45, 0),
+            new DateTime(2024, 12, 31, 9, 0, 0),
+            new DateTime(2024, 12, 31, 10, 15, 0),
+            new DateTime(2024, 12, 31, 11, 30, 0),
+            new DateTime(2024, 12, 31, 12, 45, 0),
+            new DateTime(2024, 12, 31, 14, 0, 0),
+            new DateTime(2024, 12, 31, 15, 15, 0),
+            new DateTime(2024, 12, 31, 16, 30, 0),
+            new DateTime(2024, 12, 31, 17, 45, 0),
+            new DateTime(2024, 12, 31, 19, 0, 0),
+            new DateTime(2024, 12, 31, 20, 15, 0),
+            new DateTime(2024, 12, 31, 21, 30, 0),
+            new DateTime(2024, 12, 31, 22, 45, 0),
+            new DateTime(2024, 12, 31, 23, 59, 59),
+            new DateTime(2025, 1, 1, 1, 0, 0),
+            new DateTime(2025, 1, 1, 2, 15, 0),
+            new DateTime(2025, 1, 1, 3, 30, 0),
+            new DateTime(2025, 1, 1, 4, 45, 0),
+            new DateTime(2025, 1, 1, 6, 0, 0),
+            new DateTime(2025, 1, 1, 7, 15, 0),
+            new DateTime(2025, 1, 1, 8, 30, 0),
+            new DateTime(2025, 1, 1, 9, 45, 0),
+            new DateTime(2025, 1, 1, 11, 0, 0),
+            new DateTime(2025, 1, 1, 12, 15, 0),
+            new DateTime(2025, 1, 1, 13, 30, 0),
+            new DateTime(2025, 1, 1, 14, 45, 0),
+            new DateTime(2025, 1, 1, 16, 0, 0),
+            new DateTime(2025, 1, 1, 17, 15, 0),
+            new DateTime(2025, 1, 1, 18, 30, 0),
+            new DateTime(2025, 1, 1, 19, 45, 0),
+            new DateTime(2025, 1, 1, 21, 0, 0)
+       };
         // Get the next available assignment ID.
         int assignmentId = s_dal.Config.NextAssignmentId;
 
-        // Create assignments with CompletionType.Treated for the first 15 volunteers.
-        for (int i = 0; i < 15; i++)
-        {
+            // Create assignments with CompletionType.Treated for the first 15 volunteers.
+            for (int i = 0; i < 15; i++)
+            {
+                Assignment a = new Assignment(
+                    Id: assignmentId,
+                    CallId: callIds[i],
+                    VolunteerId: volunteerIds[i],
+                    EntryTime: s_dal.Config.Clock,
+                    CompletionTime: completionTimes[i],
+                    CompletionType: AssignmentCompletionType.Treated
+                );
+                s_dal!.Assignment.Create(a); //stage 2
+
+            }
+
+            // Create assignments with CompletionType.VolunteerCancelled for the next set of volunteers.
+            for (int i = 15; i < 29; i++)
+            {
+                Assignment a = new Assignment(
+                    Id: assignmentId,
+                    CallId: callIds[i],
+                    VolunteerId: volunteerIds[i],
+                    EntryTime: s_dal.Config.Clock,
+                    CompletionTime: completionTimes[i],
+                    CompletionType: AssignmentCompletionType.VolunteerCancelled
+                );
+                s_dal!.Assignment.Create(a); //stage 2
+            }
+
+            // Create assignments with CompletionType.AdminCancelled for the next set of volunteers.
+            for (int i = 29; i < 40; i++)
+            {
+                Assignment a = new Assignment(
+                    Id: assignmentId,
+                    CallId: callIds[i],
+                    VolunteerId: volunteerIds[i],
+                    EntryTime: s_dal.Config.Clock,
+                    CompletionTime: completionTimes[i],
+                    CompletionType: AssignmentCompletionType.AdminCancelled
+                );
+                s_dal!.Assignment.Create(a); //stage 2
+            }
+
+            // Create assignments with CompletionType.Expired for the remaining volunteers.
+            for (int i = 40; i < 45; i++)
+            {
+                Assignment a = new Assignment(
+                    Id: assignmentId,
+                    CallId: callIds[i],
+                    VolunteerId: volunteerIds[i],
+                    EntryTime: s_dal.Config.Clock,
+                    CompletionTime: completionTimes[i],
+                    CompletionType: AssignmentCompletionType.Expired
+                );
+                s_dal!.Assignment.Create(a); //stage 2
+                
+            }
+            for (int i = 45; i < 50; i++)
+            {
             Assignment a = new Assignment(
                 Id: assignmentId,
-                CallId: 1,
-                VolunteerId: volunteerId[i],
+                CallId: callIds[i],
+                VolunteerId: volunteerIds[i],
                 EntryTime: s_dal.Config.Clock,
                 CompletionTime: null,
-                CompletionType: AssignmentCompletionType.Treated
+                CompletionType: null
             );
             s_dal!.Assignment.Create(a); //stage 2
 
-        }
+            }
 
-        // Create assignments with CompletionType.VolunteerCancelled for the next set of volunteers.
-        for (int i = 15; i < 29; i++)
-        {
-            Assignment a = new Assignment(
-                Id: assignmentId,
-                CallId: 1,
-                VolunteerId: volunteerId[i],
-                EntryTime: s_dal.Config.Clock,
-                CompletionTime: null,
-                CompletionType: AssignmentCompletionType.VolunteerCancelled
-            );
-            s_dal!.Assignment.Create(a); //stage 2
-        }
-
-        // Create assignments with CompletionType.AdminCancelled for the next set of volunteers.
-        for (int i = 29; i < 40; i++)
-        {
-            Assignment a = new Assignment(
-                Id: assignmentId,
-                CallId: 1,
-                VolunteerId: volunteerId[i],
-                EntryTime: s_dal.Config.Clock,
-                CompletionTime: null,
-                CompletionType: AssignmentCompletionType.AdminCancelled
-            );
-            s_dal!.Assignment.Create(a); //stage 2
-        }
-
-        // Create assignments with CompletionType.Expired for the remaining volunteers.
-        for (int i = 40; i < 50; i++)
-        {
-            Assignment a = new Assignment(
-                Id: assignmentId,
-                CallId: 1,
-                VolunteerId: volunteerId[i],
-                EntryTime: s_dal.Config.Clock,
-                CompletionTime: null,
-                CompletionType: AssignmentCompletionType.Expired
-            );
-            s_dal!.Assignment.Create(a); //stage 2
-        }
     }
 
+    
     /// <summary>
     /// Initializes and configures the DAL (Data Access Layer) objects, 
     /// resets configuration and clears existing data, then populates lists for Volunteers, Calls, and Assignments.
@@ -463,7 +578,7 @@ public static class Initialization
     /// <param name="dalAssignment">The data access object for Assignments.</param>
     /// <param name="dalConfig">The data access object for Configuration.</param>
     //public static void Do(IDal dal) //stage 2
-    public static void Do() //stage 4
+    public  static void Do() //stage 4
     {
         // Ensure all DAL objects are initialized; throw exceptions for null references.
         // s_dal = dal ?? throw new NullReferenceException("DAL object can not be null!"); stage 2
@@ -476,16 +591,61 @@ public static class Initialization
         s_dal.ResetDB();//stage 2
 
 
-        createVolunteer();
+         createVolunteer();
+         createCall();
+         createAssignment();
 
-        createCall();
+    }
+}
+public static class PasswordHasher
+{
 
-        createAssignment();
+    public static string HashPassword(string password)
+    {
+
+        byte[] salt = GenerateSalt(16);
+        int iterations = 10000;
+
+        using (var rfc2898 = new Rfc2898DeriveBytes(password, salt, iterations))
+        {
+            byte[] hash = rfc2898.GetBytes(32);
+            return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
+        }
     }
 
+    // Function to verify a password against a stored hash
+    public static bool VerifyPassword(string password, string storedHash)
+    {
 
+        string[] parts = storedHash.Split(':');
+        if (parts.Length != 2) return false;
 
+        byte[] salt = Convert.FromBase64String(parts[0]);
+        byte[] storedHashBytes = Convert.FromBase64String(parts[1]);
+        int iterations = 10000;
+        using (var rfc2898 = new Rfc2898DeriveBytes(password, salt, iterations))
+        {
+            byte[] computedHash = rfc2898.GetBytes(32);
+            return CryptographicOperations.FixedTimeEquals(computedHash, storedHashBytes);
+        }
+    }
+
+    // Private function to generate a random salt
+    private static byte[] GenerateSalt(int size)
+    {
+        byte[] salt = new byte[size];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(salt);
+        }
+        return salt;
+    }
 }
+
+
+
+
+
 
 
 

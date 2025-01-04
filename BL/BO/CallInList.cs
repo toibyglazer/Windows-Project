@@ -7,7 +7,7 @@ public class CallInList
     public int CallId { get; init; }
     public CallType Type { get; set; }
     public DateTime OpeningTime { get; set; }
-    public TimeSpan? RemainingTime { get; set; }//סך זמן שנותר לסיום הקריאה
+    public TimeSpan? RemainingTime { get; set; }
     public string? LastVolunteer { get; set; }
     public TimeSpan? TotalCompletionTime { get; set; }
     public int TotalAssignments { get; set; }

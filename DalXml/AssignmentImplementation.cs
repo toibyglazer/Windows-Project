@@ -14,6 +14,7 @@ namespace Dal;
 /// </summary>
 internal class AssignmentImplementation : IAssignment
 {
+    private static readonly object lockObj = new object();
     /// <summary>
     /// Implements the IAssignment interface to handle data operations for Assignment objects.
     /// The data is stored and manipulated in an XML file specified in the configuration.
@@ -33,7 +34,7 @@ internal class AssignmentImplementation : IAssignment
             VolunteerId = s.ToIntNullable("VolunteerId") ?? throw new FormatException("can't convert VolunteerId"),
             EntryTime = s.ToDateTimeNullable("EntryTime") ?? throw new FormatException("can't convert EntryTime"),
             CompletionTime = s?.ToDateTimeNullable("CompletionTime") ?? null,
-            CompletionType= s?.ToEnumNullable<AssignmentCompletionType>("CompletionType") ?? null
+            CompletionType = s?.ToEnumNullable<AssignmentCompletionType>("CompletionType") ?? null
         };
     }
     /// <summary>
@@ -60,7 +61,7 @@ internal class AssignmentImplementation : IAssignment
     public void Create(Assignment item)
     {
         XElement assignmentsRootElem = XMLTools.LoadListFromXMLElement(Config.s_assignments_xml);
-        
+
         int nextId = Config.NextAssignmentId;
         Assignment copy = item with { Id = nextId };
         XElement newItem = createAssignmentElement(copy);
@@ -93,9 +94,15 @@ internal class AssignmentImplementation : IAssignment
     /// </summary>
     public void DeleteAll()
     {
-        XElement assignmentsRootElem = XMLTools.LoadListFromXMLElement(Config.s_assignments_xml);
-        assignmentsRootElem.RemoveNodes();
-        XMLTools.SaveListToXMLElement(assignmentsRootElem, Config.s_assignments_xml);
+       
+        lock (lockObj)
+        {
+            XElement assignmentsRootElem = XMLTools.LoadListFromXMLElement(Config.s_assignments_xml);
+            assignmentsRootElem.RemoveNodes();
+            XMLTools.SaveListToXMLElement(assignmentsRootElem, Config.s_assignments_xml);
+
+        }
+
     }
 
     /// <summary>

@@ -1,34 +1,53 @@
-﻿using Bl;
-using BO;
+﻿using BO;
 using DalApi;
 using System.Linq;
 using System.Text.RegularExpressions;
 namespace Helpers;
-using BCrypt.Net;
+
+using BlApi;
+using DO;
+
+
 internal static class VolunteerManager
 {
     private static IDal s_dal = DalApi.Factory.Get; //stage 4
 
-    #region Calculations for call closure types
     private static int CountAssignmentsByType(int volunteerId, DO.AssignmentCompletionType completionType)
     {
         return s_dal.Assignment.ReadAll()
-            .Count(a => a.Id == volunteerId && a.CompletionType == completionType);
+            .Count(a => a.VolunteerId == volunteerId && a.CompletionType == completionType);
     }
     public static int GetTotalHandledCalls(int volunteerId) =>
     CountAssignmentsByType(volunteerId, DO.AssignmentCompletionType.Treated);
-
     public static int GetTotalCancelledCalls(int volunteerId) =>
         CountAssignmentsByType(volunteerId, DO.AssignmentCompletionType.VolunteerCancelled);
-
     public static int GetTotalExpiredCalls(int volunteerId) =>
         CountAssignmentsByType(volunteerId, DO.AssignmentCompletionType.Expired);
-    #endregion
 
+    public static BO.Volunteer CreateVolunteer(DO.Volunteer volunteer, BO.CallInProgress? callInProgress)
+    {
+        return new BO.Volunteer
+        {
+            Id = volunteer.Id,
+            FullName = volunteer.FullName,
+            PhoneNumber = volunteer.PhoneNumber,
+            Email = volunteer.Email,
+            Password = volunteer.Password,
+            CurrentAddress = volunteer.CurrentAddress,
+            Role = (BO.VolunteerRole)volunteer.Role,
+            IsActive = volunteer.IsActive,
+            MaxDistance = volunteer.MaxDistance,
+            DistanceType = (BO.DistanceType)volunteer.DistanceType,
+            TotalHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteer.Id),
+            TotalCancelledCalls = Helpers.VolunteerManager.GetTotalCancelledCalls(volunteer.Id),
+            TotalExpiredCalls = Helpers.VolunteerManager.GetTotalExpiredCalls(volunteer.Id),
+            ActiveCall = callInProgress
+        };
+    }
     public static int? GetActiveCallId(int volunteerId)
     {
         DO.Assignment? activeAssignment = s_dal.Assignment.ReadAll()
-            .FirstOrDefault(a => a.Id == volunteerId && a.CompletionTime == null);
+            .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
 
         return activeAssignment?.CallId;
     }
@@ -49,45 +68,8 @@ internal static class VolunteerManager
         }
         return (BO.CallType)call.Type;
     }
-    public static BO.CallInProgress CreateCallInProgress(DO.Volunteer volunteer, DO.Call activeCall, int activeCallId, int volunteerId)
-    {
-        return new BO.CallInProgress
-        {
-            Id = Helpers.VolunteerManager.GetActiveAssignmentId(volunteerId),
-            CallId = activeCallId,
-            Type = (BO.CallType)activeCall.Type,
-            FullAddress = activeCall.FullAddress,
-            OpeningTime = activeCall.OpeningTime,
-            MaxCompletionTime = activeCall.MaxCompletionTime,
-            EntryTime = Helpers.VolunteerManager.GetActiveCallEntryTime(volunteerId),
-            DistanceToActiveCall = Helpers.VolunteerManager
-                .CalculateDistance(volunteer.Latitude, volunteer.Longitude, activeCall.Latitude, activeCall.Longitude, (BO.DistanceType)volunteer.DistanceType),
-            activeCallStatus = Helpers.VolunteerManager.DetermineCallStatus(activeCall.MaxCompletionTime)
-        };
-    }
-    public static BO.Volunteer CreateVolunteer(DO.Volunteer volunteer, BO.CallInProgress? callInProgress)
-    {
-        return new BO.Volunteer
-        {
-            Id = volunteer.Id,
-            FullName = volunteer.FullName,
-            PhoneNumber = volunteer.PhoneNumber,
-            Email = volunteer.Email,
-            
-            CurrentAddress = volunteer.CurrentAddress,
-            Latitude = volunteer.Latitude,
-            Longitude = volunteer.Longitude,
-            Role = (BO.VolunteerRole)volunteer.Role,
-            IsActive = volunteer.IsActive,
-            MaxDistance = volunteer.MaxDistance,
-            DistanceType = (BO.DistanceType)volunteer.DistanceType,
-            TotalHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteer.Id),
-            TotalCancelledCalls = Helpers.VolunteerManager.GetTotalCancelledCalls(volunteer.Id),
-            TotalExpiredCalls = Helpers.VolunteerManager.GetTotalExpiredCalls(volunteer.Id),
-            ActiveCall = callInProgress
-        };
-    }
-    #region Conversions
+
+
     public static BO.VolunteerInList ConvertToBOVolunteerInList(DO.Volunteer volunteer)
     {
         return new BO.VolunteerInList
@@ -104,18 +86,27 @@ internal static class VolunteerManager
     }
     public static DO.Volunteer ConvertToDOVolunteer(BO.Volunteer volunteer)
     {
-        GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
-        double longitude = geoCoordinates.Longitude;
-        double latitude= geoCoordinates.Latitude;
-
-        var password = BCrypt.HashPassword(volunteer.Password);
+        double? longitude = null;
+        double? latitude = null;
+        if (!string.IsNullOrEmpty(volunteer.CurrentAddress))
+        {
+            GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
+            longitude = geoCoordinates.Longitude;
+            latitude = geoCoordinates.Latitude;
+        }
+        var hashedPassword = volunteer.Password;
+        if (!(Tools.PasswordHasher.IsHashed(volunteer.Password)))
+        {
+            hashedPassword = Tools.PasswordHasher.HashPassword(volunteer.Password);
+        }
+        
         return new DO.Volunteer
         {
             Id = volunteer.Id,
             FullName = volunteer.FullName,
             PhoneNumber = volunteer.PhoneNumber,
             Email = volunteer.Email,
-            Password = password,
+            Password = hashedPassword,
             CurrentAddress = volunteer.CurrentAddress,
             Latitude = latitude,
             Longitude = longitude,
@@ -125,62 +116,39 @@ internal static class VolunteerManager
             DistanceType = (DO.DistanceType)volunteer.DistanceType
         };
     }
-    #endregion
+ 
 
-    #region Creating Call in progress
+    #region Creating CallInProgress
+    public static BO.CallInProgress CreateCallInProgress(DO.Volunteer volunteer, DO.Call activeCall, int activeCallId, int volunteerId)
+    {
+        double distance = CalculateDistance(volunteer, activeCall, volunteer.DistanceType);
+        return new BO.CallInProgress
+        {
+            Id = GetActiveAssignmentId(volunteerId),
+            CallId = activeCallId,
+            Type = (BO.CallType)activeCall.Type,
+            FullAddress = activeCall.FullAddress,
+            OpeningTime = activeCall.OpeningTime,
+            MaxCompletionTime = activeCall.MaxCompletionTime,
+            EntryTime = GetActiveCallEntryTime(volunteerId),
+            DistanceToActiveCall = distance,
+            activeCallStatus = DetermineCallStatus(activeCall.MaxCompletionTime)
+        };
+
+    }
     public static int GetActiveAssignmentId(int volunteerId)
     {
         var activeAssignment = s_dal.Assignment.ReadAll()
-        .FirstOrDefault(a => a.Id == volunteerId && a.CompletionTime == null);
+        .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
 
         return activeAssignment.Id;
     }
-
     public static DateTime GetActiveCallEntryTime(int volunteerId)
     {
         DO.Assignment? activeAssignment = s_dal.Assignment.ReadAll()
             .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
 
         return activeAssignment.EntryTime;
-    }
-    public static double CalculateDistance(double? lat1, double? lon1, double lat2, double lon2, BO.DistanceType distanceType)
-    {
-
-        if (lat1 == null || lon1 == null)
-            return 0;
-
-        double distance = HaversineDistance(lat1, lon1, lat2, lon2);
-
-
-        return distanceType switch
-        {
-            BO.DistanceType.Aerial => distance,
-            BO.DistanceType.Walking => distance * 1.1,   // הערכה של 10% יותר
-            BO.DistanceType.Driving => distance * 1.2,   // הערכה של 20% יותר
-            _ => distance
-        };
-    }
-
-    private static double HaversineDistance(double? lat1, double? lon1, double lat2, double lon2)
-    {
-        const int R = 6371;
-
-        double latitude1 = lat1 ?? 0.0;
-        double longitude1 = lon1 ?? 0.0;
-
-        double dLat = (lat2 - latitude1) * Math.PI / 180;
-        double dLon = (lon2 - longitude1) * Math.PI / 180;
-
-        latitude1 = latitude1 * Math.PI / 180;
-        lat2 = lat2 * Math.PI / 180;
-
-        double a = Math.Pow(Math.Sin(dLat / 2), 2) +
-                    Math.Cos(latitude1) * Math.Cos(lat2) *
-                    Math.Pow(Math.Sin(dLon / 2), 2);
-
-        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-
-        return R * c;
     }
     public static ActiveCallStatus DetermineCallStatus(DateTime? maxCompletionTime)
     {
@@ -206,7 +174,6 @@ internal static class VolunteerManager
             return ActiveCallStatus.InProgress;
         }
     }
-
     #endregion
 
     #region Validate BO Volunteer Data
@@ -279,14 +246,19 @@ internal static class VolunteerManager
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))
             throw new InvalidPhoneNumberException("Phone number cannot be empty.");
-        if (!Regex.IsMatch(phoneNumber, @"^0\d{9}$"))
+        if (!Regex.IsMatch(phoneNumber, @"^0\d{1,2}[- ]?\d{3}[- ]?\d{4}$"))
             throw new InvalidPhoneNumberException("Phone number must start with 0 and have 10 digits.");
+
     }
     public static void ValidateEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new InvalidEmailException("Email cannot be empty.");
-        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+
+        int atIndex = email.IndexOf('@');
+        int dotIndex = email.LastIndexOf('.');
+
+        if (atIndex <= 0 || dotIndex <= atIndex + 1 || dotIndex == email.Length - 1)
             throw new InvalidEmailException("Email is not valid.");
     }
     public static void ValidatePassword(string? password)
@@ -307,23 +279,20 @@ internal static class VolunteerManager
     public static void ValidateAddress(string? address)
     {
         if (string.IsNullOrWhiteSpace(address))
-            return;  // No address provided, it's valid as null.
+            return;
 
+        var parts = address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                           .Select(p => p.Trim())
+                           .ToArray();
 
-        var parts = address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length != 3)
-            throw new AddressValidationException("Address must include Street, City, and Country");
+        if (parts.Length < 3)
+            throw new AddressValidationException("Address must include at least Street, City, and Country.");
 
-        string street = parts[0].Trim();
-        string city = parts[1].Trim();
-        string country = parts[2].Trim();
+        if (parts.Any(p => p.Length < 2))
+            throw new AddressValidationException("Each part of the address must be at least 2 characters long.");
 
-        if (street.Length < 2 || city.Length < 2 || country.Length < 2)
-            throw new AddressValidationException("Each part of the address must be at least 2 characters long");
-
-
-        if (!GeocodingService.VerifyAddressExists(address))
-            throw new AddressValidationException("Address does not exist in reality");
+        if (!Tools.VerifyAddressExists(address))
+            throw new AddressValidationException("Address does not exist in reality.");
     }
     public static void ValidateLatitudeLongitude(double? latitude, double? longitude)
     {
@@ -350,6 +319,66 @@ internal static class VolunteerManager
         }
     }
 
+    #endregion
+
+    #region Distance calculation according to distance type
+    public static double CalculateDistance(DO.Volunteer volunteer, DO.Call call, DO.DistanceType distanceType)
+    {
+        double distance = 0;
+        double latitude = volunteer.Latitude ?? throw new InvalidOperationException("Latitude is null");
+        double longitude = volunteer.Longitude ?? throw new InvalidOperationException("Longitude is null");
+
+        switch (distanceType)
+        {
+            case DO.DistanceType.Aerial:
+
+                distance = CalculateAerialDistance(latitude, longitude, call.Latitude, call.Longitude);
+                break;
+
+            case DO.DistanceType.Driving:
+                distance = Tools.GetWalkingRouteDistance(latitude, longitude, call.Latitude, call.Longitude);
+                break;
+
+            case DO.DistanceType.Walking:
+                distance = Tools.GetDrivingRouteDistance(latitude, longitude, call.Latitude, call.Longitude);
+                break;
+
+            default:
+                throw new ArgumentException("Unsupported distance type");
+        }
+
+        return distance;
+    }
+    private static double CalculateAerialDistance(double? lat1, double? lon1, double lat2, double lon2)
+    {
+        const double EarthRadiusKm = 6371.0;
+
+        double startLatitude = lat1.Value;
+        double startLongitude = lon1.Value;
+
+        double lat1Rad = DegreesToRadians(startLatitude);
+        double lon1Rad = DegreesToRadians(startLongitude);
+        double lat2Rad = DegreesToRadians(lat2);
+        double lon2Rad = DegreesToRadians(lon2);
+
+        double dLat = lat2Rad - lat1Rad;
+        double dLon = lon2Rad - lon1Rad;
+
+
+        double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                   Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+
+        double distance = EarthRadiusKm * c;
+
+        return distance;
+    }
+    private static double DegreesToRadians(double degrees)
+    {
+        return degrees * (Math.PI / 180.0);
+    }
     #endregion
 }
 

@@ -1,5 +1,4 @@
-﻿using Bl;
-using BlApi;
+﻿using BlApi;
 using BlImplementation;
 using BO;
 using DalApi;
@@ -28,7 +27,7 @@ internal static class CallManager
             callAssignInList = GetCallAssignments(doCall.Id)?.ToList()
         };
     }
-    public static IEnumerable<BO.CallAssignInList> GetCallAssignments(int callId)
+    public static IEnumerable<BO.CallAssignInList>? GetCallAssignments(int callId)
     {
         try
         {
@@ -58,45 +57,69 @@ internal static class CallManager
 
         return new BO.CallAssignInList
         {
-            Id = assignment.Id,
+            Id = assignment.VolunteerId,
             FullName = volunteerFullName.FullName,
             EntryTime = assignment.EntryTime,
-            CompletionTime = assignment.CompletionTime,
-            CompletionType = (BO.AssignmentCompletionType)assignment.CompletionType,
+            CompletionTime = assignment.CompletionTime != null ?assignment.CompletionTime :null,
+            CompletionType = assignment.CompletionType != null ?(BO.AssignmentCompletionType)assignment.CompletionType :null,
         };
     }
-    private static BO.CallStatus CalculateCallStatus(DO.Call doCall)
+    
+    public static BO.CallStatus CalculateCallStatus(DO.Call doCall)
     {
-        DO.Assignment assignment = s_dal.Assignment.Read(doCall.Id)
-            ?? throw new BO.BlDoesNotExistException($"Call with ID {doCall.Id} does not exist.");
+        DO.Assignment assignment = s_dal.Assignment.Read(a => a.CallId == doCall.Id);
 
         AdminImplementation admin = new AdminImplementation();
         var riskTimeRange = admin.GetRiskTimeRange();
         var systemClock = admin.GetSystemClock();
 
+        // Case 1: No assignment and no MaxCompletionTime -> Always Open
         if (assignment == null)
         {
+            if (doCall.MaxCompletionTime == null)
+                return CallStatus.Open;
+
             if ((doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
                 return CallStatus.OpenAtRisk;
+
             return CallStatus.Open;
         }
-        if (assignment.CompletionTime == null)
+        else
         {
-            if ((doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
-                return CallStatus.InTreatmentAtRisk;
-            return CallStatus.InProgress;
-        }
-        if (assignment.CompletionType == DO.AssignmentCompletionType.Treated
-            || assignment.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled
-            || assignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
-            return CallStatus.Closed;
-        if (systemClock > doCall.MaxCompletionTime)
-        {
-            return CallStatus.Expired;
+            // Case 2: Assignment exists but no CompletionTime -> In Progress (no risk check for null MaxCompletionTime)
+            if (assignment.CompletionTime == null)
+            {
+                if (doCall.MaxCompletionTime != null &&
+                    (doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
+                {
+                    return CallStatus.InTreatmentAtRisk;
+                }
+
+                return CallStatus.InProgress;
+            }
+
+            // Case 3: Assignment completed (treated or cancelled)
+            if (assignment.CompletionType == DO.AssignmentCompletionType.Treated
+                || assignment.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled
+                || assignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
+            {
+                return CallStatus.Closed;
+            }
+
+            // Case 4: Expired (only if MaxCompletionTime is defined)
+            if (doCall.MaxCompletionTime != null && systemClock > doCall.MaxCompletionTime)
+            {
+                return CallStatus.Expired;
+            }
+            if (assignment.CompletionType == DO.AssignmentCompletionType.Expired)
+            {
+                return CallStatus.Expired;
+            }  
         }
 
         throw new InvalidOperationException("Unknown call status.");
     }
+
     internal static void PeriodicCallUpdates()
     {
         IEnumerable<DO.Call> allCalls = s_dal.Call.ReadAll();
@@ -149,54 +172,33 @@ internal static class CallManager
 
 
     }
-    public static TimeSpan? CalculateRemainingTime(DO.Call call)
-    {
-        if (call.MaxCompletionTime.HasValue)
-        {
-            var remaining = call.MaxCompletionTime.Value - DateTime.Now;
-            return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero; // ensures non-negative time
-        }
-        return null; // If MaxCompletionTime is null, return null
-    }
 
 
-    public static TimeSpan? CalculateCompletionTime(DO.Call call)
-    {
-        if (call.MaxCompletionTime.HasValue)
-        {
-            return call.MaxCompletionTime.Value - call.OpeningTime;
-        }
-        return null;
-    }
-    public static int GetAssignmentCount(DO.Call call)
-    {
-        return s_dal.Assignment.ReadAll(a => a.CallId == call.Id).Count();
-    }
+
+
     public static CallInList ConvertToCallInList(DO.Call call)
     {
-        var assignment = s_dal.Assignment.ReadAll().FirstOrDefault(v => v.CallId == call.Id);
-        var BoCall = ConvertCallToBO(call);
-
-        if (assignment != null)
-        {
-            var lastAssignment = s_dal.Assignment
-                .ReadAll(v => v.CallId == call.Id)
-                .OrderByDescending(v => v.Id)
-                .FirstOrDefault();
-
+        var lastAssignment = s_dal.Assignment
+            .ReadAll(v => v.CallId == call.Id)
+            .OrderByDescending(v => v.EntryTime)
+            .FirstOrDefault();
+        if (lastAssignment != null)
+        { 
             int lastVolunteerId = lastAssignment != null ? lastAssignment.VolunteerId : -1;
 
-            string lastVolunteerName = s_dal.Volunteer.Read(lastVolunteerId).FullName;
+            string lastVolunteerName = s_dal.Volunteer.Read(lastVolunteerId).FullName
+            ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {lastVolunteerId} does not exist.");
+
             var callInList = new CallInList
             {
-                Id = assignment.Id,
-                CallId = assignment.CallId,
+                Id = lastAssignment.Id,
+                CallId = lastAssignment.CallId,
                 Type = (BO.CallType)call.Type,
                 OpeningTime = call.OpeningTime,
                 RemainingTime = CalculateRemainingTime(call),
                 LastVolunteer = lastVolunteerName,
-                TotalCompletionTime = CalculateCompletionTime(call),
-                Status = BoCall.Status,
+                TotalCompletionTime = CalculateCompletionTime(lastAssignment,call),
+                Status = CalculateCallStatus(call),
                 TotalAssignments = GetAssignmentCount(call)
             };
             return callInList;
@@ -211,13 +213,35 @@ internal static class CallManager
                 OpeningTime = call.OpeningTime,
                 RemainingTime = CalculateRemainingTime(call),
                 LastVolunteer = null,
-                TotalCompletionTime = CalculateCompletionTime(call),
-                Status = BoCall.Status,
+                TotalCompletionTime = null,
+                Status = CalculateCallStatus(call),
                 TotalAssignments = 0
             };
             return callInList;
         }
        
+    }
+    public static TimeSpan? CalculateRemainingTime(DO.Call call)
+    {
+        if (call.MaxCompletionTime.HasValue)
+        {
+            var remaining = call.MaxCompletionTime.Value - DateTime.Now;
+            return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero; // ensures non-negative time
+        }
+        return null; // If MaxCompletionTime is null, return null
+    }
+    public static TimeSpan? CalculateCompletionTime(DO.Assignment assignment, DO.Call call)
+    {
+        if (assignment.CompletionType == DO.AssignmentCompletionType.Treated)
+        {
+            return assignment.CompletionTime.Value - call.OpeningTime;
+        }
+        return null;
+    }
+   
+    public static int GetAssignmentCount(DO.Call call)
+    {
+        return s_dal.Assignment.ReadAll(a => a.CallId == call.Id).Count();
     }
     public static IOrderedEnumerable<CallInList> SortCalls(IEnumerable<CallInList> calls, CallInListField sortField)
     {
@@ -232,7 +256,7 @@ internal static class CallManager
             CallInListField.CompletionTime => calls.OrderBy(call => call.TotalCompletionTime),
             CallInListField.Status => calls.OrderBy(call => call.Status),
             CallInListField.TotalAllocations => calls.OrderBy(call => call.TotalAssignments),
-            _ => calls.OrderBy(call => call.CallId) // מיון ברירת מחדל
+            _ => calls.OrderBy(call => call.CallId) 
         };
     }
     public static object? GetValueForField(CallInList call, CallInListField field)
@@ -320,23 +344,20 @@ internal static class CallManager
         if (street.Length < 2 || city.Length < 2 || country.Length < 2)
             throw new AddressValidationException("Each part of the address must be at least 2 characters long");
 
-        if (!GeocodingService.VerifyAddressExists(address))
+        if (!Tools.VerifyAddressExists(address))
             throw new AddressValidationException("Address does not exist in reality");
     }
     public static void ValidateMaxEndTime(DateTime openTime, DateTime? maxEndTime)
     {
-        if (maxEndTime <= DateTime.Now)
-        {
-            throw new InvalidOperationException("Max end time must be later than the current time.");
-        }
-        if (maxEndTime <= openTime)
+        
+        if (maxEndTime != null && maxEndTime <= openTime)
         {
             throw new InvalidOperationException("Max end time must be later than the open time.");
         }
     }
     public static void ValidateCallStatus(string statusString)
     {
-        // מנסה להמיר את המחרוזת לסטטוס מתוך האינאמ CallStatus
+        
         if (!Enum.TryParse(statusString, true, out CallStatus status))
         {
             throw new InvalidOperationException($"Invalid status string: {statusString}. Valid values are: Open, InProgress, Closed, Expired, OpenAtRisk, InTreatmentAtRisk.");
@@ -368,7 +389,7 @@ internal static class CallManager
 
         return new ClosedCallInList
         {
-            Id = assignment.CallId,
+            Id = newCall.Id,
             Type = (BO.CallType)newCall.Type,
             FullAddress = newCall.FullAddress,
             OpeningTime = newCall.OpeningTime,

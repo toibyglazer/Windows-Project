@@ -15,6 +15,7 @@ namespace Dal;
 /// </summary>
 internal class VolunteerImplementation : IVolunteer
 {
+    private static readonly object lockObj = new object();
     public void Create(Volunteer item)
     {
         // Load the current list of volunteers from the XML file
@@ -51,7 +52,11 @@ internal class VolunteerImplementation : IVolunteer
     /// </summary>
     public void DeleteAll()
     {
-        XMLTools.SaveListToXMLSerializer(new List<Volunteer>(), Config.s_volunteers_xml);
+        lock (lockObj)
+        {
+            XMLTools.SaveListToXMLSerializer(new List<Volunteer>(), Config.s_volunteers_xml);
+        }
+           
     }
 
     /// <summary>

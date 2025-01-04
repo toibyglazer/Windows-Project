@@ -4,8 +4,10 @@ using System.Text.Json;
 using System;
 using System.Net.Http;
 using System.Xml.Linq;
-using System.Text.Json;
-
+using DalApi;
+using System.Security.Cryptography;
+using System.Text;
+using System.Collections;
 namespace Helpers;
 public class GeoCoordinates
 {
@@ -14,43 +16,54 @@ public class GeoCoordinates
     public override string ToString() => $"Latitude: {Latitude}, Longitude: {Longitude}";
 }
 
-internal static class Tools
+public static class Tools
 {
     private static readonly HttpClient httpClient = new HttpClient();
-    public static string ToStringProperty<T>(this T t)
+    public static string ToStringProperty<T>(this T t, int indentLevel = 0)
     {
         if (t == null)
-            return "The provided object is null and has no properties.";
+            return $"{new string(' ', indentLevel)}The provided object is null and has no properties.";
 
         Type type = t.GetType();
         PropertyInfo[] properties = type.GetProperties();
 
-        List<string> propertyStrings = new List<string>();
+        StringBuilder result = new StringBuilder();
+        string indent = new string(' ', indentLevel);
+        result.AppendLine($"{indent}{type.Name} Properties:");
+
         foreach (PropertyInfo property in properties)
         {
             object value = property.GetValue(t);
+            string propertyName = property.Name;
+            string valueStr = value?.ToString() ?? "null";
 
             if (value == null)
             {
-                propertyStrings.Add($"{property.Name}: null");
+                result.AppendLine($"{indent}  {propertyName}: {valueStr}");
             }
-            else if (value is IEnumerable<object> enumerable)
+            else if (value is IEnumerable enumerable && !(value is string))
             {
-                propertyStrings.Add($"{property.Name}: [{string.Join(", ", enumerable)}]");
+                result.AppendLine($"{indent}  {propertyName}:");
+                foreach (var item in enumerable)
+                {
+                    result.AppendLine(item.ToStringProperty(indentLevel + 4));
+                }
             }
             else
             {
-                propertyStrings.Add($"{property.Name}: {value}");
+                result.AppendLine($"{indent}  {propertyName}: {valueStr}");
             }
-
         }
-        return $"{type.Name} Properties:\n {string.Join(", ", propertyStrings)}";
+
+        return result.ToString();
     }
+
 
     #region Geocoding
     /// <summary>
     /// Gets the coordinates of a location by its address using OpenStreetMap API.
     /// </summary>
+   
     public static GeoCoordinates CallOpenStreetMapApi(string address)
     {
         try
@@ -87,28 +100,26 @@ internal static class Tools
     /// <summary>
     /// Verifies if an address exists in OpenStreetMap systems.
     /// </summary>
+    /// 
     public static bool VerifyAddressExists(string address)
     {
-        try
+        var url = $"https://nominatim.openstreetmap.org/search?format=xml&q={Uri.EscapeDataString(address)}";
+
+        httpClient.DefaultRequestHeaders.Clear();
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
+
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var response = httpClient.Send(request);
+        var responseBody = response.Content.ReadAsStringAsync().Result;
+
+        var doc = XDocument.Parse(responseBody);
+        var places = doc.Root?.Elements("place");
+
+        if (places != null && places.Any())
         {
-            var url = $"https://nominatim.openstreetmap.org/search?format=xml&q={Uri.EscapeDataString(address)}";
-
-            httpClient.DefaultRequestHeaders.Clear();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
-
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            var response = httpClient.Send(request);
-            var responseBody = response.Content.ReadAsStringAsync().Result;
-
-            var doc = XDocument.Parse(responseBody);
-
-            return doc.Root?.Element("place") != null;
+            return true;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to verify address existence: {ex.Message}");
-            return false;
-        }
+        throw new Exception("Address not found");
     }
     #endregion
 
@@ -170,5 +181,75 @@ internal static class Tools
         }
     }
     #endregion
+
+    #region Password Hashing and Verification Management Using PBKDF2
+    public static class PasswordHasher
+    {
+
+        public static string HashPassword(string password)
+        {
+
+            byte[] salt = GenerateSalt(16);
+            int iterations = 10000;
+
+            using (var rfc2898 = new Rfc2898DeriveBytes(password, salt, iterations))
+            {
+                byte[] hash = rfc2898.GetBytes(32);
+                return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
+            }
+        }
+
+        // Function to verify a password against a stored hash
+        public static bool VerifyPassword(string password, string storedHash)
+        {
+
+            string[] parts = storedHash.Split(':');
+            if (parts.Length != 2) return false;
+
+            byte[] salt = Convert.FromBase64String(parts[0]);
+            byte[] storedHashBytes = Convert.FromBase64String(parts[1]);
+            int iterations = 10000;
+            using (var rfc2898 = new Rfc2898DeriveBytes(password, salt, iterations))
+            {
+                byte[] computedHash = rfc2898.GetBytes(32);
+                return CryptographicOperations.FixedTimeEquals(computedHash, storedHashBytes);
+            }
+        }
+        public static bool IsHashed(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+                return false;
+
+            var parts = password.Split(':');
+            if (parts.Length != 2)
+                return false;
+
+            try
+            {
+                
+                Convert.FromBase64String(parts[0]); // salt
+                Convert.FromBase64String(parts[1]); // hash
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
+
+        // Private function to generate a random salt
+        private static byte[] GenerateSalt(int size)
+        {
+            byte[] salt = new byte[size];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+            return salt;
+        }
+    }
+    #endregion
+
 
 }

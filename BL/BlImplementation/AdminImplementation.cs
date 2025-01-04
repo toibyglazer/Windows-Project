@@ -19,8 +19,8 @@ public class AdminImplementation : IAdmin
             BO.TimeUnit.MINUTE => TimeSpan.FromMinutes(1),
             BO.TimeUnit.HOUR => TimeSpan.FromHours(1),
             BO.TimeUnit.DAY => TimeSpan.FromDays(1),
-            BO.TimeUnit.MONTH => TimeSpan.FromDays(30), // הערכה עבור חודש
-            BO.TimeUnit.YEAR => TimeSpan.FromDays(365), // הערכה עבור שנה
+            BO.TimeUnit.MONTH => TimeSpan.FromDays(30), 
+            BO.TimeUnit.YEAR => TimeSpan.FromDays(365), 
             _ => throw new BlArgumentException("Invalid time unit")
         };
 

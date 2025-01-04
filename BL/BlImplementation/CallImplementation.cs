@@ -12,6 +12,7 @@ internal class CallImplementation : ICall
     {
         DO.Volunteer volunteer = s_dal.Volunteer.Read(volunteerId)
           ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
+
         DO.Call call = s_dal.Call.Read(callId)
          ?? throw new BO.BlDoesNotExistException($"Call with ID {callId} not found.");
         var assignments = s_dal.Assignment.ReadAll();
@@ -55,7 +56,7 @@ internal class CallImplementation : ICall
 
         IEnumerable<DO.Call> allCalls = s_dal.Call.ReadAll() ?? Enumerable.Empty<DO.Call>();
         IEnumerable<BO.CallInList> callsInList = allCalls.Select(v => Helpers.CallManager.ConvertToCallInList(v));
-
+       
         if (filterField.HasValue && filterValue != null)
         {
             callsInList = callsInList.Where(call =>
@@ -73,28 +74,36 @@ internal class CallImplementation : ICall
     }
     public int[] GetCallStatusesCount()
     {
+       
         var allCalls = s_dal.Call.ReadAll();
 
-        var blCalls = allCalls.Select(call => Helpers.CallManager.ConvertCallToBO(call)).ToList();
-
-        var statusGroups = blCalls.GroupBy(call => call.Status)
-                                  .Select(group => new { Status = group.Key, Count = group.Count() })
-                                  .ToList();
-
+        var statusGroups = allCalls.GroupBy(call => Helpers.CallManager.CalculateCallStatus(call))
+                                   .Select(group => new { Status = group.Key, Count = group.Count() })
+                                   .ToList();
 
         int[] callCounts = Enum.GetValues(typeof(CallStatus))
                                .Cast<CallStatus>()
                                .Select(status => statusGroups.FirstOrDefault(group => group.Status == status)?.Count ?? 0)
                                .ToArray();
 
+        int totalCallsCount = allCalls.Count(); 
+        int calculatedCount = callCounts.Sum();
+        if (calculatedCount != totalCallsCount)
+        {
+            throw new InvalidOperationException(
+                $"Mismatch detected: Total calls in system ({totalCallsCount}) does not match calculated calls ({calculatedCount})."
+            );
+        }
+
         return callCounts;
     }
+
+  
     public BO.Call GetCallDetailsById(int callId)
     {
         DO.Call call = s_dal.Call.Read(callId)
               ?? throw new BO.BlDoesNotExistException($"Call with ID {callId} does not exist.");
-        IEnumerable<DO.Assignment> assignments = s_dal.Assignment.ReadAll(a => a.CallId == callId);
-
+        
         BO.Call boCall = Helpers.CallManager.ConvertCallToBO(call);
         return boCall;
     }
@@ -143,10 +152,7 @@ internal class CallImplementation : ICall
         {
             throw new BO.BlDoesNotExistException($"Call with ID {callId} does not exist in the data layer.", ex);
         }
-        catch (Exception ex)
-        {
-            throw new BO.BlGeneralException($"An unexpected error occurred while trying to delete call with ID {callId}.", ex);
-        }
+        
     }
     public void AddCall(BO.Call call)
     {
@@ -164,9 +170,13 @@ internal class CallImplementation : ICall
     }
     public IEnumerable<ClosedCallInList> GetClosedCallsByVolunteer(int volunteerId, BO.CallType? callTypeFilter = null, ClosedCallSortField? sortByField = null)
     {
+         
+
         var closedCallsByVolunteer = s_dal.Assignment.ReadAll()
-            .Where(assignment => assignment.VolunteerId == volunteerId && assignment.CompletionType == DO.AssignmentCompletionType.Treated)
-            .Select(assignment => Helpers.CallManager.ConvertToClosedCallInList(assignment));
+           .Where(assignment => assignment.VolunteerId == volunteerId
+           && assignment.CompletionType != null).Select(assignment => Helpers.CallManager.ConvertToClosedCallInList(assignment));
+
+
 
         if (callTypeFilter.HasValue)
         {
@@ -175,11 +185,16 @@ internal class CallImplementation : ICall
 
         closedCallsByVolunteer = sortByField switch
         {
+            ClosedCallSortField.Id => closedCallsByVolunteer.OrderBy(call => call.Id),
+            ClosedCallSortField.Type => closedCallsByVolunteer.OrderBy(call => call.Type),
+            ClosedCallSortField.FullAddress => closedCallsByVolunteer.OrderBy(call => call.FullAddress),
             ClosedCallSortField.OpeningTime => closedCallsByVolunteer.OrderBy(call => call.OpeningTime),
             ClosedCallSortField.EntryTime => closedCallsByVolunteer.OrderBy(call => call.EntryTime),
             ClosedCallSortField.CompletionTime => closedCallsByVolunteer.OrderBy(call => call.CompletionTime),
+            ClosedCallSortField.CompletionType => closedCallsByVolunteer.OrderBy(call => call.CompletionType),
             _ => closedCallsByVolunteer.OrderBy(call => call.Id)
         };
+
         return closedCallsByVolunteer;
     }
     public IEnumerable<OpenCallInList> GetOpenCallsByVolunteer(int volunteerId, BO.CallType? callTypeFilter = null, OpenCallSortField? sortByField = null)
@@ -233,7 +248,7 @@ internal class CallImplementation : ICall
         };
         try
         {
-            s_dal.Assignment.Update(assignment);
+            s_dal.Assignment.Update(updatedAssignment);
         }
         catch (DalDoesNotExistException ex)
         {
@@ -244,13 +259,11 @@ internal class CallImplementation : ICall
     {
         DO.Volunteer volunteer = s_dal.Volunteer.Read(volunteerId)
            ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
-
-        if (volunteer.Role != DO.VolunteerRole.Manager && volunteerId != volunteer.Id)
-        {
-            throw new BlInvalidRoleException("Only an admin or the assigned volunteer can cancel this assignment.");
-        }
         var assignment = s_dal.Assignment.Read(assignmentId)
           ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} not found.");
+
+        if (volunteer.Role != DO.VolunteerRole.Manager && volunteerId != assignment.VolunteerId)
+            throw new BlInvalidRoleException("Only an admin or the assigned volunteer can cancel this assignment.");
         if (assignment.CompletionType != null || assignment.CompletionTime != null)
             throw new InvalidOperationException("The assignment is already closed or completed.");
 
@@ -264,11 +277,12 @@ internal class CallImplementation : ICall
         };
         try
         {
-            s_dal.Assignment.Update(assignment);
+            s_dal.Assignment.Update(updatedAssignment);
         }
         catch (DalDoesNotExistException ex)
         {
             throw new BO.BlDoesNotExistException("An error occurred while updating the assignment.", ex);
         }
     }
+    
 }

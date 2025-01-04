@@ -213,3 +213,18 @@ public class BlInvalidRoleException : Exception
 
         public BlOperationNotAllowedException(string message, Exception innerException) : base(message, innerException) { }
     }
+public class IncorrectPasswordException : Exception
+{
+    public IncorrectPasswordException() : base() { }
+
+    public IncorrectPasswordException(string message) : base(message) { }
+
+    public IncorrectPasswordException(string message, Exception innerException)
+        : base(message, innerException) { }
+}
+public class BlLockoutException : Exception
+{
+    public BlLockoutException() : base() { }
+    public BlLockoutException(string message) : base(message) { }
+    public BlLockoutException(string message, Exception innerException) : base(message, innerException) { }
+}
