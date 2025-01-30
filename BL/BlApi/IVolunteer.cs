@@ -11,7 +11,7 @@
 /// - DeleteVolunteer: Deletes a volunteer from the system by ID.
 /// - AddVolunteer: Adds a new volunteer to the system.
 /// - UpdatePassword: Updates the password of a volunteer, ensuring proper validation of the old password.
-public interface IVolunteer
+public interface IVolunteer : IObservable //stage 5 הרחבת ממשק
 {
     BO.VolunteerRole Login(int username, string password);
     IEnumerable<BO.VolunteerInList> GetVolunteersList(bool? isActiveFilter = null, BO.VolunteerSortField? sortField = null);

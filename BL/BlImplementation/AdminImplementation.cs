@@ -41,20 +41,22 @@ public class AdminImplementation : IAdmin
         };
 
         // Update the system clock with the increment
-        DateTime newClock = ClockManager.Now.Add(increment);
-        ClockManager.UpdateClock(newClock);
+        DateTime newClock = AdminManager.GetNow().Add(increment);
+        AdminManager.SetNow(newClock);
+        AdminManager.UpdateClock(newClock);
     }
 
     public TimeSpan GetRiskTimeRange()
     {
         // Return the configured risk time range
-        return _dal.Config.RiskRangelock;
+        return AdminManager.GetMaxRange();
+
     }
 
     public DateTime GetSystemClock()
     {
         // Return the current system clock
-        return _dal.Config.Clock;
+        return AdminManager.GetNow();
     }
 
     public void InitializeDatabase()
@@ -63,6 +65,9 @@ public class AdminImplementation : IAdmin
         {
             // Initialize the database with default data
             Initialization.Do();
+            AdminManager.UpdateClock(AdminManager.Now);
+            AdminManager.MaxRange = AdminManager.MaxRange;
+
         }
         catch (DalAlreadyExistsException ex)
         {
@@ -80,14 +85,15 @@ public class AdminImplementation : IAdmin
     {
         try
         {
-            // Reset all data and configurations
-            _dal.Config.Reset();
-
             _dal.Call.DeleteAll();
             _dal.Assignment.DeleteAll();
             _dal.Volunteer.DeleteAll();
 
             _dal.Config.Reset();
+
+            AdminManager.UpdateClock(AdminManager.Now);
+            AdminManager.MaxRange = AdminManager.MaxRange;
+
         }
         catch (Exception ex)
         {
@@ -99,7 +105,20 @@ public class AdminImplementation : IAdmin
     public void SetRiskTimeRange(TimeSpan riskTimeRange)
     {
         // Set the new risk time range configuration
-        _dal.Config.RiskRangelock = riskTimeRange;
+        AdminManager.SetMaxRange(riskTimeRange);
     }
+
+    #region Stage 5
+    public void AddClockObserver(Action clockObserver) =>
+    AdminManager.ClockUpdatedObservers += clockObserver;
+    public void RemoveClockObserver(Action clockObserver) =>
+    AdminManager.ClockUpdatedObservers -= clockObserver;
+    public void AddConfigObserver(Action configObserver) =>
+   AdminManager.ConfigUpdatedObservers += configObserver;
+    public void RemoveConfigObserver(Action configObserver) =>
+    AdminManager.ConfigUpdatedObservers -= configObserver;
+
+    #endregion Stage 5
+
 
 }

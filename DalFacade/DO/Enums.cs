@@ -28,7 +28,8 @@ public enum CallType
     BaseMaintenance,         // תחזוקה בבסיס
     KitPreparation,          // הכנת ערכות לחיילים
     SpecialEventSupport ,     // תמיכה באירועים מיוחדים
-    None
+    None,
+    All
 }
 
 public enum AssignmentCompletionType

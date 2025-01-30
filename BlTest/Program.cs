@@ -1533,6 +1533,7 @@ namespace BlTest
             {
                 // קריאה לפונקציה לביטול ההקצאה
                 s_bl.Call.CancelAssignment(volunteerId, assignmentId);
+                
                 Console.WriteLine($"Assignment {assignmentId} has been successfully canceled by Volunteer {volunteerId}.");
             }
             catch (BO.BlDoesNotExistException ex)
@@ -1728,7 +1729,7 @@ namespace BlTest
         {
             Console.WriteLine("--- Advance System Clock Based on User Input ---");
             AdminImplementation admin = new AdminImplementation();
-            DateTime initialClock = ClockManager.Now;
+            DateTime initialClock = admin.GetSystemClock();
 
             while (true)
             {
@@ -1779,9 +1780,9 @@ namespace BlTest
                 }
 
                 Console.WriteLine($"Advancing the system clock by {timeUnit}...");
-                DateTime oldClock = ClockManager.Now; // שמירת השעון הנוכחי לפני הקידום
+                DateTime oldClock = admin.GetSystemClock(); // שמירת השעון הנוכחי לפני הקידום
                 s_bl.Admin.AdvanceSystemClock(timeUnit); // קידום השעון
-                DateTime newClock = ClockManager.Now; // שמירת השעון לאחר הקידום
+                DateTime newClock = admin.GetSystemClock(); // שמירת השעון לאחר הקידום
 
                 // הצגת הפלט
                 Console.WriteLine($"Old Clock: {oldClock}");

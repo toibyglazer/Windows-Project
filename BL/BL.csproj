@@ -14,6 +14,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Helpers\Images\12478938.png" />
+    <None Remove="Helpers\Images\Attention-sign-icon.png" />
+    <None Remove="Helpers\Images\cancel-close-10374.png" />
+    <None Remove="Helpers\Images\Google_Maps_icon_%282020%29.png" />
+    <None Remove="Helpers\Images\image1584606976.jpg" />
+    <None Remove="Helpers\Images\marker.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Helpers\Images\cancel-close-10374.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Helpers\Images\Google_Maps_icon_(2020).png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
 

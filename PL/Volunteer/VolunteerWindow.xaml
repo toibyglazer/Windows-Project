@@ -1,0 +1,77 @@
+﻿<Window x:Class="PL.Volunteer.VolunteerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Volunteer Details" Height="600" Width="800" Background="#F9F9F9">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Header -->
+        <TextBlock Text="Volunteer Details" FontSize="24" FontWeight="Bold" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,20" />
+
+        <!-- Volunteer Information -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="10">
+            <TextBlock Text="Personal Details" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
+            <TextBlock Text="{Binding FullName}" FontWeight="Bold" />
+            <TextBlock Text="{Binding PhoneNumber}" />
+            <TextBlock Text="{Binding Email}" />
+            <TextBlock Text="{Binding CurrentAddress}" />
+            <TextBlock Text="{Binding Role}" />
+            <TextBlock Text="{Binding IsActive, Converter={StaticResource BoolToStatusConverter}}" />
+            <TextBlock Text="{Binding MaxDistance, StringFormat='Max Distance: {0}'}" />
+            <TextBlock Text="{Binding DistanceType}" />
+            <TextBlock Text="{Binding TotalHandledCalls, StringFormat='Handled Calls: {0}'}" />
+            <TextBlock Text="{Binding TotalCancelledCalls, StringFormat='Cancelled Calls: {0}'}" />
+            <TextBlock Text="{Binding TotalExpiredCalls, StringFormat='Expired Calls: {0}'}" />
+        </StackPanel>
+
+        <!-- Active Call Section -->
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
+            <TextBlock Text="Active Call" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
+
+            <!-- Display Active Call if exists -->
+            <StackPanel Visibility="{Binding ActiveCall, Converter={StaticResource NullToVisibilityConverter}}">
+                <TextBlock Text="Call ID:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.CallId}" />
+
+                <TextBlock Text="Type:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.Type}" />
+
+                <TextBlock Text="Description:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.Description}" />
+
+                <TextBlock Text="Address:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.FullAddress}" />
+
+                <TextBlock Text="Opening Time:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.OpeningTime, StringFormat='{}{0:G}'}" />
+
+                <TextBlock Text="Max Completion Time:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.MaxCompletionTime, StringFormat='{}{0:G}'}" />
+
+                <TextBlock Text="Entry Time:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.EntryTime, StringFormat='{}{0:G}'}" />
+
+                <TextBlock Text="Distance to Active Call:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.DistanceToActiveCall, StringFormat='{}{0:N2} km'}" />
+
+                <TextBlock Text="Status:" FontWeight="Bold" />
+                <TextBlock Text="{Binding ActiveCall.activeCallStatus}" />
+            </StackPanel>
+
+            <!-- No Active Call Message -->
+            <TextBlock Text="No active call at the moment." 
+                       Visibility="{Binding ActiveCall, Converter={StaticResource NullToInverseVisibilityConverter}}" 
+                       FontStyle="Italic" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,314 @@
+﻿<Window x:Class="PL.Volunteer.VolunteerListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:PL"
+        Title="Volunteer List"
+        Width="1024"
+        Height="768"
+        WindowStartupLocation="CenterScreen"
+        FlowDirection="LeftToRight" 
+        Background="#F8F9FA"
+   DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+
+    <Window.Resources>
+        <local:CallTypesCollection x:Key="CallTypesCollection" />
+        <local:ActivityCollection x:Key="ActivityCollection" />
+ 
+
+    <!-- Color Resources -->
+        <SolidColorBrush x:Key="NavyBlueBrush" Color="#1B365D"/>
+        <SolidColorBrush x:Key="LightBlueBrush" Color="#E8EFF6"/>
+        <SolidColorBrush x:Key="DarkBlueBrush" Color="#2C5282"/>
+        <SolidColorBrush x:Key="CreamBrush" Color="#F8F9FA"/>
+        <SolidColorBrush x:Key="BeigeBrush" Color="#F4F1E7"/>
+        <SolidColorBrush x:Key="LightBeigeBrush" Color="#FFF5E6"/>
+
+        <!-- New Button Colors -->
+        <SolidColorBrush x:Key="Button1Brush" Color="#34495E"/>
+        <SolidColorBrush x:Key="Button2Brush" Color="#2C3E50"/>
+        <SolidColorBrush x:Key="Button3Brush" Color="#2E4053"/>
+        <SolidColorBrush x:Key="Button4Brush" Color="#283747"/>
+
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                        CornerRadius="8"
+                        BorderThickness="0">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="2" 
+                                          Direction="315" 
+                                          Color="Black" 
+                                          Opacity="0.3" 
+                                          BlurRadius="4"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource NavyBlueBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- Border around the window with classic color, no rounded edges -->
+
+    <!-- Outer grid -->
+    <Grid Margin="0,0,5,0">
+        <Grid.RowDefinitions>
+            <!-- Top row (Logo and Title) -->
+            <RowDefinition Height="Auto" MinHeight="129"/>
+            <!-- Middle row (Category and ComboBox) -->
+            <RowDefinition Height="Auto" MinHeight="50"/>
+            <!-- Middle row (Item List) -->
+            <RowDefinition/>
+            <!-- Bottom row (Button) -->
+            <RowDefinition Height="Auto" MinHeight="68.04"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top row - Inner Grid (Logo and Title) -->
+        <Grid VerticalAlignment="Center" Height="108">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Column for Logo -->
+                <ColumnDefinition Width="*"/>
+                <!-- Column for Title -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Logo -->
+            <Image Source="Images/logo.png" 
+                       Stretch="Uniform" 
+                       Margin="25,3,0,-9"
+                       Width="205" 
+                       HorizontalAlignment="Left" Grid.ColumnSpan="2"/>
+
+            <!-- Title -->
+            <TextBlock Text="Volunteer List" 
+                           FontFamily="Calibri"
+                           FontSize="40"
+                           FontWeight="Bold"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Left"
+                           Foreground="{StaticResource NavyBlueBrush}" 
+                           Margin="348,34,0,0" 
+                           Grid.Column="1" Height="60" Width="307"/>
+        </Grid>
+
+        <!-- Middle row - Inner Grid (Label and ComboBox for filtering) -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- Left column - Label -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Right column - ComboBoxes -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Label for category filter -->
+            <Label Content="Filter by Category:" 
+    VerticalAlignment="Top"
+    HorizontalAlignment="Left"
+    FontFamily="Calibri"
+    FontSize="25"
+    FontWeight="Bold"
+    Foreground="{StaticResource NavyBlueBrush}"
+    Margin="15,40,0,0"
+    Grid.Column="0" Grid.ColumnSpan="2" Width="218"/>
+
+            <!-- First ComboBox for CallType -->
+            <ComboBox 
+    HorizontalAlignment="Left" 
+    VerticalAlignment="Top" 
+    Width="350" 
+    Height="45" 
+    Background="White" 
+    BorderThickness="1"
+    Margin="240,40,0,0" 
+    Grid.Column="1" 
+    SelectedValue="{Binding callType, Mode=TwoWay}"
+    SelectionChanged="ComboBox_SelectionChanged"
+    ItemsSource="{Binding CallTypesCollection}" />
+
+            <!-- Second ComboBox for Activity -->
+            <ComboBox 
+ HorizontalAlignment="Left" 
+ VerticalAlignment="Top" 
+ Width="350" 
+ Height="45" 
+ Background="White" 
+ BorderThickness="1"
+ Margin="615,40,0,0" 
+ Grid.Column="1" 
+ SelectedValue="{Binding ActivityFilter, Mode=TwoWay}"
+ SelectionChanged="ComboBox_SelectionChanged"
+ ItemsSource="{Binding  ActivityCollection}" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="10,75,9,385" Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="1019"/>
+                <ColumnDefinition Width="0*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- TextBox for Name Filter -->
+
+            <Label Content="Filter by Name:" 
+               VerticalAlignment="Center" 
+               FontFamily="Calibri" 
+               FontSize="20" 
+               FontWeight="Bold" 
+               Foreground="{StaticResource NavyBlueBrush}" 
+               Margin="225,0,649,0" Height="36"/>
+            <TextBox 
+                 Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"  Margin="370,25,439,25"/>
+
+
+
+            <!-- TextBox for ID Filter -->
+
+            <Label Content="Filter by ID:" 
+               VerticalAlignment="Center" 
+               FontFamily="Calibri" 
+               FontSize="20" 
+               FontWeight="Bold" 
+               Foreground="{StaticResource NavyBlueBrush}" 
+               Margin="605,0,291,0" Height="35" RenderTransformOrigin="0.777,0.573"/>
+            <TextBox 
+                 Text="{Binding IDFilter, UpdateSourceTrigger=PropertyChanged}"  TextChanged="TextBox_TextChanged" Margin="720,25,64,25" />
+
+
+        </Grid>
+
+
+        <!-- Middle row - Item List -->
+        
+      
+
+        <DataGrid Grid.Row="2" Margin="20,80,20,20"
+          ItemsSource="{Binding VolunteerList}"
+          AutoGenerateColumns="True"
+          CanUserAddRows="False"
+          IsReadOnly="True"
+          BorderThickness="0"
+          Background="Transparent"
+          RowHeaderWidth="0"
+          VerticalAlignment="Stretch"
+          HorizontalAlignment="Stretch"
+          VerticalScrollBarVisibility="Auto"
+          FontFamily="Calibri" 
+          HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#2C3E50"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Padding" Value="10,15"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                    <Setter Property="BorderBrush" Value="#34495E"/>
+                </Style>
+
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridCell">
+                                <Border Padding="{TemplateBinding Padding}" BorderThickness="0">
+                                    <ContentPresenter />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="#FFFFFF"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#ECF0F1"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#3498DB"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridColumnHeader">
+                                <Grid>
+                                    <Border Padding="10,15" Background="#2C3E50" BorderThickness="0,0,1,0" BorderBrush="#34495E">
+                                        <TextBlock Text="{TemplateBinding Content}"  FontFamily="Calibri"  Foreground="White" FontWeight="SemiBold" />
+                                    </Border>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+        </DataGrid>
+
+
+
+
+        <!-- Uncommented Button -->
+        <Button Content="Add New Item" 
+        Grid.Row="3" 
+        Width="NaN" 
+        Height="NaN" 
+        Style="{StaticResource ModernButton}" 
+        Foreground="White" 
+        Margin="410,5,409,19" RenderTransformOrigin="0.533,17.595"/>
+    </Grid>
+
+</Window>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

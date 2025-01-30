@@ -2,41 +2,41 @@
 <ArrayOfCall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Call>
     <Id>1</Id>
-    <Type>SoldierTransportation</Type>
+    <Type>MedicalSupport</Type>
     <FullAddress>1 Herzl, Tel Aviv, Israel</FullAddress>
     <Latitude>32.0853</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-08T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-09T17:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-27T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Food delivery for a family</Description>
   </Call>
   <Call>
     <Id>2</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>MedicalSupport</Type>
     <FullAddress>15 HaNassi, Haifa, Israel</FullAddress>
     <Latitude>32.794</Latitude>
     <Longitude>34.9897</Longitude>
-    <OpeningTime>2022-12-12T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-18T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Transporting medical supplies</Description>
   </Call>
   <Call>
     <Id>3</Id>
-    <Type>BaseMaintenance</Type>
+    <Type>FoodPreparation</Type>
     <FullAddress>5 Jaffa, Jerusalem, Israel</FullAddress>
     <Latitude>31.7683</Latitude>
     <Longitude>35.2137</Longitude>
-    <OpeningTime>2022-12-22T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-23T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Delivering fresh groceries</Description>
   </Call>
   <Call>
     <Id>4</Id>
-    <Type>BaseMaintenance</Type>
+    <Type>EquipmentDelivery</Type>
     <FullAddress>10 Weizmann, Kfar Saba, Israel</FullAddress>
     <Latitude>32.1097</Latitude>
     <Longitude>34.9023</Longitude>
-    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-11T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Fixing plumbing issues</Description>
   </Call>
@@ -46,48 +46,48 @@
     <FullAddress>9 Begin, Be'er Sheva, Israel</FullAddress>
     <Latitude>31.2518</Latitude>
     <Longitude>34.7913</Longitude>
-    <OpeningTime>2022-12-19T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-19T21:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-27T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Electrical repair assistance</Description>
   </Call>
   <Call>
     <Id>6</Id>
-    <Type>FoodPreparation</Type>
+    <Type>ComplexLogisticsTransport</Type>
     <FullAddress>20 Rothschild Boulevard, Tel Aviv, Israel</FullAddress>
     <Latitude>32.0853</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-14T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-08T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-10T17:00:00</MaxCompletionTime>
     <Description>Household general delivery</Description>
   </Call>
   <Call>
     <Id>7</Id>
-    <Type>MedicalSupport</Type>
+    <Type>FoodPreparation</Type>
     <FullAddress>9 HaYehudim, Jerusalem, Israel</FullAddress>
     <Latitude>31.7683</Latitude>
     <Longitude>35.2137</Longitude>
-    <OpeningTime>2022-12-26T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-27T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Pharmacy medicines delivery</Description>
   </Call>
   <Call>
     <Id>8</Id>
-    <Type>BaseMaintenance</Type>
+    <Type>SpecialEventSupport</Type>
     <FullAddress>9 Independence, Ashdod, Israel</FullAddress>
     <Latitude>31.8015</Latitude>
     <Longitude>34.6525</Longitude>
-    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-23T12:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-31T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Helping with furniture assembly</Description>
   </Call>
   <Call>
     <Id>9</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>EmergencyResponse</Type>
     <FullAddress>5 HaGefen, Nahariya, Israel</FullAddress>
     <Latitude>33.2077</Latitude>
     <Longitude>35.0907</Longitude>
-    <OpeningTime>2022-12-17T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-09T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-10T10:00:00</MaxCompletionTime>
     <Description>Transporting construction materials</Description>
   </Call>
   <Call>
@@ -96,228 +96,228 @@
     <FullAddress>17 Jabotinsky, Ramat Gan, Israel</FullAddress>
     <Latitude>32.0736</Latitude>
     <Longitude>34.8144</Longitude>
-    <OpeningTime>2022-12-29T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-30T14:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-15T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-16T07:00:00</MaxCompletionTime>
     <Description>Catering setup for an event</Description>
   </Call>
   <Call>
     <Id>11</Id>
-    <Type>FoodDelivery</Type>
+    <Type>EmergencyResponse</Type>
     <FullAddress>4 Jerusalem, Holon, Israel</FullAddress>
     <Latitude>32.032</Latitude>
     <Longitude>34.7793</Longitude>
-    <OpeningTime>2022-12-27T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-07T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Setting up a training kit</Description>
   </Call>
   <Call>
     <Id>12</Id>
-    <Type>BaseMaintenance</Type>
+    <Type>EventCoordination</Type>
     <FullAddress>11 HaNasi, Ra'anana, Israel</FullAddress>
     <Latitude>32.1833</Latitude>
     <Longitude>34.8753</Longitude>
-    <OpeningTime>2022-12-13T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-07T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Transporting soldiers to the base</Description>
   </Call>
   <Call>
     <Id>13</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>FoodPreparation</Type>
     <FullAddress>1 HaAtzmaut, Petah Tikva, Israel</FullAddress>
     <Latitude>32.079</Latitude>
     <Longitude>34.8722</Longitude>
-    <OpeningTime>2022-12-11T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-11T04:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-12T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Emergency response support</Description>
   </Call>
   <Call>
     <Id>14</Id>
-    <Type>MedicalSupport</Type>
+    <Type>EventCoordination</Type>
     <FullAddress>8 Bialik, Ramat HaSharon, Israel</FullAddress>
     <Latitude>32.1635</Latitude>
     <Longitude>34.8559</Longitude>
-    <OpeningTime>2022-12-09T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-11T19:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-08T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Complex logistics transport</Description>
   </Call>
   <Call>
     <Id>15</Id>
-    <Type>FoodPreparation</Type>
+    <Type>EventCoordination</Type>
     <FullAddress>5 HaNasi, Ra'anana, Israel</FullAddress>
     <Latitude>32.0378</Latitude>
     <Longitude>34.8046</Longitude>
-    <OpeningTime>2022-12-26T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Medical backup team deployment</Description>
   </Call>
   <Call>
     <Id>16</Id>
-    <Type>MedicalSupport</Type>
+    <Type>SoldierTransportation</Type>
     <FullAddress>18 Allenby, Tel Aviv, Israel</FullAddress>
     <Latitude>32.0853</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-29T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-04T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Base maintenance routine</Description>
   </Call>
   <Call>
     <Id>17</Id>
-    <Type>SoldierTransportation</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>13 Eilat Boulevard, Ashkelon, Israel</FullAddress>
     <Latitude>31.6683</Latitude>
     <Longitude>34.5717</Longitude>
-    <OpeningTime>2022-12-15T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-24T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-24T05:00:00</MaxCompletionTime>
     <Description>Special event coordination</Description>
   </Call>
   <Call>
     <Id>18</Id>
-    <Type>MedicalSupport</Type>
+    <Type>FoodPreparation</Type>
     <FullAddress>9 HaYarden, Afula, Israel</FullAddress>
     <Latitude>32.63</Latitude>
     <Longitude>35.2778</Longitude>
-    <OpeningTime>2022-12-09T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-11T23:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-04T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-06T21:00:00</MaxCompletionTime>
     <Description>Moving heavy equipment</Description>
   </Call>
   <Call>
     <Id>19</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>EventCoordination</Type>
     <FullAddress>12 Ben Gurion, Haifa, Israel</FullAddress>
     <Latitude>32.5887</Latitude>
     <Longitude>35.5894</Longitude>
-    <OpeningTime>2022-12-12T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-12T12:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-26T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-26T17:00:00</MaxCompletionTime>
     <Description>Preparation for a military event</Description>
   </Call>
   <Call>
     <Id>20</Id>
-    <Type>MedicalSupport</Type>
+    <Type>SpecialEventSupport</Type>
     <FullAddress>25 Herzl, Netanya, Israel</FullAddress>
     <Latitude>32.3216</Latitude>
     <Longitude>34.6937</Longitude>
-    <OpeningTime>2022-12-04T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-22T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Support for local celebrations</Description>
   </Call>
   <Call>
     <Id>21</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>SpecialEventSupport</Type>
     <FullAddress>50 Dizengoff, Tel Aviv, Israel</FullAddress>
     <Latitude>32.3216</Latitude>
     <Longitude>34.6937</Longitude>
-    <OpeningTime>2022-12-15T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-03T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Delivery of kitchen supplies</Description>
   </Call>
   <Call>
     <Id>22</Id>
-    <Type>EquipmentDelivery</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>30 HaNeviim, Jerusalem, Israel</FullAddress>
     <Latitude>31.7683</Latitude>
     <Longitude>35.2137</Longitude>
-    <OpeningTime>2022-12-09T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-11T02:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-07T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Urgent food preparation</Description>
   </Call>
   <Call>
     <Id>23</Id>
-    <Type>FoodPreparation</Type>
+    <Type>ComplexLogisticsTransport</Type>
     <FullAddress>14 Ben Zvi, Be'er Sheva, Israel</FullAddress>
     <Latitude>31.2518</Latitude>
     <Longitude>34.7913</Longitude>
-    <OpeningTime>2022-12-04T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-10T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-11T06:00:00</MaxCompletionTime>
     <Description>Assistance with inventory setup</Description>
   </Call>
   <Call>
     <Id>24</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>9 HaGefen, Karmiel, Israel</FullAddress>
     <Latitude>32.7045</Latitude>
     <Longitude>34.9318</Longitude>
-    <OpeningTime>2022-12-28T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-29T19:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-22T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-24T10:00:00</MaxCompletionTime>
     <Description>Transporting food packages</Description>
   </Call>
   <Call>
     <Id>25</Id>
-    <Type>FoodPreparation</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>19 Rabin, Modi'in, Israel</FullAddress>
     <Latitude>31.9466</Latitude>
     <Longitude>35.1815</Longitude>
-    <OpeningTime>2022-12-27T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-13T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-13T16:00:00</MaxCompletionTime>
     <Description>Base inspection preparation</Description>
   </Call>
   <Call>
     <Id>26</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>SpecialEventSupport</Type>
     <FullAddress>3 HaYam, Haifa, Israel</FullAddress>
     <Latitude>32.0853</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-24T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-25T08:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-04T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-04T15:00:00</MaxCompletionTime>
     <Description>Coordinate emergency evacuations</Description>
   </Call>
   <Call>
     <Id>27</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>24 , Tel Aviv-Yafo,  Israel</FullAddress>
     <Latitude>29.5581</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-14T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-14T01:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Tech equipment delivery</Description>
   </Call>
   <Call>
     <Id>28</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>5 Galilee, Safed, Israel</FullAddress>
     <Latitude>33.0471</Latitude>
     <Longitude>35.3955</Longitude>
-    <OpeningTime>2022-12-25T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-27T19:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-26T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-27T01:00:00</MaxCompletionTime>
     <Description>Setting up event decorations</Description>
   </Call>
   <Call>
     <Id>29</Id>
-    <Type>EventCoordination</Type>
+    <Type>SpecialEventSupport</Type>
     <FullAddress>12 Rothschild Road, Rishon LeZion, Israel</FullAddress>
     <Latitude>31.9685</Latitude>
     <Longitude>34.8015</Longitude>
-    <OpeningTime>2022-12-25T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-25T04:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-19T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Medical supply restocking</Description>
   </Call>
   <Call>
     <Id>30</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>EquipmentDelivery</Type>
     <FullAddress>6 Wolfson, Herzliya, Israel</FullAddress>
     <Latitude>32.0779</Latitude>
     <Longitude>34.8291</Longitude>
-    <OpeningTime>2022-12-06T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-07T23:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-03T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Carrying out logistic adjustments</Description>
   </Call>
   <Call>
     <Id>31</Id>
-    <Type>FoodDelivery</Type>
+    <Type>EquipmentDelivery</Type>
     <FullAddress>28 Jabotinsky, Petah Tikva, Israel</FullAddress>
     <Latitude>32.1701</Latitude>
     <Longitude>34.851</Longitude>
-    <OpeningTime>2022-12-03T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-05T19:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-25T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-27T10:00:00</MaxCompletionTime>
     <Description>Cleaning supplies transport</Description>
   </Call>
   <Call>
     <Id>32</Id>
-    <Type>FoodDelivery</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>17 Rothschild Boulevard, Tel Aviv, Israel</FullAddress>
     <Latitude>32.073</Latitude>
     <Longitude>34.8322</Longitude>
-    <OpeningTime>2022-12-05T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-05T23:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-21T15:00:00</MaxCompletionTime>
     <Description>Delivering backup kits</Description>
   </Call>
   <Call>
@@ -326,178 +326,178 @@
     <FullAddress>5 Ben Gurion, Haifa, Israel</FullAddress>
     <Latitude>32.2662</Latitude>
     <Longitude>34.8574</Longitude>
-    <OpeningTime>2022-12-09T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-10T04:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-26T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Overseeing emergency drills</Description>
   </Call>
   <Call>
     <Id>34</Id>
-    <Type>FoodPreparation</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>18 Menachem Begin, Tel Aviv, Israel</FullAddress>
     <Latitude>31.78</Latitude>
     <Longitude>35.2825</Longitude>
-    <OpeningTime>2022-12-12T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-07T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-07T20:00:00</MaxCompletionTime>
     <Description>Inspection aid for vehicles</Description>
   </Call>
   <Call>
     <Id>35</Id>
-    <Type>KitPreparation</Type>
+    <Type>EquipmentDelivery</Type>
     <FullAddress>4 Sokolov, Holon, Israel</FullAddress>
     <Latitude>32.0853</Latitude>
     <Longitude>34.827</Longitude>
     <OpeningTime>2022-12-09T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-10T10:00:00</MaxCompletionTime>
+    <MaxCompletionTime>2022-12-11T09:00:00</MaxCompletionTime>
     <Description>Event tents setup</Description>
   </Call>
   <Call>
     <Id>36</Id>
-    <Type>BaseMaintenance</Type>
+    <Type>FoodDelivery</Type>
     <FullAddress>12 Haatzmaut, Ramat Gan, Israel</FullAddress>
     <Latitude>32.1097</Latitude>
     <Longitude>34.8555</Longitude>
-    <OpeningTime>2022-12-30T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-12T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Base structural repair</Description>
   </Call>
   <Call>
     <Id>37</Id>
-    <Type>EquipmentDelivery</Type>
+    <Type>ComplexLogisticsTransport</Type>
     <FullAddress>20 Herzl, Be'er Sheva, Israel</FullAddress>
     <Latitude>31.8717</Latitude>
     <Longitude>35.219</Longitude>
-    <OpeningTime>2022-12-29T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-30T00:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-06T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Training camp assistance</Description>
   </Call>
   <Call>
     <Id>38</Id>
-    <Type>MedicalSupport</Type>
+    <Type>ComplexLogisticsTransport</Type>
     <FullAddress>12 HaRimon, Beit Shemesh, Israel</FullAddress>
     <Latitude>31.6513</Latitude>
     <Longitude>34.8259</Longitude>
-    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-23T17:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-10T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-10T19:00:00</MaxCompletionTime>
     <Description>Monitoring emergency setups</Description>
   </Call>
   <Call>
     <Id>39</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>10 Bialik, Kfar Saba, Israel</FullAddress>
     <Latitude>32.209</Latitude>
     <Longitude>34.856</Longitude>
-    <OpeningTime>2022-12-19T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-05T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-05T07:00:00</MaxCompletionTime>
     <Description>Tools delivery for the unit</Description>
   </Call>
   <Call>
     <Id>40</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>SoldierTransportation</Type>
     <FullAddress>15 David Ben Gurion, Petah Tikva, Israel</FullAddress>
     <Latitude>32.1585</Latitude>
     <Longitude>34.7902</Longitude>
-    <OpeningTime>2022-12-06T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-06T20:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-19T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-19T11:00:00</MaxCompletionTime>
     <Description>Transport for external logistics</Description>
   </Call>
   <Call>
     <Id>41</Id>
-    <Type>KitPreparation</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>6 Hillel, Jerusalem, Israel</FullAddress>
     <Latitude>31.2518</Latitude>
     <Longitude>34.8046</Longitude>
-    <OpeningTime>2022-12-12T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-19T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-20T06:00:00</MaxCompletionTime>
     <Description>Base cleanup operations</Description>
   </Call>
   <Call>
     <Id>42</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>EmergencyResponse</Type>
     <FullAddress>20 HaShalom, Givatayim, Israel</FullAddress>
     <Latitude>31.7719</Latitude>
     <Longitude>34.8193</Longitude>
-    <OpeningTime>2022-12-28T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-30T19:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-05T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-07T08:00:00</MaxCompletionTime>
     <Description>Lighting arrangements for events</Description>
   </Call>
   <Call>
     <Id>43</Id>
-    <Type>EventCoordination</Type>
+    <Type>SoldierTransportation</Type>
     <FullAddress>15 HaNarkis, Yavne, Israel</FullAddress>
     <Latitude>32.0924</Latitude>
     <Longitude>35.2227</Longitude>
-    <OpeningTime>2022-12-21T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-06T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-08T04:00:00</MaxCompletionTime>
     <Description>On-site medical first aid</Description>
   </Call>
   <Call>
     <Id>44</Id>
-    <Type>EquipmentDelivery</Type>
+    <Type>ComplexLogisticsTransport</Type>
     <FullAddress>14 Jabotinsky, Rishon Lezion, Israel</FullAddress>
     <Latitude>32.1099</Latitude>
     <Longitude>35.2683</Longitude>
-    <OpeningTime>2022-12-22T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-22T20:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-05T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Providing logistical support</Description>
   </Call>
   <Call>
     <Id>45</Id>
-    <Type>EquipmentDelivery</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>7 HaBanim, Ramat HaSharon, Israel</FullAddress>
     <Latitude>29.5581</Latitude>
     <Longitude>34.774</Longitude>
-    <OpeningTime>2022-12-28T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-16T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Immediate repair solutions</Description>
   </Call>
   <Call>
     <Id>46</Id>
-    <Type>SoldierTransportation</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>22 King David, Jerusalem, Israel</FullAddress>
     <Latitude>32.0735</Latitude>
     <Longitude>34.7722</Longitude>
-    <OpeningTime>2022-12-15T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-15T18:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-22T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Packing kits for shipment</Description>
   </Call>
   <Call>
     <Id>47</Id>
-    <Type>ComplexLogisticsTransport</Type>
+    <Type>FoodDelivery</Type>
     <FullAddress>5 HaTamar, Ashkelon, Israel</FullAddress>
     <Latitude>29.5581</Latitude>
     <Longitude>34.5717</Longitude>
-    <OpeningTime>2022-12-10T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-08T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Urgent communication delivery</Description>
   </Call>
   <Call>
     <Id>48</Id>
-    <Type>FoodDelivery</Type>
+    <Type>ComplexLogisticsTransport</Type>
     <FullAddress>18 HaAtzmaut, Kiryat Gat, Israel</FullAddress>
     <Latitude>33.0471</Latitude>
     <Longitude>35.2778</Longitude>
-    <OpeningTime>2022-12-06T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-22T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Reinforcing base logistics</Description>
   </Call>
   <Call>
     <Id>49</Id>
-    <Type>EventCoordination</Type>
+    <Type>KitPreparation</Type>
     <FullAddress>11 Golda Meir, Tel Aviv, Israel</FullAddress>
     <Latitude>31.9685</Latitude>
     <Longitude>35.5894</Longitude>
-    <OpeningTime>2022-12-31T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-31T21:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-16T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-16T19:00:00</MaxCompletionTime>
     <Description>Backup power supply delivery</Description>
   </Call>
   <Call>
     <Id>50</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>7 HaGalil, Safed, Israel</FullAddress>
     <Latitude>32.0779</Latitude>
     <Longitude>34.6937</Longitude>
-    <OpeningTime>2022-12-03T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-05T21:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-11T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-12T02:00:00</MaxCompletionTime>
     <Description>Finalizing event logistics</Description>
   </Call>
   <Call>
@@ -506,58 +506,88 @@
     <FullAddress>17 Shalom Aleichem, Be'er Sheva, Israel</FullAddress>
     <Latitude>32.3216</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-03T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-04T07:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-15T00:00:00</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
     <Description>Transporting donated goods</Description>
   </Call>
   <Call>
     <Id>52</Id>
-    <Type>KitPreparation</Type>
+    <Type>FoodDelivery</Type>
     <FullAddress>11 Menachem Begin, Petah Tikva, Israel</FullAddress>
     <Latitude>31.7683</Latitude>
     <Longitude>34.7818</Longitude>
-    <OpeningTime>2022-12-26T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-09T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-11T00:00:00</MaxCompletionTime>
     <Description>Organizing event volunteers</Description>
   </Call>
   <Call>
     <Id>53</Id>
-    <Type>SoldierTransportation</Type>
+    <Type>FoodDelivery</Type>
     <FullAddress>5 HaPlada, Ashkelon, Israel</FullAddress>
     <Latitude>31.2518</Latitude>
     <Longitude>35.3955</Longitude>
-    <OpeningTime>2022-12-13T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-15T13:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-16T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-16T14:00:00</MaxCompletionTime>
     <Description>Emergency vehicle maintenance</Description>
   </Call>
   <Call>
     <Id>54</Id>
-    <Type>FoodDelivery</Type>
+    <Type>MedicalSupport</Type>
     <FullAddress>18 Ibn Gabirol, Tel Aviv, Israel</FullAddress>
     <Latitude>32.7045</Latitude>
     <Longitude>34.8015</Longitude>
-    <OpeningTime>2022-12-25T00:00:00</OpeningTime>
-    <MaxCompletionTime xsi:nil="true" />
+    <OpeningTime>2022-12-11T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-13T02:00:00</MaxCompletionTime>
     <Description>Distributing emergency rations</Description>
   </Call>
   <Call>
     <Id>55</Id>
-    <Type>EmergencyResponse</Type>
+    <Type>EventCoordination</Type>
     <FullAddress>12 Arlozorov, Herzliya, Israel</FullAddress>
     <Latitude>31.9466</Latitude>
     <Longitude>34.8291</Longitude>
-    <OpeningTime>2022-12-14T00:00:00</OpeningTime>
+    <OpeningTime>2022-12-06T00:00:00</OpeningTime>
     <MaxCompletionTime xsi:nil="true" />
     <Description>Delivering urgent medical kits</Description>
   </Call>
   <Call>
     <Id>56</Id>
-    <Type>SpecialEventSupport</Type>
+    <Type>BaseMaintenance</Type>
     <FullAddress>5 HaTmarim, Eilat, Israel</FullAddress>
     <Latitude>32.1701</Latitude>
     <Longitude>34.774</Longitude>
-    <OpeningTime>2022-12-20T00:00:00</OpeningTime>
-    <MaxCompletionTime>2022-12-20T05:00:00</MaxCompletionTime>
+    <OpeningTime>2022-12-27T00:00:00</OpeningTime>
+    <MaxCompletionTime>2022-12-29T14:00:00</MaxCompletionTime>
     <Description>Setting up temporary shelters</Description>
+  </Call>
+  <Call>
+    <Id>57</Id>
+    <Type>SpecialEventSupport</Type>
+    <FullAddress>16 Rothschild Boulevard, Tel Aviv, Israel</FullAddress>
+    <Latitude>32.0627834</Latitude>
+    <Longitude>34.7709248</Longitude>
+    <OpeningTime>2025-01-30T03:16:06</OpeningTime>
+    <MaxCompletionTime xsi:nil="true" />
+    <Description />
+  </Call>
+  <Call>
+    <Id>60</Id>
+    <Type>SpecialEventSupport</Type>
+    <FullAddress>17 Rothschild Boulevard, Tel Aviv, Israel</FullAddress>
+    <Latitude>32.063257</Latitude>
+    <Longitude>34.771241</Longitude>
+    <OpeningTime>2025-01-30T03:16:06</OpeningTime>
+    <MaxCompletionTime>2025-11-01T14:30:15</MaxCompletionTime>
+    <Description>asdasdasd</Description>
+  </Call>
+  <Call>
+    <Id>61</Id>
+    <Type>EmergencyResponse</Type>
+    <FullAddress>17 Rothschild Boulevard, Tel Aviv, Israel</FullAddress>
+    <Latitude>32.063257</Latitude>
+    <Longitude>34.771241</Longitude>
+    <OpeningTime>2025-01-30T03:16:06</OpeningTime>
+    <MaxCompletionTime>2025-11-01T14:30:15</MaxCompletionTime>
+    <Description>sdadasdasd</Description>
   </Call>
 </ArrayOfCall>

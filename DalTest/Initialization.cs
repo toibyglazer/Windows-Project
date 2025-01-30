@@ -47,24 +47,24 @@ public static class Initialization
 };
         string[] VolunteerEmails = new string[]
 {
-    "david.levi@gmail.com",
-    "rachel.cohen@gmail.com",
-    "moshe.mizrahi@gmail.com",
-    "tamar.kaplan@gmail.com",
-    "yosef.goldstein@gmail.com",
-    "esther.benshimon@gmail.com",
-    "avi.rosenberg@gmail.com",
-    "hila.sharabi@gmail.com",
-    "noam.azulai@gmail.com",
-    "yael.peretz@gmail.com",
-    "eli.barak@gmail.com",
-    "michal.nave@gmail.com",
-    "shai.elbaz@gmail.com",
-    "dana.regev@gmail.com",
-    "nadav.shamir@gmail.com",
-    "orly.yitzhak@gmail.com",
-    "daniel.vaknin@gmail.com",
-    "adi.kadosh@gmail.com"
+    "toibyglazer@gmail.com",
+    "danihadarr@gmail.com",
+    "shanysh3434@gmail.com",
+    "rosensh3434@gmail.com",
+    "S0584404949@gmail.com",
+    "esther.glazer2017@gmail.com",
+    "100origlazer@gmail.com",
+    "arie7209@gmail.com",
+    "hodayahararii@gmail.com",
+    "rothfamily2019@gmail.com",
+    "yaeltamir21@gmail.com",
+    "ittichaimson@gmail.com",
+    "LIEMRAMADI11@gmail.com",
+    "zermichal500@gmail.com",
+    "nadavenav@gmail.com",
+    "davidkarga98@gmail.com",
+    "100bat7@gmail.com",
+    "zermichal555@gmail.com"
 };
         string[] addresses = new[]
 {
@@ -491,11 +491,23 @@ public static class Initialization
             new DateTime(2025, 1, 1, 19, 45, 0),
             new DateTime(2025, 1, 1, 21, 0, 0)
        };
+        DateTime[] completionTimesNull = new DateTime[]
+{
+    new DateTime(2023, 1, 1, 8, 0, 0),
+    new DateTime(2023, 1, 11, 10, 0, 0),
+    new DateTime(2023, 1, 21, 12, 0, 0),
+    new DateTime(2023, 1, 31, 14, 0, 0),
+    new DateTime(2023, 2, 10, 16, 0, 0),
+    new DateTime(2023, 2, 20, 18, 0, 0),
+    new DateTime(2023, 3, 2, 20, 0, 0)
+};
         // Get the next available assignment ID.
-        int assignmentId = s_dal.Config.NextAssignmentId;
+        //int assignmentId = s_dal.Config.NextAssignmentId;
+        int assignmentId =0;
 
-            // Create assignments with CompletionType.Treated for the first 15 volunteers.
-            for (int i = 0; i < 15; i++)
+
+        // Create assignments with CompletionType.Treated for the first 15 volunteers.
+        for (int i = 0; i < 15; i++)
             {
                 Assignment a = new Assignment(
                     Id: assignmentId,
@@ -551,19 +563,23 @@ public static class Initialization
                 s_dal!.Assignment.Create(a); //stage 2
                 
             }
-            for (int i = 45; i < 50; i++)
+        int j = 0;
+        for (int i = 45; i < 50; i++)
             {
+            
             Assignment a = new Assignment(
-                Id: assignmentId,
-                CallId: callIds[i],
-                VolunteerId: volunteerIds[i],
-                EntryTime: s_dal.Config.Clock,
-                CompletionTime: null,
-                CompletionType: null
-            );
+              Id: assignmentId,
+              CallId: callIds[i],
+              VolunteerId: volunteerIds[i],
+              EntryTime: completionTimesNull[j++],
+              CompletionTime: null,
+              CompletionType: null
+          );
+
             s_dal!.Assignment.Create(a); //stage 2
 
-            }
+
+        }
 
     }
 

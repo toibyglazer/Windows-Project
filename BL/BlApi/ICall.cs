@@ -15,7 +15,8 @@
 /// - CompleteAssignment: Marks an assignment as completed by a volunteer.
 /// - CancelAssignment: Cancels an assignment for a volunteer.
 /// - AssignCallToVolunteer: Assigns a specific call to a volunteer.
-public interface ICall
+public interface ICall :IObservable //stage 5 הרחבת ממשק
+
 {
     int[] GetCallStatusesCount();
     IEnumerable<BO.CallInList> GetCalls(BO.CallInListField? filterField = null, object? filterValue = null, BO.CallInListField? sortField = null);

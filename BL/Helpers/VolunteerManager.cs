@@ -11,6 +11,7 @@ using DO;
 internal static class VolunteerManager
 {
     private static IDal s_dal = DalApi.Factory.Get; //stage 4
+    internal static ObserverManager Observers = new(); //stage 5 
 
     /// <summary>
     /// Counts the number of assignments for a given volunteer and a specific completion type.
@@ -53,8 +54,26 @@ internal static class VolunteerManager
         CountAssignmentsByType(volunteerId, DO.AssignmentCompletionType.Expired);
 
 
-
-
+    /// <summary>
+    /// Converts a DO.Volunteer object to a BO.VolunteerInList object for use in a list display.
+    /// </summary>
+    /// <param name="volunteer">The data object representing a volunteer.</param>
+    /// <returns>A business object representing the volunteer in list format, with total calls and active call details.</returns>
+    public static BO.VolunteerInList ConvertToBOVolunteerInList(DO.Volunteer volunteer)
+    {
+        // Creating a new VolunteerInList business object, populating it with data from DO.Volunteer.
+        return new BO.VolunteerInList
+        {
+            Id = volunteer.Id,
+            FullName = volunteer.FullName,
+            IsActive = volunteer.IsActive, // Whether the volunteer is active.
+            TotalCallsHandled = GetTotalHandledCalls(volunteer.Id), // Total calls handled by the volunteer.
+            TotalCallsCanceled = GetTotalCancelledCalls(volunteer.Id), // Total calls canceled by the volunteer.
+            TotalCallsExpired = GetTotalExpiredCalls(volunteer.Id), // Total calls expired for the volunteer.
+            ActiveCallId = GetActiveCallId(volunteer.Id), // The ID of the active call, if any.
+            Type = GetOpenCallType(volunteer.Id) // Type of the open call for the volunteer.
+        };
+    }
     /// <summary>
     /// Creates a new Volunteer business object (BO.Volunteer) from the data object (DO.Volunteer) and an optional in-progress call.
     /// </summary>
@@ -109,44 +128,21 @@ internal static class VolunteerManager
             .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
 
         if (activeAssignment == null)
-            // If no active assignment is found, returns 'None'.
             return BO.CallType.None;
 
-        // Looks up the call using the assignment's CallId.
+        
         DO.Call? call = s_dal.Call.ReadAll()
             .FirstOrDefault(c => c.Id == activeAssignment.CallId);
 
         if (call == null)
         {
-            // If no call is found, returns 'None'.
             return BO.CallType.None;
         }
-
-        // Returns the type of the found call.
         return (BO.CallType)call.Type;
     }
 
 
-    /// <summary>
-    /// Converts a DO.Volunteer object to a BO.VolunteerInList object for use in a list display.
-    /// </summary>
-    /// <param name="volunteer">The data object representing a volunteer.</param>
-    /// <returns>A business object representing the volunteer in list format, with total calls and active call details.</returns>
-    public static BO.VolunteerInList ConvertToBOVolunteerInList(DO.Volunteer volunteer)
-    {
-        // Creating a new VolunteerInList business object, populating it with data from DO.Volunteer.
-        return new BO.VolunteerInList
-        {
-            Id = volunteer.Id,
-            FullName = volunteer.FullName,
-            IsActive = volunteer.IsActive, // Whether the volunteer is active.
-            TotalCallsHandled = GetTotalHandledCalls(volunteer.Id), // Total calls handled by the volunteer.
-            TotalCallsCanceled = GetTotalCancelledCalls(volunteer.Id), // Total calls canceled by the volunteer.
-            TotalCallsExpired = GetTotalExpiredCalls(volunteer.Id), // Total calls expired for the volunteer.
-            ActiveCallId = GetActiveCallId(volunteer.Id), // The ID of the active call, if any.
-            Type = GetOpenCallType(volunteer.Id) // Type of the open call for the volunteer.
-        };
-    }
+  
 
     /// <summary>
     /// Converts a BO.Volunteer object to a DO.Volunteer object for saving to the database.

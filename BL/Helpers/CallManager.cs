@@ -4,6 +4,14 @@ using BO;
 using DalApi;
 using DO;
 using System;
+using System.Net.Mail;
+using System.Net;
+using static Helpers.Tools;
+using System.Text.RegularExpressions;
+using System.Drawing;
+using static System.Net.Mime.MediaTypeNames;
+using System.Net.Mime;
+using System.Text;
 namespace Helpers;
 /// <summary>
 /// Helper class for managing Calls in the system.
@@ -13,6 +21,7 @@ namespace Helpers;
 internal static class CallManager
 {
     private static IDal s_dal = DalApi.Factory.Get; //stage 4
+    internal static ObserverManager Observers = new(); //stage 5 
 
 
     /// <summary>
@@ -65,6 +74,17 @@ internal static class CallManager
     /// </summary>
     private static BO.CallAssignInList ConvertToCallAssignInList(DO.Assignment assignment)
     {
+        if (assignment.VolunteerId == 0)
+        {
+            return new BO.CallAssignInList
+            {
+                Id = 0,
+                FullName = "",
+                EntryTime = assignment.EntryTime,
+                CompletionTime = assignment.CompletionTime != null ? assignment.CompletionTime : null,
+                CompletionType = assignment.CompletionType != null ? (BO.AssignmentCompletionType)assignment.CompletionType : null,
+            };
+        }
         var volunteerFullName = s_dal.Volunteer.Read(assignment.VolunteerId)
             ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {assignment.VolunteerId} does not exist."); // Ensures the volunteer exists
 
@@ -137,7 +157,7 @@ internal static class CallManager
     /// <summary>
     /// Periodically updates the statuses of all calls in the system.
     /// </summary>
-    internal static void PeriodicCallUpdates()
+    internal static void UpdateExpiredCalls()
     {
         IEnumerable<DO.Call> allCalls = s_dal.Call.ReadAll(); // Fetches all calls
         AdminImplementation admin = new AdminImplementation();
@@ -164,6 +184,7 @@ internal static class CallManager
                         CompletionType = DO.AssignmentCompletionType.Expired // Mark the call as expired
                     };
                     s_dal.Assignment.Create(newAssignment);
+                    VolunteerManager.Observers.NotifyListUpdated();//stage 5
                 }
                 else
                 {
@@ -178,11 +199,14 @@ internal static class CallManager
                         };
 
                         s_dal.Assignment.Update(updatedAssignment);
+                        Observers.NotifyItemUpdated(updatedAssignment.Id); //stage 5
+                        VolunteerManager.Observers.NotifyListUpdated();//stage 5
                     }
                 }
             }
         }
     }
+
 
 
 
@@ -334,7 +358,7 @@ internal static class CallManager
             FullAddress: call.FullAddress,
             Latitude: latitude,
             Longitude: longitude,
-            OpeningTime: call.OpeningTime,
+            OpeningTime: AdminManager.Now,
             MaxCompletionTime: call.MaxCompletionTime,
             Description: call.Description
         );
@@ -565,7 +589,370 @@ internal static class CallManager
     }
 
 
+    /// <summary>
+    /// Service for sending emails
+    /// </summary>
+    public static class EmailService
+    {
+        private const string SmtpHost = "smtp.gmail.com";
+        private const int SmtpPort = 587;
+        private const string SenderEmail = "toibymichalminiproject@gmail.com";
+        private const string SenderPassword = "iwge idji gbtj lomm";
+        public static void SendEmailWithAttachment(string recipientEmail, string subject, string body, string attachmentPath)
+        {
+            try
+            {
+                using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
+                {
+                    Credentials = new NetworkCredential(SenderEmail, SenderPassword),
+                    EnableSsl = true
+                };
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(SenderEmail,"Support Team"),
+                    Subject = subject,
+                    IsBodyHtml = true
+                };
+
+                mailMessage.To.Add(recipientEmail);
+
+                if (!string.IsNullOrEmpty(attachmentPath) && File.Exists(attachmentPath))
+                {
+                    // צריבת התמונה למייל
+                    var inlineImage = new LinkedResource(attachmentPath, "image/png")
+                    {
+                        ContentId = "MapImage"
+                    };
+
+                    // יצירת תוכן HTML עם תמונה מקושרת
+                    var alternateView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+                    alternateView.LinkedResources.Add(inlineImage);
+
+                    mailMessage.AlternateViews.Add(alternateView);
+                }
+
+                // הוספת האייקון לאימייל
+                var mapImageGenerator = new MapImageGenerator("", "", "", ""); // זה לא משנה איזה ערכים תעביר כאן
+                string iconPath = mapImageGenerator.GetIconPath();
+                if (iconPath != null)
+                {
+                    var iconResource = new LinkedResource(iconPath, "image/png")
+                    {
+                        ContentId = "MapIcon"
+                    };
+
+                    var alternateViewWithIcon = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+                    alternateViewWithIcon.LinkedResources.Add(iconResource);
+                    mailMessage.AlternateViews.Add(alternateViewWithIcon);
+                }
+
+                smtpClient.Send(mailMessage);
+                Console.WriteLine($"Email sent successfully to {recipientEmail}");
+            }
+            catch (SmtpException ex)
+            {
+                Console.WriteLine($"SMTP error while sending email to {recipientEmail}: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General error while sending email to {recipientEmail}: {ex.Message}");
+            }
+        }
+
+        public static string FormatCallType(BO.CallType callType)
+        {
+            return Regex.Replace(callType.ToString(), "(?<!^)([A-Z])", " $1");
+        }
+
+
+        public static void SendEmailToVolunteersForNewCall(BO.Call call)
+        {
+            var volunteers = s_dal.Volunteer.ReadAll();
+
+            foreach (var volunteer in volunteers)
+            {
+                if (volunteer.Latitude == null || volunteer.Longitude == null || volunteer.MaxDistance == null)
+                {
+                    continue;
+                }
+
+                double distance = CalculateDistance(volunteer, call, volunteer.DistanceType);
+                if (distance <= volunteer.MaxDistance && !string.IsNullOrWhiteSpace(volunteer.Email))
+                {
+                    var mapGenerator = new MapImageGenerator(volunteer.Latitude.ToString(), volunteer.Longitude.ToString(),
+                                                             call.Latitude.ToString(), call.Longitude.ToString());
+                    string mapImagePath = mapGenerator.GenerateMapImage();
+
+                    string subject = $"New call type: {FormatCallType(call.Type)} is now available in your locale";
+
+                    string body = $@"
+<html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+            }}
+            .email-container {{
+                width: 100%;
+                max-width: 650px; /* הגדלת רוחב הקונטיינר */
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f9f9f9;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+            }}
+            h2 {{
+                color: #007BFF;
+display: flex;
+    align-items: center;
+            }}
+            p {{
+                font-size: 16px;
+            }}
+            .highlight {{
+                font-weight: bold;
+                color: #555;
+            }}
+            .icon {{
+                width: 24px;
+                 height:auto;
+                vertical-align: text-bottom;
+                margin-right: 10px;
+            }}
+           .map-image {{width: 100%; /* מאפשר גמישות בגודל */
+    max-width: 400px; /* מגבלת גודל סבירה */
+    height: auto;
+    margin-top: 10px; /* הפחתת המרווח */
+}}
+.call-type-highlight {{color: blue;
+  
+  
+  
+  
+}}
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+        <h2 style='text-align: center; max-width: 90%; word-break: break-word;'>
+ <span>
+  <img class='icon' src='cid:MapIcon' alt='Map Icon' style='display: inline; vertical-align: text-bottom; margin-right: 10px;' />
+  New call of type <span class='call-type-highlight'>{FormatCallType(call.Type)}</span> has been opened in your locale
+</span>
+
+</h2>
+
+
+            <p><span class='highlight'>Exact Address:</span> {call.FullAddress}</p>
+
+         <!-- תמונה מיד אחרי הכתובת -->
+         <div style='text-align: center; margin-top: 5px;'>
+            <h3>Here's the location map for the call:</h3>
+            <img src='cid:MapImage' alt='Call Location Map' class='map-image' /> 
+         </div>";
+
+                    if (!string.IsNullOrWhiteSpace(call.Description))
+                    {
+                        body += $@"
+        <p><span class='highlight'>Description:</span> {call.Description}</p>";
+                    }
+
+                    body += $@"
+        <p><span class='highlight'>Opening Time:</span> {call.OpeningTime}</p>";
+
+                    if (call.MaxCompletionTime.HasValue)
+                    {
+                        body += $@"
+        <p><span class='highlight'>Max Completion Time:</span> {call.MaxCompletionTime.Value.ToString("yyyy-MM-dd HH:mm")}</p>";
+                    }
+
+                    body += $@"
+        </div>
+    </body>
+</html>";
+
+
+
+                    SendEmailWithAttachment(volunteer.Email, subject, body, mapImagePath);
+                }
+            }
+        }
+
+        public static void SendCancellationEmailToVolunteer(int assignmentId)
+        {
+            DO.Assignment assignment = s_dal.Assignment.Read(assignmentId)
+                 ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} does not exist.");
+
+            DO.Call call = s_dal.Call.Read(assignment.CallId)
+                ?? throw new BO.BlDoesNotExistException($"Call with ID {assignment.CallId} does not exist.");
+
+            DO.Volunteer volunteer = s_dal.Volunteer.Read(assignment.VolunteerId)
+                 ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {assignment.VolunteerId} does not exist.");
+
+            BO.Call callDetailsEmail = ConvertCallToBO(call);
+
+            if (string.IsNullOrWhiteSpace(volunteer.Email))
+            {
+                Console.WriteLine("The volunteer does not have a current email in the system.");
+                return;
+            }
+
+            string subject = $"Important Update: Your {FormatCallType(callDetailsEmail.Type)} Call has been Cancelled";
+
+            string body = $@"
+<html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background-color: #f9f9f9;
+                padding: 20px;
+            }}
+            .email-container {{
+                max-width: 610px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f9f9f9;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+            }}
+            h2 {{
+                color: #d9534f;
+                
+            }}
+            p {{
+                font-size: 16px;
+                color: #333;
+                margin: 8px 0;
+            }}
+            .highlight {{
+                font-weight: bold;
+                color: #555;
+                margin-right: 4px;
+            }}
+            .details {{
+                margin: 4px 0;
+                font-size: 15px;
+            }}
+            .icon {{
+                width: 30px;
+                height: auto;
+                vertical-align: text-bottom;
+                margin-right: 10px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <h2 style='text-align: center; max-width: 90%; word-break: break-word;'>
+                <span>
+                    <img class='icon' src='cid:WarningIcon' alt='Warning icon' style='display: inline; vertical-align: text-bottom; margin-right: 10px;' />
+                    Call Manager Cancellation Message
+                </span>
+            </h2>
+        
+        <p style='font-size: 16px; color: #555;'>
+            <span class='highlight'>Dear Volunteer,</span> 
+            Please be informed that the call you were assigned to has been 
+            <span class='highlight' style='color: #d9534f;'>cancelled</span> by the manager.
+        </p>
+        <br>
+
+        <p class='details'><span class='highlight'>Call Type:</span> {FormatCallType(callDetailsEmail.Type)}</p>
+        <p class='details'><span class='highlight'>Full Address:</span> {callDetailsEmail.FullAddress}</p>";
+
+            if (!string.IsNullOrWhiteSpace(callDetailsEmail.Description))
+            {
+                body += $@"
+            <p class='details'><span class='highlight'>Description:</span> {callDetailsEmail.Description}</p>";
+            }
+
+            body += $@"
+            <p class='details'><span class='highlight'>Call Status:</span> {FormatCallStatus(callDetailsEmail.Status)}</p>
+
+          <p class='highlight' style='font-size: 16px; margin-top: 16px;'>
+            We apologize for any inconvenience caused. Thank you for your service.
+        </p>
+</div>
+    </body>
+</html>";
+
+            // שליחת המייל למתנדב
+            SendEmailWithImage(volunteer.Email, subject, body);
+        }
+        public static string FormatCallStatus(BO.CallStatus status)
+        {
+            // המרה למחרוזת
+            string statusString = status.ToString();
+
+            // הוספת רווח לפני כל אות גדולה שאינה בתחילת המילה
+            return Regex.Replace(statusString, "(?<!^)([A-Z])", " $1");
+        }
+
+        public static void SendEmailWithImage(string recipientEmail, string subject, string body)
+        {
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                Console.WriteLine("Invalid recipient email.");
+                return;
+            }
+
+            try
+            {
+                using (MailMessage mail = new MailMessage())
+                {
+                    mail.From = new MailAddress(SenderEmail, "Support Team");
+                    mail.To.Add(recipientEmail);
+                    mail.Subject = subject;
+                    mail.IsBodyHtml = true;
+
+                    // שימוש בנתיב יחסי ליצירת התמונה
+                    string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Helpers", "Images");
+                    string imagePath = Path.Combine(directoryPath, "cancel-close-10374.png");
+
+                    if (!File.Exists(imagePath))
+                    {
+                        Console.WriteLine("Image file not found.");
+                        return;
+                    }
+
+                    var linkedResource = new LinkedResource(imagePath)
+                    {
+                        ContentId = "WarningIcon",
+                        ContentType = new ContentType(MediaTypeNames.Image.Png)
+                    };
+
+                    var altView = AlternateView.CreateAlternateViewFromString(body, Encoding.UTF8, MediaTypeNames.Text.Html);
+                    altView.LinkedResources.Add(linkedResource);
+                    mail.AlternateViews.Add(altView);
+
+                    using (SmtpClient smtp = new SmtpClient(SmtpHost, SmtpPort))
+                    {
+                        smtp.Credentials = new NetworkCredential(SenderEmail, SenderPassword);
+                        smtp.EnableSsl = true;
+
+                        smtp.Send(mail);
+                        Console.WriteLine($"Email successfully sent to {recipientEmail}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send email: {ex.Message}");
+            }
+        }
+
+
+    }
 }
+
+
+
 
 
 

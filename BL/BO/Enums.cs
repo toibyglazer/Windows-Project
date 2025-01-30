@@ -29,7 +29,8 @@ public enum CallType
     BaseMaintenance,         // Base maintenance
     KitPreparation,          // Kit preparation for soldiers
     SpecialEventSupport,     // Support for special events
-    None
+    None,
+    All
 }
 
 // Enum for assignment completion types
@@ -156,4 +157,10 @@ public enum OpenCallInListField
     OpeningTime,           // Field for opening time
     MaxCompletionTime,     // Field for maximum completion time
     DistanceToActiveCall   // Field for distance to the active call
+}
+public enum Activity
+{
+    All,
+    Active,
+    Inactive
 }

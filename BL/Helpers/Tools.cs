@@ -9,6 +9,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Collections;
 namespace Helpers;
+using System.IO;
+using System.Net.Http;
 /// <summary>
 /// Represents geographical coordinates with latitude and longitude.
 /// </summary>
@@ -134,6 +136,15 @@ public static class Tools
     }
     #endregion
 
+    public static bool AreCoordinatesEqual(double lat1, double lon1, double lat2, double lon2, double epsilon = 0.01)
+    {
+        // חישוב ההבדל המוחלט בין הקואורדינטות
+        double latDifference = Math.Abs(lat1 - lat2);
+        double lonDifference = Math.Abs(lon1 - lon2);
+
+        // אם ההבדל קטן מהסובלנות, נחזיר true
+        return latDifference < epsilon && lonDifference < epsilon;
+    }
 
     #region Route Calculator OpenStreetMap
     /// <summary>
@@ -147,6 +158,10 @@ public static class Tools
     /// <returns>The walking route distance in kilometers.</returns>
     public static double GetWalkingRouteDistance(double lat1, double lon1, double lat2, double lon2)
     {
+        if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
+            return 0.0;
+
+
         // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
         string url = $"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
 
@@ -187,6 +202,10 @@ public static class Tools
     /// <returns>The driving route distance in kilometers.</returns>
     public static double GetDrivingRouteDistance(double lat1, double lon1, double lat2, double lon2)
     {
+        if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
+            return 0.0;
+
+
         // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
         string url = $"https://routing.openstreetmap.de/routed-car/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
 
@@ -333,4 +352,86 @@ public static class Tools
     #endregion
 
 
-}
+
+
+
+    public class MapImageGenerator
+    {
+        private readonly string _volunteerLat;
+        private readonly string _volunteerLng;
+        private readonly string _callLat;
+        private readonly string _callLng;
+
+        private const string ApiKey = "pk.539fa4b064b6aef33fb2f2970f042808";
+
+        public MapImageGenerator(string volunteerLat, string volunteerLng, string callLat, string callLng)
+        {
+            _volunteerLat = volunteerLat;
+            _volunteerLng = volunteerLng;
+            _callLat = callLat;
+            _callLng = callLng;
+        }
+
+        public string GenerateMapImage()
+        {
+            string mapUrl = GenerateMapUrl();
+            string imagePath = DownloadMapImage(mapUrl);
+
+            return imagePath;
+        }
+
+        private string GenerateMapUrl()
+        {
+            // בניית ה-URL עם מיקומים ומסלול
+            string markers = $"{_volunteerLat},{_volunteerLng}|{_callLat},{_callLng}";
+            string path = $"{_volunteerLat},{_volunteerLng}|{_callLat},{_callLng}";
+
+            return $"https://maps.locationiq.com/v3/staticmap?key={ApiKey}" +
+                   $"&size=600x400&path=weight:3|color:blue|{path}" +
+                   $"&markers={markers}";
+        }
+
+        private string DownloadMapImage(string mapUrl)
+        {
+            using HttpClient client = new HttpClient();
+            var imageBytes = client.GetByteArrayAsync(mapUrl).Result;
+
+            // שימוש בתיקיית בסיס יחסית לפרויקט או לסביבת הריצה
+            string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Helpers", "Images");
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            string imageFileName = $"{Guid.NewGuid()}.png";
+            string imagePath = Path.Combine(directoryPath, imageFileName);
+
+            File.WriteAllBytes(imagePath, imageBytes);
+
+            return imagePath;
+        }
+
+        public string GetIconPath()
+        {
+            // שימוש בנתיב יחסי ביחס לתיקיית הבסיס של הפרויקט
+            string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Helpers", "Images");
+            string iconFileName = "Google_Maps_icon_(2020).png";
+            string iconPath = Path.Combine(directoryPath, iconFileName);
+
+            if (File.Exists(iconPath))
+            {
+                return iconPath;
+            }
+            else
+            {
+                Console.WriteLine("Icon file not found.");
+                return null;
+            }
+        }
+
+
+    }
+
+}    
+

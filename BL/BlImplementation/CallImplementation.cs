@@ -2,8 +2,10 @@
 using BlApi;
 using BO;
 using DO;
+using Helpers;
 using System.Collections.Generic;
 using System.Data;
+using static Helpers.CallManager;
 
 /// <summary>
 /// The ICall interface defines methods for managing calls within the system.
@@ -162,9 +164,15 @@ internal class CallImplementation : ICall
         Helpers.CallManager.ValidateCallData(call);
         newCall = Helpers.CallManager.ConvertToDOCall(call);
 
+        call.Latitude = newCall.Latitude;
+        call.Longitude = newCall.Longitude;
+        call.OpeningTime = AdminManager.Now;
+
         try
         {
             s_dal.Call.Update(newCall);
+            if(call.FullAddress!= newCall.FullAddress)
+                CallManager.EmailService.SendEmailToVolunteersForNewCall(call);
         }
         catch (DO.DalDoesNotExistException ex)
         {
@@ -199,12 +207,26 @@ internal class CallImplementation : ICall
     }
     public void AddCall(BO.Call call)
     {
-
         Helpers.CallManager.ValidateCallData(call);
         DO.Call newDoCall = Helpers.CallManager.ConvertToDOCall(call);
+
+        call.Latitude = newDoCall.Latitude;
+        call.Longitude = newDoCall.Longitude;
+        call.OpeningTime = AdminManager.Now;
+        IEnumerable<DO.Call> allCalls = s_dal.Call.ReadAll();
+        var existingCall = allCalls.FirstOrDefault(c => c.Type == newDoCall.Type &&
+                                                c.Latitude == newDoCall.Latitude &&
+                                                c.Longitude == newDoCall.Longitude);
+
+        if (existingCall != null)
+        {
+            throw new BO.BlAlreadyExistsException($"The call already exists in the system. Call ID: {existingCall.Id}");
+        }
+
         try
         {
             s_dal.Call.Create(newDoCall);
+            CallManager.EmailService.SendEmailToVolunteersForNewCall(call);
         }
         catch (DO.DalDoesNotExistException ex)
         {
@@ -320,6 +342,10 @@ internal class CallImplementation : ICall
         if (assignment.CompletionType != null || assignment.CompletionTime != null)
             throw new InvalidOperationException("The assignment is already closed or completed.");
 
+        if (assignment.VolunteerId == 0)
+            throw new InvalidOperationException("The assignment you are trying to update is expired and has never been handled by any volunteer.");
+            
+        
         // Determine the cancellation type based on who is canceling the assignment (volunteer or admin).
         var cancellationType = volunteerId == assignment.VolunteerId
             ? DO.AssignmentCompletionType.VolunteerCancelled
@@ -331,10 +357,12 @@ internal class CallImplementation : ICall
             CompletionTime = DateTime.Now,
             CompletionType = cancellationType
         };
-
+        
         try
         {
             s_dal.Assignment.Update(updatedAssignment);
+            if(updatedAssignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
+                EmailService.SendCancellationEmailToVolunteer(assignmentId);
         }
         catch (DalDoesNotExistException ex)
         {
@@ -342,4 +370,16 @@ internal class CallImplementation : ICall
         }
 
     }
+
+    #region Stage 5
+    public void AddObserver(Action listObserver) =>
+    CallManager.Observers.AddListObserver(listObserver); //stage 5
+    public void AddObserver(int id, Action observer) =>
+    CallManager.Observers.AddObserver(id, observer); //stage 5
+    public void RemoveObserver(Action listObserver) =>
+    CallManager.Observers.RemoveListObserver(listObserver); //stage 5
+    public void RemoveObserver(int id, Action observer) =>
+    CallManager.Observers.RemoveObserver(id, observer); //stage 5
+    #endregion Stage 5
+
 }

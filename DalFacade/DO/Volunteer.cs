@@ -31,6 +31,8 @@ public record Volunteer
     bool IsActive = true,
     double? MaxDistance = null,
     DistanceType DistanceType = DistanceType.Aerial
+
+    //string ImagePath = "Profile Volunteer Image/Default_pfp.svg.png"// שדה לתמונת פרופיל עם ערך ברירת מחדל
 )
 
 {

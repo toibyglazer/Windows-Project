@@ -8,7 +8,7 @@ using Helpers;
 
 
 
-internal class VolunteerImplementation : IVolunteer
+public class VolunteerImplementation : IVolunteer
 {
     private readonly DalApi.IDal _dal = DalApi.Factory.Get;
 
@@ -112,6 +112,7 @@ internal class VolunteerImplementation : IVolunteer
         try
         {
             _dal.Volunteer.Create(DOvolunteer);
+            VolunteerManager.Observers.NotifyListUpdated(); //stage 5  
         }
         catch (DO.DalAlreadyExistsException ex)
         {
@@ -235,6 +236,9 @@ internal class VolunteerImplementation : IVolunteer
         try
         {
             _dal.Volunteer.Update(DOvolunteer);
+            VolunteerManager.Observers.NotifyItemUpdated(DOvolunteer.Id);  //stage 5
+            VolunteerManager.Observers.NotifyListUpdated();  //stage 5
+
         }
         catch (DO.DalDoesNotExistException ex)
         {
@@ -257,6 +261,8 @@ internal class VolunteerImplementation : IVolunteer
             if (!hasHandledCalls && !hasActiveCall)
             {
                 _dal.Volunteer.Delete(volunteerId);
+                VolunteerManager.Observers.NotifyListUpdated();  //stage 5  	
+
             }
             else
             {
@@ -312,5 +318,17 @@ internal class VolunteerImplementation : IVolunteer
         // Update the volunteer in the data layer.
         _dal.Volunteer.Update(DOvolunteer);
     }
+
+    #region Stage 5
+    public void AddObserver(Action listObserver) =>
+    VolunteerManager.Observers.AddListObserver(listObserver); //stage 5
+    public void AddObserver(int id, Action observer) =>
+    VolunteerManager.Observers.AddObserver(id, observer); //stage 5
+    public void RemoveObserver(Action listObserver) =>
+    VolunteerManager.Observers.RemoveListObserver(listObserver); //stage 5
+    public void RemoveObserver(int id, Action observer) =>
+    VolunteerManager.Observers.RemoveObserver(id, observer); //stage 5
+    #endregion Stage 5
+
 
 }
