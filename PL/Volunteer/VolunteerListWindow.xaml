@@ -7,7 +7,7 @@
         Height="614.4"
         
         Background="#F9F9F9"
-        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"> 
 
     <Window.Resources>
         <local:CallTypesCollection x:Key="CallTypesCollection" />
