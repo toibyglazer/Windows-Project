@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 namespace Helpers;
 
+using System.Drawing;
+using System.Net;
+using System.Net.Mail;
 using BlApi;
 using DO;
 
@@ -89,16 +92,17 @@ internal static class VolunteerManager
             FullName = volunteer.FullName,
             PhoneNumber = volunteer.PhoneNumber,
             Email = volunteer.Email,
-            Password = volunteer.Password, 
+            Password = volunteer.Password,
             CurrentAddress = volunteer.CurrentAddress,
             Role = (BO.VolunteerRole)volunteer.Role,
             IsActive = volunteer.IsActive,
             MaxDistance = volunteer.MaxDistance,
             DistanceType = (BO.DistanceType)volunteer.DistanceType,
-            TotalHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteer.Id),
-            TotalCancelledCalls = Helpers.VolunteerManager.GetTotalCancelledCalls(volunteer.Id),
-            TotalExpiredCalls = Helpers.VolunteerManager.GetTotalExpiredCalls(volunteer.Id),
-            ActiveCall = callInProgress
+            TotalHandledCalls = GetTotalHandledCalls(volunteer.Id),
+            TotalCancelledCalls = GetTotalCancelledCalls(volunteer.Id),
+            TotalExpiredCalls = GetTotalExpiredCalls(volunteer.Id),
+            ActiveCall = callInProgress,
+            //ImageProfilePath= volunteer.ImageProfilePath
         };
     }
 
@@ -130,7 +134,7 @@ internal static class VolunteerManager
         if (activeAssignment == null)
             return BO.CallType.None;
 
-        
+
         DO.Call? call = s_dal.Call.ReadAll()
             .FirstOrDefault(c => c.Id == activeAssignment.CallId);
 
@@ -142,7 +146,7 @@ internal static class VolunteerManager
     }
 
 
-  
+
 
     /// <summary>
     /// Converts a BO.Volunteer object to a DO.Volunteer object for saving to the database.
@@ -151,17 +155,25 @@ internal static class VolunteerManager
     /// <returns>A data object representing the volunteer, ready to be saved to the database.</returns>
     public static DO.Volunteer ConvertToDOVolunteer(BO.Volunteer volunteer)
     {
+        DO.Volunteer DOvolunteer = s_dal.Volunteer.Read(volunteer.Id);
+
+        bool addressChangeCheck = !string.IsNullOrEmpty(volunteer.CurrentAddress) &&
+                           volunteer.CurrentAddress != DOvolunteer.CurrentAddress;
+
         double? longitude = null;
         double? latitude = null;
-
-        // If the volunteer has a current address, retrieve geographical coordinates (latitude and longitude).
-        if (!string.IsNullOrEmpty(volunteer.CurrentAddress))
+        if (addressChangeCheck)
         {
-            // Calling an external API (OpenStreetMap) to get latitude and longitude based on the address.
-            GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
-            longitude = geoCoordinates.Longitude;
-            latitude = geoCoordinates.Latitude;
+            // If the volunteer has a current address, retrieve geographical coordinates (latitude and longitude).
+            if (!string.IsNullOrEmpty(volunteer.CurrentAddress))
+            {
+                // Calling an external API (OpenStreetMap) to get latitude and longitude based on the address.
+                GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
+                longitude = geoCoordinates.Longitude;
+                latitude = geoCoordinates.Latitude;
+            }
         }
+
 
         // Ensure that the volunteer's password is hashed. If not, hash it before saving.
         var hashedPassword = volunteer.Password;
@@ -179,14 +191,62 @@ internal static class VolunteerManager
             Email = volunteer.Email,
             Password = hashedPassword, // Store the hashed password in the database.
             CurrentAddress = volunteer.CurrentAddress,
+            Latitude = addressChangeCheck ? latitude : volunteer.Latitude, // Store latitude.
+            Longitude = addressChangeCheck ? longitude : volunteer.Longitude, // Store longitude.
+            Role = (DO.VolunteerRole)volunteer.Role, // Convert the volunteer's role to a data object enum.
+            IsActive = volunteer.IsActive, // Store the volunteer's activity status.
+            MaxDistance = volunteer.MaxDistance, // Store the volunteer's maximum distance for service.
+            DistanceType = (DO.DistanceType)volunteer.DistanceType, // Convert the distance type to a data object enum.
+            //ImageProfilePath= volunteer.ImageProfilePath
+        };
+    }
+    public static DO.Volunteer ConvertToDOVolunteerAdd(BO.Volunteer volunteer)
+    {
+
+        double? longitude = null;
+        double? latitude = null;
+
+
+        // If the volunteer has a current address, retrieve geographical coordinates (latitude and longitude).
+        if (!string.IsNullOrEmpty(volunteer.CurrentAddress))
+        {
+            // Calling an external API (OpenStreetMap) to get latitude and longitude based on the address.
+            GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
+            longitude = geoCoordinates.Longitude;
+            latitude = geoCoordinates.Latitude;
+        }
+
+
+        // Ensure that the volunteer's password is hashed. If not, hash it before saving.
+        var hashedPassword = volunteer.Password;
+        if (!(Tools.PasswordHasher.IsHashed(volunteer.Password)))
+        {
+            hashedPassword = Tools.PasswordHasher.HashPassword(volunteer.Password); // Hash the password if not already hashed.
+        }
+
+        // Creating and returning a new DO.Volunteer object, populating it with data from the BO.Volunteer.
+        return new DO.Volunteer
+        {
+            Id = volunteer.Id,
+            FullName = volunteer.FullName,
+            PhoneNumber = volunteer.PhoneNumber,
+            Email = volunteer.Email,
+            Password = hashedPassword, // Store the hashed password in the database.
+            CurrentAddress = string.IsNullOrEmpty(volunteer.CurrentAddress) ? null : volunteer.CurrentAddress, // שמירה של null במקום ערך ריק
             Latitude = latitude, // Store latitude.
             Longitude = longitude, // Store longitude.
             Role = (DO.VolunteerRole)volunteer.Role, // Convert the volunteer's role to a data object enum.
             IsActive = volunteer.IsActive, // Store the volunteer's activity status.
             MaxDistance = volunteer.MaxDistance, // Store the volunteer's maximum distance for service.
-            DistanceType = (DO.DistanceType)volunteer.DistanceType // Convert the distance type to a data object enum.
+            DistanceType = (DO.DistanceType)volunteer.DistanceType, // Convert the distance type to a data object enum.
+            //ImageProfilePath= volunteer.ImageProfilePath
         };
     }
+    //public static DO.Volunteer UpdateImageDoVolunteer(DO.Volunteer volunteer, string path)
+    //{
+    //    return volunteer with { ImageProfilePath = path };
+    //}
+
 
 
 
@@ -208,15 +268,15 @@ internal static class VolunteerManager
         // Return a new CallInProgress object with the relevant details
         return new BO.CallInProgress
         {
-            Id = GetActiveAssignmentId(volunteerId), 
-            CallId = activeCallId, 
+            Id = GetActiveAssignmentId(volunteerId),
+            CallId = activeCallId,
             Type = (BO.CallType)activeCall.Type,
-            FullAddress = activeCall.FullAddress, 
+            FullAddress = activeCall.FullAddress,
             OpeningTime = activeCall.OpeningTime,
-            MaxCompletionTime = activeCall.MaxCompletionTime, 
-            EntryTime = GetActiveCallEntryTime(volunteerId), 
-            DistanceToActiveCall = distance, 
-            activeCallStatus = DetermineCallStatus(activeCall.MaxCompletionTime) 
+            MaxCompletionTime = activeCall.MaxCompletionTime,
+            EntryTime = GetActiveCallEntryTime(volunteerId),
+            DistanceToActiveCall = distance,
+            activeCallStatus = DetermineCallStatus(activeCall.MaxCompletionTime)
         };
     }
 
@@ -486,7 +546,7 @@ internal static class VolunteerManager
     public static void ValidateMaxDistance(double? maxDistance)
     {
         // Max distance must be positive if provided.
-        if (maxDistance.HasValue && maxDistance <= 0)
+        if (maxDistance.HasValue && maxDistance < 0)
             throw new InvalidMaxDistanceException("Max distance must be a positive number.");
     }
 
@@ -502,6 +562,32 @@ internal static class VolunteerManager
             throw new InvalidDistanceTypeException($"Invalid input '{input}' for DistanceType.");
         }
     }
+
+    /// <summary>
+    /// Validates the image profile path for a volunteer.
+    /// Ensures the path exists, points to a valid file, and has the correct extension.
+    /// </summary>
+    /// <param name="imageProfilePath">The image file path to validate.</param>
+    public static void ValidateImageProfilePath(string imageProfilePath)
+    {
+
+        if (string.IsNullOrWhiteSpace(imageProfilePath))
+        {
+            throw new ArgumentException("Image profile path is required.");
+        }
+
+        if (!File.Exists(imageProfilePath))
+        {
+            throw new FileNotFoundException($"The image file '{imageProfilePath}' was not found.");
+        }
+        string extension = Path.GetExtension(imageProfilePath).ToLower();
+
+        if (extension != ".jpg" && extension != ".jpeg" && extension != ".png")
+        {
+            throw new ArgumentException($"The file '{imageProfilePath}' must be a .jpg, .jpeg, or .png image.");
+        }
+    }
+
 
     #endregion
 
@@ -597,6 +683,154 @@ internal static class VolunteerManager
     }
 
     #endregion
+
+    public static string GeneratePassword()
+    {
+        const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
+        const string digits = "0123456789";
+        const string specialChars = "!@#$%^&*()_+<>?";
+        const int passwordLength = 12;
+
+        var allChars = upperChars + lowerChars + digits + specialChars;
+        var random = new Random();
+
+        // מוודאים שהסיסמה כוללת לפחות תו אחד מכל סוג
+        string password = new string(new[]
+        {
+        upperChars[random.Next(upperChars.Length)],
+        lowerChars[random.Next(lowerChars.Length)],
+        digits[random.Next(digits.Length)],
+        specialChars[random.Next(specialChars.Length)]
+    });
+
+        // משלימים את שאר התווים באורך הרצוי
+        password += new string(Enumerable.Range(0, passwordLength - 4)
+            .Select(_ => allChars[random.Next(allChars.Length)]).ToArray());
+
+        // ערבוב הסיסמה למניעת תבנית קבועה
+        return new string(password.OrderBy(_ => random.Next()).ToArray());
+    }
+
+
+    public class SendEmailNewVolunteer
+    {
+        private const string SmtpHost = "smtp.gmail.com";
+        private const int SmtpPort = 587;
+        private const string SenderEmail = "toibymichalminiproject@gmail.com";
+        private const string SenderPassword = "iwge idji gbtj lomm";
+
+        public static void SendStaticEmail(string recipientEmail, string volunteerFullName, string generatedPassword)
+        {
+            if (string.IsNullOrEmpty(recipientEmail))
+            {
+                throw new InvalidOperationException("Recipient email address is missing.");
+            }
+
+            try
+            {
+                using (var smtpClient = new SmtpClient(SmtpHost, SmtpPort))
+                {
+                    smtpClient.Credentials = new NetworkCredential(SenderEmail, SenderPassword);
+                    smtpClient.EnableSsl = true;
+
+                    var mailMessage = new MailMessage
+                    {
+                        From = new MailAddress(SenderEmail, "Volunteer Support Team"),
+                        Subject = "Welcome to Our Volunteer Family!",
+                        IsBodyHtml = true
+                    };
+
+                    string body = $@"
+<html>
+    <head>
+        <style>
+            body {{
+                font-family: 'Arial', sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background-color: #ffffff;
+                margin: 0;
+                padding: 0;
+            }}
+            .email-container {{
+                width: 100%;
+                max-width: 500px; /* הקטנת הרוחב המקסימלי */
+                margin: 0 auto;
+                padding: 20px; /* הקטנת הריפוד */
+                background-image: url('https://pnghq.com/wp-content/uploads/pnghq.com-confetti-png-free-download.png');
+                background-repeat: repeat;
+                background-size: 150px 150px; /* הקטנת גודל הרקע */
+                background-position: center;
+                background-color: #f0f0f0;
+            }}
+            .content {{
+                background-color: rgba(255, 255, 255, 0.9);
+                padding: 15px; /* הקטנת הריפוד */
+                border-radius: 8px; /* הקטנת הרדיוס */
+                box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            }}
+            h2 {{
+                color: #4a5568; /* שינוי צבע הכותרת לשחור */
+                text-align: center;
+                padding: 15px 0;
+                font-size: 20px; /* הקטנת גודל הפונט */
+                font-weight: bold;
+                margin-top: 0;
+            }}
+            p {{
+                font-size: 14px; /* הקטנת גודל הפונט */
+                color: #4a5568;
+            }}
+            .highlight {{
+                font-weight: bold;
+                color: #1e3a8a;
+                background-color: #e2e8f0;
+                padding: 4px 8px;
+                border-radius: 4px;
+            }}
+            .footer {{
+                font-size: 12px; /* הקטנת גודל הפונט */
+                text-align: center;
+                margin-top: 20px;
+                color: #718096;
+                padding: 15px 0;
+                background-color: rgba(247, 250, 252, 0.8);
+                border-radius: 0 0 8px 8px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <div class='content'>
+                <h2>Welcome to Our Volunteer Family, {volunteerFullName}!</h2>
+                <p>We are thrilled to have you join our team of dedicated volunteers. Your commitment to making a difference is truly inspiring!</p>
+                <p>Here are the details for your new account:</p>
+                <p><span class='highlight'>Your new password:</span> {generatedPassword}</p>
+                <p>Please ensure you keep this password secure and don't share it with anyone.</p>
+                <p>We can't wait to see the positive impact you'll make in our community. Remember, your efforts, no matter how small, can create ripples of change!</p>
+                <p>If you have any questions or need assistance, don't hesitate to reach out to us. We're here to support you every step of the way.</p>
+                
+                <div class='footer'>
+                    <p>With gratitude,</p>
+                    <p>The Volunteer Management Team</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>";
+
+                    mailMessage.Body = body;
+                    mailMessage.To.Add(recipientEmail);
+                    smtpClient.Send(mailMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to send email: {ex.Message}");
+            }
+        }
+    }
 
 }
 

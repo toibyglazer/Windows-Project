@@ -16,16 +16,19 @@
 
   <ItemGroup>
     <None Remove="Resources\Images\logo.png" />
-    <None Remove="Volunteer\Images\logo.png" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BL\BL.csproj" />
   </ItemGroup>
+	<ItemGroup>
+		<Content Include="ProfileImage\**\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <Resource Include="Resources\Images\logo.png" />
-    <Resource Include="Volunteer\Images\logo.png" />
   </ItemGroup>
 
 </Project>

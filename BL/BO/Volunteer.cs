@@ -28,7 +28,7 @@ public class Volunteer
     public required string FullName { get; set; }
     public required string PhoneNumber { get; set; }
     public required string Email { get; set; }
-    public string Password { get; set; }
+    public string? Password { get; set; }
     public string? CurrentAddress { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
@@ -40,6 +40,11 @@ public class Volunteer
     public int TotalCancelledCalls { get; set; }
     public int TotalExpiredCalls { get; set; }
     public BO.CallInProgress? ActiveCall { get; set; }
+
+    //public string ImageProfilePath { get; set; } =
+    //  Path.Combine(AppContext.BaseDirectory, "ProfileImage", "default.jpg");
+
+
     public override string ToString() => this.ToStringProperty();
 }
 

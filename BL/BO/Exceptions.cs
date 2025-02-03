@@ -228,3 +228,16 @@ public class BlLockoutException : Exception
     public BlLockoutException(string message) : base(message) { }
     public BlLockoutException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class BlUpdateException : Exception
+{
+    // Constructor עם הודעה בלבד
+    public BlUpdateException(string message) : base(message)
+    {
+    }
+
+    // Constructor עם הודעה וחריגה פנימית
+    public BlUpdateException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+}

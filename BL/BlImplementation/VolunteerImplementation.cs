@@ -105,20 +105,26 @@ public class VolunteerImplementation : IVolunteer
     }
     public void AddVolunteer(BO.Volunteer volunteer)
     {
+        volunteer.Password = VolunteerManager.GeneratePassword();
+
         // Validate the input volunteer object to ensure all required data is correct and complete.
         Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
-        DO.Volunteer DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteer(volunteer);
+        DO.Volunteer DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteerAdd(volunteer);
 
         try
         {
             _dal.Volunteer.Create(DOvolunteer);
+            VolunteerManager.SendEmailNewVolunteer.SendStaticEmail(volunteer.Email, volunteer.FullName, volunteer.Password);
             VolunteerManager.Observers.NotifyListUpdated(); //stage 5  
+
         }
         catch (DO.DalAlreadyExistsException ex)
         {
             throw new BO.BlAlreadyExistsException($"Volunteer retrieval failed: {ex.Message}");
         }
     }
+
+
     public BO.Volunteer GetVolunteerDetails(int volunteerId)
     {
         try
@@ -230,15 +236,22 @@ public class VolunteerImplementation : IVolunteer
         if (DOvolunteer.IsActive != volunteer.IsActive && DOvolunteer.Role == DO.VolunteerRole.Volunteer)
             throw new BO.BlAccessDeniedException("You are not allowed to change your activity, only the manager.");
 
+        bool addressChangeCheck=false;
+        if(volunteer.CurrentAddress!= DOvolunteer.CurrentAddress)
+            addressChangeCheck=true; 
+
+        
         Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
         DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteer(volunteer);
 
         try
         {
             _dal.Volunteer.Update(DOvolunteer);
-            VolunteerManager.Observers.NotifyItemUpdated(DOvolunteer.Id);  //stage 5
+            Console.WriteLine("Volunteer updated successfully.");
             VolunteerManager.Observers.NotifyListUpdated();  //stage 5
-
+            Console.WriteLine("NotifyListUpdated called.");
+            VolunteerManager.Observers.NotifyItemUpdated(DOvolunteer.Id);  //stage 5
+            Console.WriteLine("NotifyItemUpdated called.");
         }
         catch (DO.DalDoesNotExistException ex)
         {
@@ -329,6 +342,47 @@ public class VolunteerImplementation : IVolunteer
     public void RemoveObserver(int id, Action observer) =>
     VolunteerManager.Observers.RemoveObserver(id, observer); //stage 5
     #endregion Stage 5
+
+
+
+
+
+    /// <summary>
+    /// Updates the profile image path for a specific volunteer.
+    /// </summary>
+    /// <param name="volunteerId">The unique identifier of the volunteer.</param>
+    ///// <param name="imagePath">The path to the new profile image.</param>
+    //public void UpdateVolunteerImage(int volunteerId, string imagePath)
+    //{
+        
+    //        // קריאה ועדכון מתנדב
+    //        DO.Volunteer volunteer = _dal.Volunteer.Read(volunteerId)
+    //            ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
+
+    //        //VolunteerManager.ValidateImageProfilePath(imagePath);
+    //        //DO.Volunteer updatedVolunteer = VolunteerManager.UpdateImageDoVolunteer(volunteer, imagePath);
+
+    //    try
+    //    {
+    //        _dal.Volunteer.Update(updatedVolunteer);
+    //        VolunteerManager.Observers.NotifyItemUpdated(volunteerId);  //stage 5
+            
+    //    }
+    //    catch (BO.BlDoesNotExistException ex)
+    //    {
+            
+    //        throw;
+    //    }
+    //    catch (BO.BlUpdateException ex)
+    //    {
+    //        throw;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new BO.BlUpdateException("Unexpected error occurred while updating volunteer image.", ex);
+    //    }
+    //}
+
 
 
 }

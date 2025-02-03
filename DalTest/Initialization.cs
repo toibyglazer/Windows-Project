@@ -167,7 +167,12 @@ public static class Initialization
     374306371, 523220655, 678543901, 281041475,
     489627356, 154553671
   };
+
+      
         DistanceType firstDistanceType = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
+
+        
+        var imageProfileFirstPath = GetImagePathForVolunteer(volunteerIds[0]);
         var firstVolunteer = new Volunteer
             (
                 Id: volunteerIds[0],
@@ -182,6 +187,7 @@ public static class Initialization
                 IsActive: true,
                 MaxDistance: maxDistances[0],
                 DistanceType: firstDistanceType
+                //ImageProfilePath: imageProfileFirstPath
            );
         s_dal!.Volunteer.Create(firstVolunteer); //stage 2
 
@@ -190,8 +196,14 @@ public static class Initialization
             {
 
                 DistanceType d = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
+           
+                var imageProfilePath = GetImagePathForVolunteer(volunteerIds[i]);
+            if (!File.Exists(imageProfilePath))
+            {
+                throw new FileNotFoundException($"Image not found for volunteer {volunteerIds[i]}");
+            }
 
-                var volunteer = new Volunteer
+            var volunteer = new Volunteer
                 (
                     Id: volunteerIds[i],
                     FullName: VolunteerNames[i],
@@ -205,6 +217,7 @@ public static class Initialization
                     IsActive: true,
                     MaxDistance: maxDistances[i],
                     DistanceType: d
+                    //ImageProfilePath: imageProfilePath
                );
 
                 s_dal!.Volunteer.Create(volunteer); //stage 2
@@ -212,8 +225,16 @@ public static class Initialization
             }
         
     }
+   
 
-    static private void createCall()
+    private static string GetImagePathForVolunteer(int volunteerId)
+    {
+        string imageDirectory = "ProfileImage";
+        return Path.Combine(imageDirectory, $"{volunteerId}.jpg");
+    }
+   
+
+static private void createCall()
     {
        
 

@@ -1,5 +1,6 @@
 ﻿// Module Volunteer.cs
 namespace DO;
+using System.IO; // עבור Path ו-Directory
 
 
 /// <summary>
@@ -32,10 +33,17 @@ public record Volunteer
     double? MaxDistance = null,
     DistanceType DistanceType = DistanceType.Aerial
 
-    //string ImagePath = "Profile Volunteer Image/Default_pfp.svg.png"// שדה לתמונת פרופיל עם ערך ברירת מחדל
+   //string ImageProfilePath = 
+
 )
 
 {
+   
+    /// <summary>
+    /// Default constructor for initializing a new volunteer with default values.
+    /// </summary>
+
+
     /// <summary>
     /// Default constructor for initializing a new volunteer with default values.
     /// </summary>

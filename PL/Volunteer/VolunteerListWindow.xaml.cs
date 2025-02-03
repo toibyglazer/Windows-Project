@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -31,6 +32,8 @@ namespace PL.Volunteer
         public static readonly DependencyProperty VolunteerListProperty =
             DependencyProperty.Register("VolunteerList", typeof(IEnumerable<BO.VolunteerInList>), typeof(VolunteerListWindow), new PropertyMetadata(null));
 
+      
+
         public BO.CallType callType { get; set; } = BO.CallType.All;
         public BO.Activity ActivityFilter { get; set; } = BO.Activity.All;
 
@@ -40,13 +43,27 @@ namespace PL.Volunteer
 
         public void UpdateVolunteerList()
         {
+            
+
             IEnumerable<BO.VolunteerInList> filteredList = s_bl.Volunteer.GetVolunteersList(
-       isActiveFilter: ActivityFilter == BO.Activity.All ? null : ActivityFilter == BO.Activity.Active,
+       isActiveFilter: null,
        sortField: null);
+
 
             if (callType != BO.CallType.All)
             {
                 filteredList = filteredList.Where(v => v.Type == callType);
+            }
+            if (ActivityFilter != BO.Activity.All)
+            {
+                if (ActivityFilter == BO.Activity.Active)
+                {
+                    filteredList = filteredList.Where(v => v.IsActive == true);
+                }
+                else if (ActivityFilter == BO.Activity.Inactive)
+                {
+                    filteredList = filteredList.Where(v => v.IsActive == false);
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(NameFilter))
@@ -59,11 +76,12 @@ namespace PL.Volunteer
                 filteredList = filteredList.Where(v => v.Id.ToString().StartsWith(IDFilter));
             }
 
+           
             VolunteerList = filteredList.ToList();
             OnPropertyChanged(nameof(VolunteerList));
-
-
         }
+
+
 
 
         public void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -73,17 +91,23 @@ namespace PL.Volunteer
 
         public void VolunteerListObserver()
         {
+           
+            
             UpdateVolunteerList();
         }
         public void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // מוסיפים צופה על כל המתנדבים
             s_bl.Volunteer.AddObserver(VolunteerListObserver);
             UpdateVolunteerList();
         }
         public void Window_Closed(object sender, EventArgs e)
         {
             s_bl.Volunteer.RemoveObserver(VolunteerListObserver);
+           
         }
+
+      
 
 
 
@@ -124,17 +148,42 @@ namespace PL.Volunteer
         {
             UpdateVolunteerList();
         }
+
        
 
+        public VolunteerListWindow(int volunteerId)
+        {
+            InitializeComponent();
+           
+        }
 
         public VolunteerListWindow()
         {
             InitializeComponent();
-
-            //var window = new VolunteerListWindow();
-            //window.Show();
+        }
+        public BO.VolunteerInList? SelectedVolunteer { get; set; }
+        public void lsvVolunteersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // בדיקה אם נבחר מתנדב
+            if (SelectedVolunteer != null)
+            {
+                // פתיחת חלון במצב רגיל
+                new VolunteerWindow(SelectedVolunteer.Id).Show();
+                UpdateVolunteerList(); // עדכון הרשימה לאחר סגירת החלון
+            }
         }
 
-    
+        private void AddNewItem_Click(object sender, RoutedEventArgs e)
+        {
+            // פתיחת חלון תצוגת פריט חדש במצב הוספה
+            var window = new VolunteerWindow(); // בנאי ללא פרמטרים עבור הוספה
+            window.Show(); // פתיחה במצב Show כך שהמסך הקודם נשאר פעיל
+            UpdateVolunteerList(); // עדכון הרשימה לאחר סגירת החלון
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

@@ -371,9 +371,9 @@ internal static class CallManager
     {
         try
         {
-            // Validate if latitude and longitude are present
-            if (call.Latitude == null || call.Longitude == null)
-                throw new InvalidOperationException("Latitude and Longitude must not be null. This indicates an unexpected issue.");
+            //// Validate if latitude and longitude are present
+            //if (call.Latitude == null || call.Longitude == null)
+            //    throw new InvalidOperationException("Latitude and Longitude must not be null. This indicates an unexpected issue.");
 
             // Validate the call type string by trying to parse it
             TryParseAndValidateCallType(call.Type.ToString());

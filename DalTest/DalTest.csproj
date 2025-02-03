@@ -13,6 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Profile Volunteer Image\**" />
+    <EmbeddedResource Remove="Profile Volunteer Image\**" />
+    <None Remove="Profile Volunteer Image\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
 

@@ -19,6 +19,7 @@ public interface IVolunteer : IObservable //stage 5 הרחבת ממשק
     void UpdateVolunteer(int volunteerId, BO.Volunteer volunteer, string? managerPassword);
     void DeleteVolunteer(int volunteerId);
     void AddVolunteer(BO.Volunteer volunteer);
+    //void UpdateVolunteerImage(int volunteerId, string imagePath);
 
     //Addition: Password update function
     void UpdatePassword(int volunteerId, string oldPassword, string newPassword);

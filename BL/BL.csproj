@@ -14,6 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Profile Volunteer Image\**" />
+    <EmbeddedResource Remove="Profile Volunteer Image\**" />
+    <None Remove="Profile Volunteer Image\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Helpers\Images\12478938.png" />
     <None Remove="Helpers\Images\Attention-sign-icon.png" />
     <None Remove="Helpers\Images\cancel-close-10374.png" />
