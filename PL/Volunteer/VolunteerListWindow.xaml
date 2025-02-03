@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PL.Volunteer"
         Title="Volunteer List"
-        Width="1024"
-        Height="768"
-        WindowStartupLocation="CenterScreen"
+        Width="921.6"
+        Height="614.4"
+        
         Background="#F9F9F9"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
@@ -13,25 +13,25 @@
         <local:CallTypesCollection x:Key="CallTypesCollection" />
         <local:ActivityCollection x:Key="ActivityCollection" />
         <DropShadowEffect x:Key="DropShadowEffect" 
-                  ShadowDepth="1" 
+                  ShadowDepth="0.855" 
                   Direction="315" 
                   Color="#DDDDDD" 
                   Opacity="0.5" 
-                  BlurRadius="10"/>
+                  BlurRadius="8.55"/>
         <!-- Style for TextBox -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="0,5,0,15"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="34.2"/>
+            <Setter Property="Margin" Value="0,4.275,0,12.825"/>
+            <Setter Property="Padding" Value="8.55,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                                CornerRadius="6.84" 
                                 BorderBrush="#E5E7EB"
-                                BorderThickness="1">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="5"/>
+                                BorderThickness="0.855">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="4.275"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -43,7 +43,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="17.1" />
                 </Grid.ColumnDefinitions>
                 <Border x:Name="Border" 
                         Grid.ColumnSpan="2" 
@@ -55,7 +55,7 @@
                       Fill="#374151"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center"
-                      Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"/>
+                      Data="M0,0 L0,1.71 L3.42,5.13 L6.84,1.71 L6.84,0 L3.42,3.42 z"/>
             </Grid>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
@@ -66,16 +66,16 @@
 
         <!-- Style for ComboBox -->
         <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="0,5,0,15"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="34.2"/>
+            <Setter Property="Margin" Value="0,4.275,0,12.825"/>
+            <Setter Property="Padding" Value="8.55,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                                CornerRadius="6.84" 
                                 BorderBrush="#E5E7EB"
-                                BorderThickness="1">
+                                BorderThickness="0.855">
                             <Grid>
                                 <ToggleButton IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                               Template="{StaticResource ComboBoxToggleButton}"/>
@@ -83,7 +83,7 @@
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                   ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                  Margin="10,0,30,0"
+                                                  Margin="8.55,0,25.65,0"
                                                   VerticalAlignment="Center"/>
                                 <Popup IsOpen="{TemplateBinding IsDropDownOpen}" 
                                        Placement="Bottom"
@@ -93,9 +93,9 @@
                                     <Grid Background="White" 
                                           MinWidth="{TemplateBinding ActualWidth}"
                                           MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                        <Border CornerRadius="8" 
+                                        <Border CornerRadius="6.84" 
                                                 BorderBrush="#E5E7EB"
-                                                BorderThickness="1">
+                                                BorderThickness="0.855">
                                             <ScrollViewer SnapsToDevicePixels="True">
                                                 <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
                                             </ScrollViewer>
@@ -111,7 +111,7 @@
 
         <!-- Style for Button -->
         <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Height" Value="40"/>
+            <Setter Property="Height" Value="34.2"/>
             <Setter Property="Background" Value="#3B82F6"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -119,7 +119,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="8"
+                                CornerRadius="6.84"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -138,17 +138,17 @@
         <Style x:Key="ModernLabel" TargetType="Label">
             <Setter Property="Foreground" Value="#374151"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="FontSize" Value="11.97"/>
+            <Setter Property="Margin" Value="0,0,0,4.275"/>
         </Style>
     </Window.Resources>
 
     <Border Background="#F9F9F9" 
-            CornerRadius="15" 
-            Margin="20" 
-            Padding="30"
+            CornerRadius="12.825" 
+            Margin="17.1" 
+            Padding="25.65"
             BorderBrush="#E0E0E0"
-            BorderThickness="1"
+            BorderThickness="0.855"
             Effect="{StaticResource DropShadowEffect}">
         <Grid>
             <Grid.RowDefinitions>
@@ -159,66 +159,65 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-        <TextBlock Text="Volunteer List" 
-                   FontSize="28" 
+            <TextBlock Text="Volunteer List" 
+                   FontSize="23.94" 
                    FontWeight="Bold" 
-                   Margin="0,0,0,20"
+                   Margin="0,0,0,17.1"
                    Grid.Row="0"/>
 
-        <!-- Filters in a single white box -->
-        <Border Grid.Row="1" Background="White" CornerRadius="10" Margin="0,0,0,20" Padding="20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <!-- Filters in a single white box -->
+            <Border Grid.Row="1" Background="White" CornerRadius="8.55" Margin="0,0,0,17.1" Padding="17.1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <Label Content="Filter by Category:" Grid.Column="0" Grid.Row="0"
+                    <Label Content="Filter by Category:" Grid.Column="0" Grid.Row="0"
                        Style="{StaticResource ModernLabel}"/>
-                <ComboBox Grid.Column="1" Grid.Row="0"
+                    <ComboBox Grid.Column="1" Grid.Row="0"
                           Style="{StaticResource ModernComboBox}"
                           SelectedValue="{Binding callType, Mode=TwoWay}"
                           SelectionChanged="ComboBox_SelectionChanged"
                           ItemsSource="{Binding CallTypesCollection}"/>
 
-                <Label Content="Filter by Activity:" Grid.Column="2" Grid.Row="0"
+                    <Label Content="Filter by Activity:" Grid.Column="2" Grid.Row="0"
                        Style="{StaticResource ModernLabel}"/>
-                <ComboBox Grid.Column="3" Grid.Row="0"
+                    <ComboBox Grid.Column="3" Grid.Row="0"
                           Style="{StaticResource ModernComboBox}"
                           SelectedValue="{Binding ActivityFilter, Mode=TwoWay}"
                           SelectionChanged="ComboBox_SelectionChanged"
                           ItemsSource="{Binding ActivityCollection}"/>
 
-                <Label Content="Filter by Name:" Grid.Column="0" Grid.Row="1"
+                    <Label Content="Filter by Name:" Grid.Column="0" Grid.Row="1"
                        Style="{StaticResource ModernLabel}"/>
-                <TextBox Grid.Column="1" Grid.Row="1"
+                    <TextBox Grid.Column="1" Grid.Row="1"
                          Style="{StaticResource ModernTextBox}"
                          Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <Label Content="Filter by ID:" Grid.Column="2" Grid.Row="1"
+                    <Label Content="Filter by ID:" Grid.Column="2" Grid.Row="1"
                        Style="{StaticResource ModernLabel}"/>
-                <TextBox Grid.Column="3" Grid.Row="1"
+                    <TextBox Grid.Column="3" Grid.Row="1"
                          Style="{StaticResource ModernTextBox}"
                          Text="{Binding IDFilter, UpdateSourceTrigger=PropertyChanged}"
                          TextChanged="TextBox_TextChanged"/>
-            </Grid>
-        </Border>
+                </Grid>
+            </Border>
 
-        <!-- DataGrid -->
-        <!-- DataGrid -->
-        <DataGrid Grid.Row="2"
+            <!-- DataGrid -->
+            <DataGrid Grid.Row="2"
                   ItemsSource="{Binding VolunteerList}"
                   SelectedItem="{Binding SelectedVolunteer}"
                   AutoGenerateColumns="True"
                   CanUserAddRows="False"
                   IsReadOnly="True"
-                  BorderThickness="1"
+                  BorderThickness="0.855"
                   BorderBrush="#E5E7EB"
                   Background="White"
                   RowHeaderWidth="0"
@@ -226,52 +225,51 @@
                   HorizontalScrollBarVisibility="Auto"
                   MouseDoubleClick="lsvVolunteersList_MouseDoubleClick"
                   SelectionChanged="DataGrid_SelectionChanged" 
-                  Margin="0,0,0,20">
-            <DataGrid.Resources>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="#F3F4F6"/>
-                    <Setter Property="Foreground" Value="#111827"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="Padding" Value="10,15"/>
-                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                    <Setter Property="BorderBrush" Value="#E5E7EB"/>
-                </Style>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="Padding" Value="10,8"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="DataGridCell">
-                                <Border Padding="{TemplateBinding Padding}" BorderThickness="0">
-                                    <ContentPresenter />
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Background" Value="White"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#F3F4F6"/>
-                        </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#E5E7EB"/>
-                            <Setter Property="Foreground" Value="#111827"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Resources>
-        </DataGrid>
+                  Margin="0,0,0,17.1">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#F3F4F6"/>
+                        <Setter Property="Foreground" Value="#111827"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="8.55,12.825"/>
+                        <Setter Property="BorderThickness" Value="0,0,0.855,0.855"/>
+                        <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                    </Style>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="8.55,6.84"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border Padding="{TemplateBinding Padding}" BorderThickness="0">
+                                        <ContentPresenter />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="White"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F3F4F6"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#E5E7EB"/>
+                                <Setter Property="Foreground" Value="#111827"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+            </DataGrid>
 
-        <!-- Add New Item Button -->
-        <Button Grid.Row="3"
+            <!-- Add New Item Button -->
+            <Button Grid.Row="3"
                 Content="Add New Volunteer"
                 Style="{StaticResource ModernButton}"
-                Width="200"
+                Width="171"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Center"
                 Click="AddNewItem_Click"/>
-    </Grid>
-          </Border>
+        </Grid>
+    </Border>
 </Window>
-

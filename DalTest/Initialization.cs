@@ -172,7 +172,7 @@ public static class Initialization
         DistanceType firstDistanceType = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
 
         
-        var imageProfileFirstPath = GetImagePathForVolunteer(volunteerIds[0]);
+        //var imageProfileFirstPath = GetImagePathForVolunteer(volunteerIds[0]);
         var firstVolunteer = new Volunteer
             (
                 Id: volunteerIds[0],
@@ -197,11 +197,11 @@ public static class Initialization
 
                 DistanceType d = (DistanceType)s_rand.Next(Enum.GetValues(typeof(DistanceType)).Length);
            
-                var imageProfilePath = GetImagePathForVolunteer(volunteerIds[i]);
-            if (!File.Exists(imageProfilePath))
-            {
-                throw new FileNotFoundException($"Image not found for volunteer {volunteerIds[i]}");
-            }
+                //var imageProfilePath = GetImagePathForVolunteer(volunteerIds[i]);
+            //if (!File.Exists(imageProfilePath))
+            //{
+            //    throw new FileNotFoundException($"Image not found for volunteer {volunteerIds[i]}");
+            //}
 
             var volunteer = new Volunteer
                 (
@@ -227,11 +227,11 @@ public static class Initialization
     }
    
 
-    private static string GetImagePathForVolunteer(int volunteerId)
-    {
-        string imageDirectory = "ProfileImage";
-        return Path.Combine(imageDirectory, $"{volunteerId}.jpg");
-    }
+    //private static string GetImagePathForVolunteer(int volunteerId)
+    //{
+    //    string imageDirectory = "ProfileImage";
+    //    return Path.Combine(imageDirectory, $"{volunteerId}.jpg");
+    //}
    
 
 static private void createCall()

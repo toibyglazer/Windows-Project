@@ -271,6 +271,7 @@ internal static class VolunteerManager
             Id = GetActiveAssignmentId(volunteerId),
             CallId = activeCallId,
             Type = (BO.CallType)activeCall.Type,
+            Description= activeCall.Description,
             FullAddress = activeCall.FullAddress,
             OpeningTime = activeCall.OpeningTime,
             MaxCompletionTime = activeCall.MaxCompletionTime,

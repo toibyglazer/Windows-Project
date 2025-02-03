@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using BlApi;
+using PL.Volunteer;
 
 namespace PL;
 
@@ -310,7 +311,16 @@ public partial class MainWindow : Window
         }
     }
 
-public MainWindow()
+    private void VolunteerManagementButton_Click(object sender, RoutedEventArgs e)
+    {
+       
+        VolunteerListWindow volunteerListWindow = new VolunteerListWindow();
+        volunteerListWindow.Show();
+    }
+
+
+
+    public MainWindow()
     {
         InitializeComponent();
     }

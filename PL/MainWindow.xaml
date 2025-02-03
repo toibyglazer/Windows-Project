@@ -1,5 +1,5 @@
 ﻿<Window x:Class="PL.MainWindow"
-          Loaded="Window_Loaded"
+        Loaded="Window_Loaded"
         Closing="Window_Closing"
         Closed="Window_Closed"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,299 +8,184 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Main Management Screen"
-        Height="768" Width="1024"
+        Width="900" Height="600"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
-    WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <!-- Color Resources -->
-        <SolidColorBrush x:Key="NavyBlueBrush" Color="#1B365D"/>
-        <SolidColorBrush x:Key="LightBlueBrush" Color="#E8EFF6"/>
-        <SolidColorBrush x:Key="DarkBlueBrush" Color="#2C5282"/>
-        <SolidColorBrush x:Key="CreamBrush" Color="#F8F9FA"/>
-        <SolidColorBrush x:Key="BeigeBrush" Color="#F4F1E7"/>
-        <SolidColorBrush x:Key="LightBeigeBrush" Color="#FFF5E6"/>
+        <DropShadowEffect x:Key="DropShadowEffect" 
+           ShadowDepth="1" 
+           Direction="315" 
+           Color="#DDDDDD" 
+           Opacity="0.5" 
+           BlurRadius="10"/>
 
-        <!-- New Button Colors -->
-        <SolidColorBrush x:Key="Button1Brush" Color="#34495E"/>
-        <SolidColorBrush x:Key="Button2Brush" Color="#2C3E50"/>
-        <SolidColorBrush x:Key="Button3Brush" Color="#2E4053"/>
-        <SolidColorBrush x:Key="Button4Brush" Color="#283747"/>
+        <!-- Style for TextBox -->
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="#FFFFFF" 
+                                CornerRadius="8" 
+                                BorderBrush="#E5E7EB"
+                                BorderThickness="1">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="5"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <!-- Button Style -->
-        <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Height" Value="50"/>
+        <!-- Style for Button -->
+        <Style TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
                                 CornerRadius="8"
-                                BorderThickness="0">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="2" 
-                                                Direction="315" 
-                                                Color="Black" 
-                                                Opacity="0.3" 
-                                                BlurRadius="4"/>
-                            </Border.Effect>
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center"/>
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource NavyBlueBrush}" />
+                    <Setter Property="Background" Value="#E1F5FE"/>
+                    <Setter Property="BorderBrush" Value="#81D4FA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style for Label -->
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style x:Key="MainActionButton" TargetType="Button">
+            <Setter Property="Height" Value="70"/>
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                        CornerRadius="12"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E1F5FE"/>
+                    <Setter Property="BorderBrush" Value="#81D4FA"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </Window.Resources>
 
-    <!-- Main Grid -->
-    <Grid Background="{StaticResource CreamBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="139"/>
-            <RowDefinition Height="613.04"/>
-        </Grid.RowDefinitions>
-
-
-        <!-- Header -->
-        <Grid Grid.Row="0" Background="{StaticResource CreamBrush}" Margin="20,20,20,9">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="מסך ניהול ראשי" 
-                       FontSize="37" FontWeight="Bold" 
-                       Foreground="{StaticResource NavyBlueBrush}" Margin="290,29,384,29"/>
-            <!--<Image Source="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D7%94%D7%90%D7%92%D7%95%D7%93%D7%94_%D7%9C%D7%9E%D7%A2%D7%9F_%D7%94%D7%97%D7%99%D7%99%D7%9C_%D7%A1%D7%9E%D7%9C%D7%99%D7%9C_2022.svg-D71Z84oN50cHtfSvnoGYQYCCnXrkfY.png" 
-                   Stretch="Uniform" Margin="740,0,0,-19"/>-->
-            <Image Source="Resources/Images/logo.png" Stretch="Uniform" Margin="740,0,0,-19" />
-
-
-        </Grid>
-
-        <!-- Content -->
-        <Grid Margin="20,25,20,20" Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Modified Left Column: Buttons with Grid -->
-            <Grid Grid.Column="0" Grid.ColumnSpan="2" Height="580" Margin="0,-40,590,0" VerticalAlignment="Top">
+    <Border Background="#F9F9F9" CornerRadius="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                           RenderingBias="Quality" ShadowDepth="2"
+                           Color="#20000000"/>
+        </Border.Effect>
+        <Border Background="#F9F9F9" CornerRadius="12" Margin="15" Effect="{StaticResource DropShadowEffect}">
+            <Grid Margin="25">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Button Grid.Row="0" 
-                        Content="ניהול מתנדבים" 
-                        Style="{StaticResource ModernButton}"
-                        Background="{StaticResource Button4Brush}"
-                        Margin="21,50,19,45"/>
+                <!-- Header -->
+                <TextBlock Text="Main Management Screen" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Foreground="#111827"
+                           Margin="0,0,0,20"/>
 
-                <Button Grid.Row="1" 
-                        Content="ניהול קריאות" 
-                        Style="{StaticResource ModernButton}"
-                        Background="{StaticResource Button4Brush}"
-                        Margin="20,55,20,40"/>
+                <!-- System Clock and Configuration -->
+                <Grid Grid.Row="1" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
 
-                <Button Grid.Row="2" 
-                        Content="אתחול מסד נתונים" 
-                        Style="{StaticResource ModernButton}"
-                        Background="{StaticResource Button4Brush}"
-                        Margin="20,60,20,35"
-                        Click="InitializeDB_Click"/>
+                    <!-- System Clock -->
+                    <Border Grid.Column="0" Background="White" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="0,0,10,0">
+                        <StackPanel>
+                            <Label Content="System Clock" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding CurrentTime}" 
+                                       FontSize="20" 
+                                       FontWeight="Bold" 
+                                       Foreground="#374151" 
+                                       HorizontalAlignment="Center" 
+                                       Margin="0,5,0,15"/>
+                            <UniformGrid Rows="2" Columns="3">
+                                <Button Content="Add Minute" Click="btnAddOneMinute_Click" Margin="3"/>
+                                <Button Content="Add Hour" Click="btnAddOneHour_Click" Margin="3"/>
+                                <Button Content="Add Day" Click="btnAddOneDay_Click" Margin="3"/>
+                                <Button Content="Add Month" Click="btnAddOneMonth_Click" Margin="3"/>
+                                <Button Content="Add Year" Click="btnAddOneYear_Click" Margin="3"/>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
 
-                <Button Grid.Row="3" 
-                        Content="איפוס מסד נתונים" 
-                        Style="{StaticResource ModernButton}"
-                        Background="{StaticResource Button4Brush}"
-                        Margin="20,55,20,40"
-                        Click="ResetDB_Click" />
+                    <!-- Configuration -->
+                    <Border Grid.Column="1" Background="White" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="10,0,0,0">
+                        <StackPanel>
+                            <Label Content="Configuration" FontSize="16" FontWeight="Bold"/>
+                            <Label Content="Maximum Time for Call:" />
+                            <TextBox Text="{Binding MaxTimeSpanValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0,0,0,10"/>
+                            <Button Content="Update" 
+                                    Click="btnUpdateMaxYearRange_Click"
+                                    HorizontalAlignment="Right"
+                                    Width="90" Height="36"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Main Action Buttons -->
+                <Border Grid.Row="2" Background="#F0F4F8" CornerRadius="12" BorderBrush="#D1D5DB" BorderThickness="1" Padding="15">
+                    <UniformGrid Rows="1" Columns="4">
+                        <Button Content="Volunteer Management" 
+                                Style="{StaticResource MainActionButton}"
+                                  Click="VolunteerManagementButton_Click"/>
+                        <Button Content="Call Management" 
+                                Style="{StaticResource MainActionButton}"/>
+                        <Button Content="Initialize Database" 
+                                Style="{StaticResource MainActionButton}"
+                                Click="InitializeDB_Click"/>
+                        <Button Content="Reset Database" 
+                                Style="{StaticResource MainActionButton}"
+                                Click="ResetDB_Click"/>
+                    </UniformGrid>
+                </Border>
             </Grid>
-
-            <!-- Right Column: Boxes -->
-            <StackPanel Grid.Column="1">
-                <!-- System Clock -->
-
-                <!-- Configuration -->
-                <!-- System Clock -->
-
-                <!-- Configuration -->
-                <!-- System Clock -->
-                <Border Background="{StaticResource BeigeBrush}" CornerRadius="10" Padding="20" Height="283">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" MinHeight="60"/>
-
-                            <RowDefinition Height="Auto" MinHeight="70"/>
-
-                        </Grid.RowDefinitions>
-
-                        <TextBlock 
-                            Text="שעון מערכת" 
-                            FontWeight="Bold" 
-                            FontSize="30" 
-                            Foreground="{StaticResource NavyBlueBrush}" 
-                            HorizontalAlignment="Right" 
-                            Margin="0,0,0,10" 
-                            Grid.Row="0" Width="167"/>
-                        <Label
-                            Content="{Binding CurrentTime}" 
-                            FontSize="30" 
-                            FontWeight="Bold" 
-                            Foreground="{StaticResource NavyBlueBrush}" 
-                            HorizontalAlignment="Left" 
-                            Margin="21,10,0,45" Width="345" Grid.RowSpan="2"/>
-
-
-
-
-                        <WrapPanel Grid.Row="1" Margin="136,105,154,-105"/>
-                        <Button Content="הוסף חודש" Click="btnAddOneMonth_Click" Style="{StaticResource ModernButton}" Margin="275,125,154,-105" Grid.Row="1" RenderTransformOrigin="0.3,0.601"/>
-                        <Button Content="הוסף שנה" Click="btnAddOneYear_Click" Style="{StaticResource ModernButton}" Margin="129,125,299,-105" Grid.Row="1"/>
-                        <Button Content="הוסף שעה" Click="btnAddOneHour_Click" Style="{StaticResource ModernButton}" Margin="55,60,374,-40" Grid.Row="1"/>
-                        <Button Content="הוסף דקה" Click="btnAddOneMinute_Click" Style="{StaticResource ModernButton}" Margin="336,60,92,-40" Grid.Row="1"/>
-                        <Button Content="הוסף יום" Click="btnAddOneDay_Click" Style="{StaticResource ModernButton}" Margin="193,60,234,-40" Grid.Row="1"/>
-                    </Grid>
-                </Border>
-
-                <!-- Configuration -->
-                <Border Background="{StaticResource BeigeBrush}" CornerRadius="10" Padding="20" Margin="0,20,0,0" Height="220">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock 
-                            Text="עדכון משתני תצורה" 
-                            FontWeight="Bold" 
-                            FontSize="24" 
-                            Foreground="{StaticResource NavyBlueBrush}" 
-                            HorizontalAlignment="Right" 
-                            Grid.Row="0"/>
-
-                        <Grid Grid.Row="1" Margin="0,20,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="371*"/>
-                                <ColumnDefinition Width="179*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                           
-
-                            <TextBlock 
-                                FontWeight="Normal" 
-                                FontSize="20" 
-                                Foreground="{StaticResource NavyBlueBrush}" 
-                                Margin="50,15,-6,0" 
-                                Grid.ColumnSpan="3" Height="33" VerticalAlignment="Top" Grid.Column="1">
-                                <Run Text=" "/><Run FlowDirection="RightToLeft" Language="he-il" Text="זמן מקסימלי לקריאה:"/>
-                            </TextBlock>
-                            <TextBox 
-                                Margin="16,5,174,5" 
-                                Background="{StaticResource CreamBrush}" 
-                                Foreground="{StaticResource NavyBlueBrush}" 
-                                BorderBrush="#D3D3D3" 
-                                FontSize="19"
-                                FontWeight="Bold"
-                                BorderThickness="1"
-                                Text="{Binding MaxTimeSpanValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center" />
-                          
-
-                            <Button 
-                                Content="עדכון" 
-                                Width="85" 
-                                Style="{StaticResource ModernButton}" 
-                                Margin="151,5,69,5" 
-                                Click="btnUpdateMaxYearRange_Click" />
-                        </Grid>
-                    </Grid>
-
-                </Border>
-            </StackPanel>
-        </Grid>
-    </Grid>
+        </Border>
+    </Border>
 </Window>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--<TextBox
-      Margin="16,5,174,5" 
-      Background="{StaticResource CreamBrush}"
-      Foreground="{StaticResource NavyBlueBrush}" 
-      BorderBrush="#D3D3D3" 
-      FontSize="14"
-      BorderThickness="1"
-      Text="{Binding MaxTimeSpanValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-      <TextBox.Style>
-          <Style TargetType="{x:Type TextBox}">
-              <Setter Property="Template">
-                  <Setter.Value>
-                      <ControlTemplate TargetType="{x:Type TextBox}">
-                          <Border
-                              Background="{TemplateBinding Background}" 
-                              CornerRadius="10" 
-                              BorderBrush="{TemplateBinding BorderBrush}" 
-                              BorderThickness="{TemplateBinding BorderThickness}">
-                              <ScrollViewer Margin="5" 
-                                            VerticalScrollBarVisibility="Hidden" 
-                                            HorizontalScrollBarVisibility="Hidden">
-                                  <ContentPresenter />
-                              </ScrollViewer>
-                          </Border>
-                      </ControlTemplate>
-                  </Setter.Value>
-              </Setter>
-          </Style>
-      </TextBox.Style>
-  </TextBox>-->
