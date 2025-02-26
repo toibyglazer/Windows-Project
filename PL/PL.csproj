@@ -15,6 +15,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Icons\BaseMaintenance.png" />
+    <None Remove="Icons\ComplexLogisticsTransport.png" />
+    <None Remove="Icons\EmergencyResponse.png" />
+    <None Remove="Icons\EquipmentDelivery.png" />
+    <None Remove="Icons\EventCoordination.png" />
+    <None Remove="Icons\FoodDelivery.png" />
+    <None Remove="Icons\FoodPreparation.png" />
+    <None Remove="Icons\KitPreparation.png" />
+    <None Remove="Icons\MedicalSupport.png" />
+    <None Remove="Icons\None.png" />
+    <None Remove="Icons\SoldierTransportation.png" />
+    <None Remove="Icons\SpecialEventSupport.png" />
     <None Remove="Resources\Images\logo.png" />
   </ItemGroup>
 
@@ -25,6 +37,44 @@
 		<Content Include="ProfileImage\**\*">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Icons\BaseMaintenance.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\ComplexLogisticsTransport.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\EmergencyResponse.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\EquipmentDelivery.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\EventCoordination.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\FoodDelivery.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\FoodPreparation.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\KitPreparation.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\MedicalSupport.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\None.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\SoldierTransportation.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Icons\SpecialEventSupport.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
 	<ItemGroup>

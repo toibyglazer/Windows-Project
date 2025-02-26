@@ -11,8 +11,9 @@ namespace PL.Volunteer
 
             if (activeCall == null)
             {
-                MessageBox.Show("לא ניתן לטעון קריאה פעילה - הנתונים חסרים.",
-                    "שגיאה", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Unable to load active call - data is missing.",
+    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
                 Close(); 
             }
             else

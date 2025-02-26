@@ -73,6 +73,8 @@ internal class CallImplementation : ICall
         try
         {
             s_dal.Assignment.Create(newAssignment);
+            CallManager.Observers.NotifyItemUpdated(callId);
+            CallManager.Observers.NotifyListUpdated();
         }
         catch (DalAlreadyExistsException ex)
         {
@@ -85,7 +87,7 @@ internal class CallImplementation : ICall
         IEnumerable<DO.Call> allCalls = s_dal.Call.ReadAll() ?? Enumerable.Empty<DO.Call>();
 
         // Convert the data layer calls to BO (Business Object) call format for processing.
-        IEnumerable<BO.CallInList> callsInList = allCalls.Select(v => Helpers.CallManager.ConvertToCallInList(v));
+        IEnumerable<BO.CallInList> callsInList = allCalls.Select(v => ConvertToCallInList(v));
 
         // Apply filtering if a filter field and value are provided.
         if (filterField.HasValue && filterValue != null)
@@ -93,7 +95,8 @@ internal class CallImplementation : ICall
             callsInList = callsInList.Where(call =>
             {
                 // Retrieve the value of the specified field in the call and compare it with the filter value.
-                var callValue = Helpers.CallManager.GetValueForField(call, filterField.Value);
+                var callValue = GetValueForField(call, filterField.Value);
+
                 return callValue != null && callValue.Equals(filterValue);
             });
         }
@@ -101,9 +104,9 @@ internal class CallImplementation : ICall
         // Apply sorting if a sort field is provided.
         if (sortField.HasValue)
         {
-            callsInList = Helpers.CallManager.SortCalls(callsInList, sortField.Value);
+            callsInList = SortCalls(callsInList, sortField.Value);
         }
-
+        
         return callsInList;
     }
     public int[] GetCallStatusesCount()
@@ -147,7 +150,9 @@ internal class CallImplementation : ICall
               ?? throw new BO.BlDoesNotExistException($"Call with ID {callId} does not exist.");
 
         BO.Call boCall = Helpers.CallManager.ConvertCallToBO(call);
+        CallManager.Observers.NotifyItemUpdated(callId);
         return boCall;
+
     }
     public void UpdateCallDetails(BO.Call call)
     {
@@ -171,7 +176,9 @@ internal class CallImplementation : ICall
         try
         {
             s_dal.Call.Update(newCall);
-            if(call.FullAddress!= newCall.FullAddress)
+            CallManager.Observers.NotifyItemUpdated(newCall.Id);
+            CallManager.Observers.NotifyListUpdated();
+            if (call.FullAddress!= newCall.FullAddress)
                 CallManager.EmailService.SendEmailToVolunteersForNewCall(call);
         }
         catch (DO.DalDoesNotExistException ex)
@@ -198,6 +205,8 @@ internal class CallImplementation : ICall
                 throw new BO.BlInvalidStatusException($"Call with ID {callId} cannot be deleted because its status is not 'Open'.");
 
             s_dal.Call.Delete(callId);
+            CallManager.Observers.NotifyListUpdated();
+
         }
         catch (DO.DalDoesNotExistException ex)
         {
@@ -226,6 +235,7 @@ internal class CallImplementation : ICall
         try
         {
             s_dal.Call.Create(newDoCall);
+            CallManager.Observers.NotifyListUpdated();
             CallManager.EmailService.SendEmailToVolunteersForNewCall(call);
         }
         catch (DO.DalDoesNotExistException ex)
@@ -317,6 +327,8 @@ internal class CallImplementation : ICall
         try
         {
             s_dal.Assignment.Update(updatedAssignment);
+            CallManager.Observers.NotifyItemUpdated(assignmentId);
+            CallManager.Observers.NotifyListUpdated();
         }
         catch (DalDoesNotExistException ex)
         {
@@ -361,7 +373,9 @@ internal class CallImplementation : ICall
         try
         {
             s_dal.Assignment.Update(updatedAssignment);
-            if(updatedAssignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
+            CallManager.Observers.NotifyItemUpdated(assignmentId);
+            CallManager.Observers.NotifyListUpdated();
+            if (updatedAssignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
                 EmailService.SendCancellationEmailToVolunteer(assignmentId);
         }
         catch (DalDoesNotExistException ex)

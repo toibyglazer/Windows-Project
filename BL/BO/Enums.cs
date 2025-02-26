@@ -57,7 +57,8 @@ public enum CallStatus
     Closed,             // The call has been successfully closed
     Expired,            // The call expired without resolution
     OpenAtRisk,         // Open call at risk of not being completed
-    InTreatmentAtRisk   // Call in treatment but at risk
+    InTreatmentAtRisk,  // Call in treatment but at risk
+    All
 }
 
 // Enum for sorting fields for volunteers

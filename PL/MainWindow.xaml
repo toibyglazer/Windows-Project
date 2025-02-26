@@ -176,7 +176,8 @@
                                 Style="{StaticResource MainActionButton}"
                                   Click="VolunteerManagementButton_Click"/>
                         <Button Content="Call Management" 
-                                Style="{StaticResource MainActionButton}"/>
+                                Style="{StaticResource MainActionButton}"
+                                Click="CallManagementButton_Click"/>
                         <Button Content="Initialize Database" 
                                 Style="{StaticResource MainActionButton}"
                                 Click="InitializeDB_Click"/>

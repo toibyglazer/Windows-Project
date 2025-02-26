@@ -1,0 +1,21 @@
+﻿<Window x:Class="PL.Call.AssignmentCall"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Assignments for Call"  
+        Height="450" Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+    <Grid>
+        <!-- Background -->
+        <DataGrid ItemsSource="{Binding Assignments}" AutoGenerateColumns="False" Margin="10"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" CanUserAddRows="False"
+                  IsReadOnly="True" Foreground="Black">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Volunteer ID" Binding="{Binding VolunteerId}" Width="100"/>
+                <DataGridTextColumn Header="Volunteer Name" Binding="{Binding VolunteerName}" Width="200"/>
+                <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime}" Width="150"/>
+                <DataGridTextColumn Header="End Time" Binding="{Binding EndTime}" Width="150"/>
+                <DataGridTextColumn Header="End Type" Binding="{Binding EndType}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

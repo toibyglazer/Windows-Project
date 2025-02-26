@@ -12,6 +12,7 @@ using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 using System.Net.Mime;
 using System.Text;
+using System.Runtime.InteropServices.Marshalling;
 namespace Helpers;
 /// <summary>
 /// Helper class for managing Calls in the system.
@@ -223,7 +224,7 @@ internal static class CallManager
             .FirstOrDefault();
 
         // If there is an assignment, populate the call-in list with relevant data
-        if (lastAssignment != null)
+        if (lastAssignment != null && lastAssignment.VolunteerId != 0)
         {
             int lastVolunteerId = lastAssignment.VolunteerId;
 
@@ -295,7 +296,12 @@ internal static class CallManager
     /// </summary>
     public static int GetAssignmentCount(DO.Call call)
     {
-        return s_dal.Assignment.ReadAll(a => a.CallId == call.Id).Count();
+
+      return s_dal.Assignment
+     .ReadAll(a => a.CallId == call.Id )
+     .Count();
+
+
     }
 
     /// <summary>
@@ -358,7 +364,7 @@ internal static class CallManager
             FullAddress: call.FullAddress,
             Latitude: latitude,
             Longitude: longitude,
-            OpeningTime: AdminManager.Now,
+            OpeningTime: DateTime.Now,
             MaxCompletionTime: call.MaxCompletionTime,
             Description: call.Description
         );
@@ -422,7 +428,7 @@ internal static class CallManager
     {
         // If the address is null or empty, consider it valid
         if (string.IsNullOrWhiteSpace(address))
-            return;
+            throw new AddressValidationException("The address field is a required field.");
 
         // Split the address into components (Street, City, Country)
         var parts = address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);

@@ -68,7 +68,7 @@ internal class VolunteerImplementation : IVolunteer
     {
         List<Volunteer> volunteers = XMLTools.LoadListFromXMLSerializer<Volunteer>(Config.s_volunteers_xml);
         var matchingVolunteer = volunteers.FirstOrDefault(v => v.Id==id);
-        if(matchingVolunteer == null)
+        if(matchingVolunteer == null )
             throw new DalDoesNotExistException($"volunteer with ID={id} does Not exist");
         return matchingVolunteer;
     }

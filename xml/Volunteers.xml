@@ -5,7 +5,7 @@
     <FullName>David Levi</FullName>
     <PhoneNumber>052-1234567</PhoneNumber>
     <Email>toibyglazer@gmail.com</Email>
-    <Password>hawfuY+kPMqrFMYMs08kmw==:fEZfclfCLXsfklbW2FbqcAWJxDQfsq74ljBiRPaorvM=</Password>
+    <Password>6xHZQ7UmKsC/Qd2STNJlrw==:0r/uoHduAOyMGnuZnPrU1qAN+Dq/6zRNLrTYgjfxvgA=</Password>
     <CurrentAddress>10 Bograshov, Tel Aviv, Israel</CurrentAddress>
     <Latitude>32.0853</Latitude>
     <Longitude>34.7818</Longitude>
@@ -19,7 +19,7 @@
     <FullName>Rachel Cohen</FullName>
     <PhoneNumber>054-2345678</PhoneNumber>
     <Email>danihadarr@gmail.com</Email>
-    <Password>05KTfeWcyifOS873krg+iQ==:QdoopFPGXrBeIyuzQYm0aoG7L+m1BsxNyu7Zbctk18M=</Password>
+    <Password>q+a0cPatF+pKG6XhvlQxXA==:13nIwAJXuWjQ9RX6rmSE8VtuPUEcq2SB+W5cwoEblX4=</Password>
     <CurrentAddress>1 Allenby, Tel Aviv-Yafo, Israel</CurrentAddress>
     <Latitude>32.8217</Latitude>
     <Longitude>34.9896</Longitude>
@@ -33,7 +33,7 @@
     <FullName>Moshe Mizrahi</FullName>
     <PhoneNumber>050-3456789</PhoneNumber>
     <Email>shanysh3434@gmail.com</Email>
-    <Password>W4v73AU5gxol5rzwbQdPMA==:ZQPBdlcvSqGdkToWvEDSR4kpKQ8KKtc961yg10syTd0=</Password>
+    <Password>D1zNCHcRUcsoxVFSsgkkUQ==:g4c069BM3NJuPGeHZOMfA5HXkbjHC7E3ZBfB0Mu5r+k=</Password>
     <CurrentAddress>34 Herzl, Haifa, Israel</CurrentAddress>
     <Latitude>31.7683</Latitude>
     <Longitude>35.2137</Longitude>
@@ -47,21 +47,21 @@
     <FullName>Tamar Kaplan</FullName>
     <PhoneNumber>052-4567890</PhoneNumber>
     <Email>rosensh3434@gmail.com</Email>
-    <Password>NOQz5UQck6CRdSiLjCVMDQ==:D2HxPaB3E3az0qSmCM2ILX4A2KVT0yClzbwwmda5g4o=</Password>
+    <Password>rJv5CDWgkxB3YRa4kJYQnQ==:6xdeK+ChgleRWdK0+o9Ado81l3HqA5dc8kicjpRp1rU=</Password>
     <CurrentAddress>12 Kaplan, Rishon Lezion, Israel</CurrentAddress>
     <Latitude>31.9686</Latitude>
     <Longitude>34.8013</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>4.5</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Aerial</DistanceType>
   </Volunteer>
   <Volunteer>
     <Id>912011889</Id>
     <FullName>Yosef Goldstein</FullName>
     <PhoneNumber>054-5678901</PhoneNumber>
     <Email>S0584404949@gmail.com</Email>
-    <Password>iTJ3ohwt58vi06f74GcbYg==:2w9rgBZITI9Oh55Nua+aCkyhFk2RT+FKyAvW1auooiw=</Password>
+    <Password>PwEEg/TszqssvMMHfIoIaw==:7/LcGhdwWnHpZfQGZ/hustmLOOPdATdnLB4T5DOZ32M=</Password>
     <CurrentAddress>56 Ben Yehuda, Jerusalem, Israel</CurrentAddress>
     <Latitude>31.8056</Latitude>
     <Longitude>34.6439</Longitude>
@@ -75,7 +75,7 @@
     <FullName>Esther Ben-Shimon</FullName>
     <PhoneNumber>050-6789012</PhoneNumber>
     <Email>esther.glazer2017@gmail.com</Email>
-    <Password>NW8kWSstWqVN4EN0ulwfDw==:F6N9GQntYbcHnZw3yXDU9zW81z63WDJL6P1MoTVJUho=</Password>
+    <Password>U+vfSMR09pa3jJ5MCYiHnQ==:eWLruJ39973/8zQDzv2Em2PrWEy/N3CtB1CfyG0+4E0=</Password>
     <CurrentAddress>45 Ben Gurion Avenue, Ashdod, Israel</CurrentAddress>
     <Latitude>32.1093</Latitude>
     <Longitude>34.8885</Longitude>
@@ -89,7 +89,7 @@
     <FullName>Avi Rosenberg</FullName>
     <PhoneNumber>052-7890123</PhoneNumber>
     <Email>100origlazer@gmail.com</Email>
-    <Password>moAsBo7vyNcSY3cP50us8A==:H7XjnDvmhlYkuUZpnt7XwFL+3oSMgrxz4xP9us2fQdc=</Password>
+    <Password>R6TG5iRogUvKJjdWZ8s2mg==:D7GwSAtISll+5uXTqfKIhY148+hwIMmqPGn6+H6HO3U=</Password>
     <CurrentAddress>9 King David, Tel Aviv, Israel</CurrentAddress>
     <Latitude>32.3218</Latitude>
     <Longitude>34.8531</Longitude>
@@ -103,7 +103,7 @@
     <FullName>Hila Sharabi</FullName>
     <PhoneNumber>054-8901234</PhoneNumber>
     <Email>arie7209@gmail.com</Email>
-    <Password>j6yz/0UBH8bz3Q8odWkxPA==:oU7NodY1CfjCt3mQYnhD9m2sQKCwaMcIz40Tw9v+s2k=</Password>
+    <Password>w0tFmBni3t0uY10TPlOjRg==:TJozWu7vcMCxb99jnHdUCfnudcImlchQ6D37OmkUCGs=</Password>
     <CurrentAddress>77 Rothschild Boulevard, Tel Aviv-Yafo, Israel</CurrentAddress>
     <Latitude>31.2518</Latitude>
     <Longitude>34.7913</Longitude>
@@ -117,21 +117,21 @@
     <FullName>Noam Azulai</FullName>
     <PhoneNumber>050-9012345</PhoneNumber>
     <Email>hodayahararii@gmail.com</Email>
-    <Password>yQfTrYHAzIoCuFQyd5oAWQ==:W3itn7JRgvL2kuTu/cNwF3CGQE2AvHGziqAf85ThKs4=</Password>
+    <Password>CqcELnLCQOuFc9YddQrFzA==:JHI3uk7Tr2Y47GQu5i20hn24Dgmut3YAPFEpYg/AKEA=</Password>
     <CurrentAddress>58 Jaffa, Jerusalem, Israel</CurrentAddress>
     <Latitude>32.0126</Latitude>
     <Longitude>34.7701</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>10</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Aerial</DistanceType>
   </Volunteer>
   <Volunteer>
     <Id>294703103</Id>
     <FullName>Yael Peretz</FullName>
     <PhoneNumber>052-0123456</PhoneNumber>
     <Email>rothfamily2019@gmail.com</Email>
-    <Password>eQ5wbYEY7ClU4fsAvZjO/g==:qSmfXE9unrFgNlJ6IJ3t20JX7mDIKy0xqfc/4spAxVs=</Password>
+    <Password>rVqzWiCgMpYObuYDUKxwJw==:aDadQcBv7mqyv/5lCS+WXyhKifuX1Cb34SwoYk+B6rM=</Password>
     <CurrentAddress>21 Yehuda Halevi, Tel Aviv, Israel</CurrentAddress>
     <Latitude>31.2488</Latitude>
     <Longitude>34.7687</Longitude>
@@ -145,21 +145,21 @@
     <FullName>Eli Barak</FullName>
     <PhoneNumber>054-1234567</PhoneNumber>
     <Email>yaeltamir21@gmail.com</Email>
-    <Password>bMBl02yhQVQk9jLOC9TwlA==:jJ53gPsFNcm+GpBoysVIuNAmkyHfUoDwnUq7j+9YTUU=</Password>
+    <Password>ADupAWkzEww1UgD4TrdJNw==:26rVvNx8R0tvU7k4vgawCLfEAz+wFzyc0NwXmzgVIao=</Password>
     <CurrentAddress>68 David Ben Gurion, Herzliya, Israel</CurrentAddress>
     <Latitude>29.5581</Latitude>
     <Longitude>34.9519</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>15</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
     <Id>345210678</Id>
     <FullName>Michal Nave</FullName>
     <PhoneNumber>050-2345678</PhoneNumber>
     <Email>ittichaimson@gmail.com</Email>
-    <Password>1kQeSG62MHeH/5C7RHDWWA==:LNrZtUIU5qDVW2ymmkg824pF9r8OKQWz4/iMUO4irm4=</Password>
+    <Password>h28n+ETB+vYgYl+IA0Xx2A==:brIUa1AYZySWOqWaoBiYCNbFpNXhSCW8sXvvJZ5dmQU=</Password>
     <CurrentAddress>33 Jabotinsky, Bat Yam, Israel</CurrentAddress>
     <Latitude>31.8935</Latitude>
     <Longitude>34.8131</Longitude>
@@ -173,7 +173,7 @@
     <FullName>Shai Elbaz</FullName>
     <PhoneNumber>052-3456789</PhoneNumber>
     <Email>LIEMRAMADI11@gmail.com</Email>
-    <Password>Hpndecwv+ANHMWVONCnyLw==:Sa0SNVB9bh/XQ8UJxKEk1j6ZHlOj3eEFQneiZNXVLLw=</Password>
+    <Password>zAiUryEcWEYLD+1rHfxj0g==:Msl3rzKMq8Fu0TJBm6wsgTJgEgpzo0qNHGe93pN/zCQ=</Password>
     <CurrentAddress>12 Dubnov, Haifa, Israel</CurrentAddress>
     <Latitude>31.9061</Latitude>
     <Longitude>34.8699</Longitude>
@@ -187,21 +187,21 @@
     <FullName>Dana Regev</FullName>
     <PhoneNumber>054-4567890</PhoneNumber>
     <Email>zermichal500@gmail.com</Email>
-    <Password>w1cWJx4Fw5MWvI/7+hZn3A==:dgUpGR5cwNCyHfAkreMsV6tbEENOU06Yb4yPVZ5YaDY=</Password>
+    <Password>9COwjuBYRBKFc5Ttact4IA==:65xXejEa6jZrESdoK/aaxf40OOMkHVq2Ir2DFb8TrkQ=</Password>
     <CurrentAddress>88 Shazar, Ramat Gan, Israel</CurrentAddress>
     <Latitude>32.0809</Latitude>
     <Longitude>34.767</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>22.5</MaxDistance>
-    <DistanceType>Driving</DistanceType>
+    <DistanceType>Aerial</DistanceType>
   </Volunteer>
   <Volunteer>
     <Id>678543901</Id>
     <FullName>Nadav Shamir</FullName>
     <PhoneNumber>050-5678901</PhoneNumber>
     <Email>nadavenav@gmail.com</Email>
-    <Password>8DY4kYtFaXR3XyLFLBCADg==:OEsylFvRbNXdxNkdX9z1IauHYcQzQRWESH5oJUju9YU=</Password>
+    <Password>fvCLSAEu70nsUJnX9Uag5A==:DdE1Kt+Qa5b3W80qXdlEuK56xXre99LhOoyT+aavmvk=</Password>
     <CurrentAddress>17 Sokolov, Petah Tikva, Israel</CurrentAddress>
     <Latitude>32.073</Latitude>
     <Longitude>34.8197</Longitude>
@@ -215,41 +215,41 @@
     <FullName>Orly Yitzhak</FullName>
     <PhoneNumber>052-6789012</PhoneNumber>
     <Email>davidkarga98@gmail.com</Email>
-    <Password>QnnBkXtpN0gn+0OFz3j4Qg==:tXRrHAXlZZJv80j24SPTHet05GOpXJo4MyTZ7/sXrn0=</Password>
+    <Password>lEt0Yf3W9S5H3vNXE5A6/A==:MqkOsKfdZ/OGCaXL4hO9Sck0pnbJerOg/UZBM/9aSAc=</Password>
     <CurrentAddress>44 Yigal Alon, Tel Aviv, Israel</CurrentAddress>
     <Latitude>32.1585</Latitude>
     <Longitude>34.9215</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>30</MaxDistance>
-    <DistanceType>Walking</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
   <Volunteer>
     <Id>489627356</Id>
     <FullName>Daniel Vaknin</FullName>
     <PhoneNumber>054-7890123</PhoneNumber>
     <Email>100bat7@gmail.com</Email>
-    <Password>xxfLjnyxGV0BqmxO+f+vDA==:rvvkEIA3kV8kOfuDYrQMy9ZaE+Js6IudcaT1nHCo/8A=</Password>
+    <Password>YZfggyYE/QsW1JOcxPa0sg==:JUl8Vtya5p1o06I9c9hezVv2KWwc3QGw1KgX1ohFLX4=</Password>
     <CurrentAddress>76 Nahalat Binyamin, Tel Aviv, Israel</CurrentAddress>
     <Latitude>31.636</Latitude>
     <Longitude>34.5663</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>35</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Walking</DistanceType>
   </Volunteer>
   <Volunteer>
     <Id>154553671</Id>
     <FullName>Adi Kadosh</FullName>
     <PhoneNumber>050-8901234</PhoneNumber>
     <Email>zermichal555@gmail.com</Email>
-    <Password>gpOz/WmmdlAUsGEEiuIS2Q==:nIVhWXtMlYSqC99FHGVC50bKia4gE+yLYNgFIQ31Szk=</Password>
+    <Password>xJUoPkkZPsLSC26q/lQ4Mw==:4suvEFVaeGRFw5mfBmPrg9u9xk+a+8FDFa2iJgDKA1U=</Password>
     <CurrentAddress>22 Rambam, Be'er Sheva, Israel</CurrentAddress>
     <Latitude>33.0093</Latitude>
     <Longitude>35.0873</Longitude>
     <Role>Volunteer</Role>
     <IsActive>true</IsActive>
     <MaxDistance>40</MaxDistance>
-    <DistanceType>Aerial</DistanceType>
+    <DistanceType>Driving</DistanceType>
   </Volunteer>
 </ArrayOfVolunteer>

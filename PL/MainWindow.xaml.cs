@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using BlApi;
+using PL.Call;
 using PL.Volunteer;
 
 namespace PL;
@@ -318,7 +319,12 @@ public partial class MainWindow : Window
         volunteerListWindow.Show();
     }
 
+    private void CallManagementButton_Click(object sender, RoutedEventArgs e)
+    {
 
+        CallListWindow callListWindow = new CallListWindow();
+        callListWindow.Show();
+    }
 
     public MainWindow()
     {
