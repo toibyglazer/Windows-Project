@@ -1,21 +1,193 @@
 ﻿<Window x:Class="PL.Call.AssignmentCall"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Assignments for Call"  
-        Height="450" Width="800"
-        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
-    <Grid>
-        <!-- Background -->
-        <DataGrid ItemsSource="{Binding Assignments}" AutoGenerateColumns="False" Margin="10"
-                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" CanUserAddRows="False"
-                  IsReadOnly="True" Foreground="Black">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Volunteer ID" Binding="{Binding VolunteerId}" Width="100"/>
-                <DataGridTextColumn Header="Volunteer Name" Binding="{Binding VolunteerName}" Width="200"/>
-                <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime}" Width="150"/>
-                <DataGridTextColumn Header="End Time" Binding="{Binding EndTime}" Width="150"/>
-                <DataGridTextColumn Header="End Type" Binding="{Binding EndType}" Width="150"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PL.Call"
+        mc:Ignorable="d"
+        Title="Assignment History - Call #{CallId}"
+        Height="450" Width="700"
+        WindowStyle="SingleBorderWindow"
+        WindowStartupLocation="CenterScreen"
+        Background="#F9F9F9"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <DropShadowEffect x:Key="DropShadowEffect" 
+                          ShadowDepth="0.855" 
+                          Direction="315" 
+                          Color="#DDDDDD" 
+                          Opacity="0.5" 
+                          BlurRadius="8.55"/>
+
+        <!-- Style for Card Border -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            
+        </Style>
+
+        <!-- Style for Section Headers -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Foreground" Value="#111827"/>
+        </Style>
+
+        <!-- Style for Stat Value -->
+        <Style x:Key="StatValueStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <!-- Style for DataGrid -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F9FAFB"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#E5E7EB"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#E5E7EB"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserReorderColumns" Value="False"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+
+        <!-- Style for DataGrid Column Header -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="8,8"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+
+        <!-- Style for DataGrid Row -->
+        <Style TargetType="DataGridRow">
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F3F4F6"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E5E7EB"/>
+                    <Setter Property="Foreground" Value="#111827"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style for DataGrid Cell -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}" BorderThickness="0">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Column - Call Profile -->
+        <StackPanel Grid.Column="0" Width="120" Margin="0,0,16,0">
+            <!-- Call Icon -->
+            <Border x:Name="ProfileBorder"
+                    Width="96" 
+                    Height="96" 
+                    CornerRadius="48"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,12">
+                <Border.Background>
+                    <ImageBrush x:Name="CallIconBrush" Stretch="UniformToFill"/>
+                </Border.Background>
+            </Border>
+
+            <!-- Call Info -->
+            <TextBlock Text="{Binding FormattedCallType}" 
+                       FontSize="16" 
+                       FontWeight="Bold" 
+                       Foreground="#111827"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"/>
+
+            <TextBlock Text="{Binding CallId, StringFormat='Call #{0}'}" 
+                       FontSize="12" 
+                       Foreground="#374151"
+                       Margin="0,4,0,0"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Right Column - Assignments -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <TextBlock Grid.Row="0" 
+                       Text="Assignment History" 
+                       Style="{StaticResource SectionHeaderStyle}"
+                       Margin="0,0,0,16"/>
+
+            <!-- DataGrid with Assignments -->
+            <Border Grid.Row="1" 
+                    Style="{StaticResource CardStyle}">
+                <DataGrid ItemsSource="{Binding Assignments}" 
+                          ColumnHeaderHeight="32"
+                          VerticalScrollBarVisibility="Auto"
+                          Margin="0"
+                          ColumnWidth="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
+                        <DataGridTextColumn Header="Full Name" Binding="{Binding FullName}" Width="Auto"/>
+                        <DataGridTextColumn Header="Entry Time" Binding="{Binding EntryTime, StringFormat=\{0:dd/MM/yyyy HH:mm:ss\}}" Width="Auto"/>
+                        <DataGridTextColumn Header="Completion Time" Binding="{Binding CompletionTime, StringFormat=\{0:dd/MM/yyyy HH:mm:ss\}}" Width="Auto"/>
+                        <DataGridTextColumn Header="Completion Type" Binding="{Binding CompletionType}" Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Total Assignments -->
+            <Border Grid.Row="2" 
+                    Style="{StaticResource CardStyle}" 
+                    Margin="0,12,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Total Assignments: " 
+                               Foreground="#6B7280"
+                               FontSize="14"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalAssignments}" 
+                               Style="{StaticResource StatValueStyle}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

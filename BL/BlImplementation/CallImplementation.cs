@@ -1,11 +1,17 @@
 ﻿namespace BlImplementation;
 using BlApi;
 using BO;
+using Dal;
+using DalApi;
 using DO;
 using Helpers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using static Helpers.CallManager;
+using BlCall = BlApi.ICall;
+
+
 
 /// <summary>
 /// The ICall interface defines methods for managing calls within the system.
@@ -25,7 +31,7 @@ using static Helpers.CallManager;
 /// 10. CancelAssignment: Cancels an assignment for a volunteer.
 /// 11. AssignCallToVolunteer: Assigns a call to a volunteer.
 /// </summary>
-internal class CallImplementation : ICall
+internal class CallImplementation : BlCall
 {
     private readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
@@ -49,8 +55,10 @@ internal class CallImplementation : ICall
             throw new BlInvalidValueException("The call is currently being handled by another volunteer.");
         }
 
+
+        IConfig config = new ConfigImplementation();
         // Check if the call's maximum completion time has passed (call expired).
-        if (call.MaxCompletionTime.HasValue && call.MaxCompletionTime < DateTime.Now)
+        if (call.MaxCompletionTime.HasValue && call.MaxCompletionTime < config.Clock)
         {
             throw new BlInvalidValueException("The call is expired and cannot be assigned.");
         }
@@ -66,8 +74,8 @@ internal class CallImplementation : ICall
             CallId = callId,
             VolunteerId = volunteerId,
             EntryTime = DateTime.Now,
-            CompletionTime = null, 
-            CompletionType = null  
+            CompletionTime = null,
+            CompletionType = null
         };
 
         try
@@ -80,7 +88,6 @@ internal class CallImplementation : ICall
         {
             throw new BlAlreadyExistsException("This assignment already exists.", ex);
         }
-
     }
     public IEnumerable<CallInList> GetCalls(CallInListField? filterField = null, object? filterValue = null, CallInListField? sortField = null)
     {
@@ -106,7 +113,7 @@ internal class CallImplementation : ICall
         {
             callsInList = SortCalls(callsInList, sortField.Value);
         }
-        
+
         return callsInList;
     }
     public int[] GetCallStatusesCount()
@@ -124,7 +131,7 @@ internal class CallImplementation : ICall
                                .Select(status => statusGroups.FirstOrDefault(group => group.Status == status)?.Count ?? 0)
                                .ToArray();
 
-       
+
         int totalCallsCount = allCalls.Count();
         int calculatedCount = callCounts.Sum();
 
@@ -154,10 +161,10 @@ internal class CallImplementation : ICall
         return boCall;
 
     }
-    public void UpdateCallDetails(BO.Call call)
+    public async Task UpdateCallDetailsAsync(BO.Call call)
     {
         DO.Call newCall = s_dal.Call.Read(call.Id)
-             ?? throw new BO.BlDoesNotExistException($"Call with ID {call.Id} does not exist.");
+            ?? throw new BO.BlDoesNotExistException($"Call with ID {call.Id} does not exist.");
 
         // Check if the ID or OpeningTime fields are being modified, which is not allowed.
         if (newCall.Id != call.Id)
@@ -165,9 +172,11 @@ internal class CallImplementation : ICall
         if (newCall.OpeningTime != call.OpeningTime)
             throw new InvalidOperationException("Cannot update OpeningTime. This field is immutable.");
 
-        // Validate the new call data to ensure it meets the required criteria.
-        Helpers.CallManager.ValidateCallData(call);
-        newCall = Helpers.CallManager.ConvertToDOCall(call);
+        // Validate the new call data asynchronously
+        await Helpers.CallManager.ValidateCallDataAsync(call);
+
+        // Convert to DO.Call asynchronously
+        newCall = await Helpers.CallManager.ConvertToDOCallAsync(call);
 
         call.Latitude = newCall.Latitude;
         call.Longitude = newCall.Longitude;
@@ -178,14 +187,16 @@ internal class CallImplementation : ICall
             s_dal.Call.Update(newCall);
             CallManager.Observers.NotifyItemUpdated(newCall.Id);
             CallManager.Observers.NotifyListUpdated();
-            if (call.FullAddress!= newCall.FullAddress)
-                CallManager.EmailService.SendEmailToVolunteersForNewCall(call);
+
+            if (call.FullAddress != newCall.FullAddress)
+                await CallManager.EmailService.SendEmailToVolunteersForNewCallAsync(call); // שים לב ל-await כאן
         }
         catch (DO.DalDoesNotExistException ex)
         {
             throw new BO.BlDoesNotExistException($"Call retrieval failed: {ex.Message}", ex);
         }
     }
+
     public void DeleteCall(int callId)
     {
         try
@@ -212,20 +223,21 @@ internal class CallImplementation : ICall
         {
             throw new BO.BlDoesNotExistException($"Call with ID {callId} does not exist in the data layer.", ex);
         }
-    
     }
-    public void AddCall(BO.Call call)
+    public async Task AddCallAsync(BO.Call call)
     {
-        Helpers.CallManager.ValidateCallData(call);
-        DO.Call newDoCall = Helpers.CallManager.ConvertToDOCall(call);
+        await Helpers.CallManager.ValidateCallDataAsync(call);
+
+        DO.Call newDoCall = await Helpers.CallManager.ConvertToDOCallAsync(call);
 
         call.Latitude = newDoCall.Latitude;
         call.Longitude = newDoCall.Longitude;
         call.OpeningTime = AdminManager.Now;
+
         IEnumerable<DO.Call> allCalls = s_dal.Call.ReadAll();
         var existingCall = allCalls.FirstOrDefault(c => c.Type == newDoCall.Type &&
-                                                c.Latitude == newDoCall.Latitude &&
-                                                c.Longitude == newDoCall.Longitude);
+                                                 c.Latitude == newDoCall.Latitude &&
+                                                 c.Longitude == newDoCall.Longitude);
 
         if (existingCall != null)
         {
@@ -236,13 +248,14 @@ internal class CallImplementation : ICall
         {
             s_dal.Call.Create(newDoCall);
             CallManager.Observers.NotifyListUpdated();
-            CallManager.EmailService.SendEmailToVolunteersForNewCall(call);
+            await CallManager.EmailService.SendEmailToVolunteersForNewCallAsync(call);
         }
         catch (DO.DalDoesNotExistException ex)
         {
             throw new BO.BlDoesNotExistException($"Call creation failed: {ex.Message}", ex);
         }
     }
+
     public IEnumerable<ClosedCallInList> GetClosedCallsByVolunteer(int volunteerId, BO.CallType? callTypeFilter = null, ClosedCallSortField? sortByField = null)
     {
         // Retrieve all assignments for the given volunteer that have a non-null CompletionType, indicating closed calls.
@@ -271,7 +284,7 @@ internal class CallImplementation : ICall
 
         return closedCallsByVolunteer;
     }
-    public IEnumerable<OpenCallInList> GetOpenCallsByVolunteer(int volunteerId, BO.CallType? callTypeFilter = null, OpenCallSortField? sortByField = null)
+    public async Task<IEnumerable<OpenCallInList>> GetOpenCallsByVolunteerAsync(int volunteerId, BO.CallType? callTypeFilter = null, OpenCallSortField? sortByField = null)
     {
         // Retrieve the volunteer from the database.
         var volunteer = s_dal.Volunteer.Read(volunteerId)
@@ -279,18 +292,24 @@ internal class CallImplementation : ICall
 
         // Ensure the volunteer has provided a valid address for displaying the calls.
         if (string.IsNullOrEmpty(volunteer.CurrentAddress) || volunteer.Latitude == null || volunteer.Longitude == null)
-            throw new InvalidOperationException("Unable to display open calls list: Volunteer did not provide a valid address.");
+            throw new InvalidOperationException("Can't display the open calls list because a valid address hasn't been set. Please enter a valid address first, and then you'll be able to view the open calls list");
 
         var allCalls = s_dal.Call.ReadAll();
-        var allOpenCalls = allCalls.Select(call => Helpers.CallManager.ConvertCallToBO(call));
-        allOpenCalls = allOpenCalls.Where(call => call.Status == BO.CallStatus.Open || call.Status == BO.CallStatus.OpenAtRisk);
+        var allOpenCalls = allCalls.Select(call => Helpers.CallManager.ConvertCallToBO(call))
+                                   .Where(call => call.Status == BO.CallStatus.Open || call.Status == BO.CallStatus.OpenAtRisk);
+
         if (callTypeFilter.HasValue)
         {
             allOpenCalls = allOpenCalls.Where(call => call.Type == callTypeFilter.Value);
         }
-        // Convert the filtered calls to the OpenCallInList format, using the volunteer's data for further processing.
-        var allOpenCallInList = allOpenCalls.Select(call => Helpers.CallManager.ConvertToOpenCallInList(call, volunteer, volunteer.DistanceType));
-        allOpenCallInList = sortByField switch
+
+        // Convert the filtered calls to OpenCallInList asynchronously
+        var allOpenCallInList = await Task.WhenAll(
+            allOpenCalls.Select(call => Helpers.CallManager.ConvertToOpenCallInListAsync(call, volunteer, volunteer.DistanceType))
+        );
+
+        // Sort the results
+        var sortedOpenCallInList = sortByField switch
         {
             OpenCallSortField.Id => allOpenCallInList.OrderBy(call => call.Id),
             OpenCallSortField.Type => allOpenCallInList.OrderBy(call => call.Type),
@@ -302,7 +321,129 @@ internal class CallImplementation : ICall
             _ => allOpenCallInList.OrderBy(call => call.Id),
         };
 
-        return allOpenCallInList;
+        return sortedOpenCallInList;
+    }
+
+    //public async Task<IEnumerable<OpenCallInList>> GetOpenCallsByVolunteerAsync(int volunteerId, BO.CallType? callTypeFilter = null, OpenCallSortField? sortByField = null)
+    //{
+    //    // Retrieve the volunteer from the database.
+    //    var volunteer = s_dal.Volunteer.Read(volunteerId)
+    //        ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} not found.");
+
+    //    // Ensure the volunteer has provided a valid address for displaying the calls.
+    //    if (string.IsNullOrEmpty(volunteer.CurrentAddress) || volunteer.Latitude == null || volunteer.Longitude == null)
+    //        throw new InvalidOperationException("Can't display the open calls list because a valid address hasn't been set. Please enter a valid address first, and then you'll be able to view the open calls list");
+
+    //    var allCalls = s_dal.Call.ReadAll();
+    //    var allOpenCalls = allCalls.Select(call => Helpers.CallManager.ConvertCallToBO(call))
+    //                               .Where(call => call.Status == BO.CallStatus.Open || call.Status == BO.CallStatus.OpenAtRisk);
+
+    //    if (callTypeFilter.HasValue)
+    //    {
+    //        allOpenCalls = allOpenCalls.Where(call => call.Type == callTypeFilter.Value);
+    //    }
+
+    //    // Convert the filtered open calls to OpenCallInList asynchronously
+    //    var allOpenCallInList = await Task.WhenAll(
+    //        allOpenCalls.Select(call => Helpers.CallManager.ConvertToOpenCallInListAsync(call, volunteer, volunteer.DistanceType))
+    //    );
+
+    //    // --- New part: Include cancelled calls by this volunteer ---
+    //    var allAssignments = s_dal.Assignment.ReadAll();
+
+    //    var cancelledCallIdsByVolunteer = allAssignments
+    //        .Where(a => a.VolunteerId == volunteerId && a.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled)
+    //        .Select(a => a.CallId)
+    //        .Distinct()
+    //        .ToList();
+
+    //    var cancelledCalls = allCalls
+    //        .Where(call => cancelledCallIdsByVolunteer.Contains(call.Id))
+    //        .Select(call => Helpers.CallManager.ConvertCallToBO(call));
+
+    //    if (callTypeFilter.HasValue)
+    //    {
+    //        cancelledCalls = cancelledCalls.Where(call => call.Type == callTypeFilter.Value);
+    //    }
+
+    //    var cancelledCallInList = await Task.WhenAll(
+    //        cancelledCalls.Select(call => Helpers.CallManager.ConvertToOpenCallInListAsync(call, volunteer, volunteer.DistanceType))
+    //    );
+
+    //    // Combine open and cancelled calls
+    //    var allCombinedCalls = allOpenCallInList.Concat(cancelledCallInList);
+
+    //    // Sort the combined results
+    //    var sortedCombinedCalls = sortByField switch
+    //    {
+    //        OpenCallSortField.Id => allCombinedCalls.OrderBy(call => call.Id),
+    //        OpenCallSortField.Type => allCombinedCalls.OrderBy(call => call.Type),
+    //        OpenCallSortField.Description => allCombinedCalls.OrderBy(call => call.Description),
+    //        OpenCallSortField.FullAddress => allCombinedCalls.OrderBy(call => call.FullAddress),
+    //        OpenCallSortField.OpeningTime => allCombinedCalls.OrderBy(call => call.OpeningTime),
+    //        OpenCallSortField.MaxCompletionTime => allCombinedCalls.OrderBy(call => call.MaxCompletionTime),
+    //        OpenCallSortField.DistanceToActiveCall => allCombinedCalls.OrderBy(call => call.DistanceToActiveCall),
+    //        _ => allCombinedCalls.OrderBy(call => call.Id),
+    //    };
+
+    //    return sortedCombinedCalls;
+    //}
+
+    public async Task<Dictionary<int, GeoCoordinates>> GetCoordinatesForCallsAsync(IEnumerable<OpenCallInList> calls)
+    {
+        var coordinatesDict = new ConcurrentDictionary<int, GeoCoordinates>();
+        var tasks = new List<Task>();
+
+        // יצירת משימות לחישוב קואורדינטות במקביל
+        foreach (var call in calls)
+        {
+            tasks.Add(Task.Run(async () =>
+            {
+                if (!string.IsNullOrEmpty(call.FullAddress))
+                {
+                    var coordinates = await GetCachedCoordinatesAsync(call.FullAddress);
+                    if (coordinates != null)
+                    {
+                        coordinatesDict[call.Id] = coordinates;
+                    }
+                }
+            }));
+        }
+
+        // המתנה לסיום כל המשימות
+        await Task.WhenAll(tasks);
+
+        // המרה ל-Dictionary רגיל לפני החזרה
+        return new Dictionary<int, GeoCoordinates>(coordinatesDict);
+    }
+
+    private static readonly ConcurrentDictionary<string, GeoCoordinates> _coordinatesCache = new ConcurrentDictionary<string, GeoCoordinates>();
+    private async Task<GeoCoordinates> GetCachedCoordinatesAsync(string address)
+    {
+        if (_coordinatesCache.TryGetValue(address, out var cachedCoordinates))
+        {
+            return cachedCoordinates;
+        }
+
+        try
+        {
+
+            var coordinates = await Tools.CallOpenStreetMapApiAsync(address);
+
+            if (coordinates != null)
+            {
+
+                _coordinatesCache.TryAdd(address, coordinates);
+                return coordinates;
+            }
+        }
+        catch (Exception ex)
+        {
+
+            System.Diagnostics.Debug.WriteLine($"Error getting coordinates for address {address}: {ex.Message}");
+        }
+
+        return new GeoCoordinates { Latitude = 31.895049, Longitude = 34.810181 };
     }
     public void CompleteAssignment(int volunteerId, int assignmentId)
     {
@@ -320,8 +461,8 @@ internal class CallImplementation : ICall
 
         var updatedAssignment = assignment with
         {
-            CompletionTime = DateTime.Now, 
-            CompletionType = DO.AssignmentCompletionType.Treated  
+            CompletionTime = DateTime.Now,
+            CompletionType = DO.AssignmentCompletionType.Treated
         };
 
         try
@@ -334,9 +475,9 @@ internal class CallImplementation : ICall
         {
             throw new BO.BlDoesNotExistException("An error occurred while updating the assignment.", ex);
         }
-    
+
     }
-    public void CancelAssignment(int volunteerId, int assignmentId)
+    public async Task CancelAssignmentAsync(int volunteerId, int assignmentId)
     {
         // Fetch volunteer data from the database.
         DO.Volunteer volunteer = s_dal.Volunteer.Read(volunteerId)
@@ -345,6 +486,7 @@ internal class CallImplementation : ICall
         // Fetch assignment data from the database.
         var assignment = s_dal.Assignment.Read(assignmentId)
             ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} not found.");
+
 
         // Check if the volunteer has the required role (either Manager or the assigned volunteer) to cancel the assignment.
         if (volunteer.Role != DO.VolunteerRole.Manager && volunteerId != assignment.VolunteerId)
@@ -356,8 +498,8 @@ internal class CallImplementation : ICall
 
         if (assignment.VolunteerId == 0)
             throw new InvalidOperationException("The assignment you are trying to update is expired and has never been handled by any volunteer.");
-            
-        
+
+
         // Determine the cancellation type based on who is canceling the assignment (volunteer or admin).
         var cancellationType = volunteerId == assignment.VolunteerId
             ? DO.AssignmentCompletionType.VolunteerCancelled
@@ -369,21 +511,23 @@ internal class CallImplementation : ICall
             CompletionTime = DateTime.Now,
             CompletionType = cancellationType
         };
-        
+
+
         try
         {
             s_dal.Assignment.Update(updatedAssignment);
             CallManager.Observers.NotifyItemUpdated(assignmentId);
             CallManager.Observers.NotifyListUpdated();
+
             if (updatedAssignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
-                EmailService.SendCancellationEmailToVolunteer(assignmentId);
+                await EmailService.SendCancellationEmailToVolunteerAsync(assignmentId); // קריאה אסינכרונית
         }
         catch (DalDoesNotExistException ex)
         {
             throw new BO.BlDoesNotExistException("An error occurred while updating the assignment.", ex);
         }
-
     }
+
 
     #region Stage 5
     public void AddObserver(Action listObserver) =>

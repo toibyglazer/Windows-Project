@@ -3,6 +3,7 @@ using PL.Volunteer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -19,11 +20,197 @@ using System.Windows.Shapes;
 namespace PL.Call
 {
     /// <summary>
+    /// Converter for formatting remaining time based on call status
+    /// </summary>
+
+    public class RemainingTimeConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            // First value is RemainingTime, second value is Status, third value is TotalCompletionTime
+            if (values.Length < 3)
+                return "--";
+
+            TimeSpan? remainingTime = values[0] as TimeSpan?;
+            CallStatus? status = values[1] as CallStatus?;
+            TimeSpan? totalCompletionTime = values[2] as TimeSpan?;
+
+            if (status == null)
+                return "--";
+
+            switch (status)
+            {
+                case CallStatus.Closed:
+                    // Check if totalCompletionTime has a value
+                    if (totalCompletionTime.HasValue && totalCompletionTime.Value > TimeSpan.Zero)
+                    {
+                        return "Completed";
+                    }
+                    return "Admin Canceled"; // שינוי מ"--" ל-"Admin Canceled"
+
+                case CallStatus.Expired:
+                    return "--";
+
+                case CallStatus.Open:
+                case CallStatus.OpenAtRisk:
+                case CallStatus.InProgress:
+                case CallStatus.InTreatmentAtRisk:
+                    if (remainingTime.HasValue)
+                    {
+                        if (remainingTime.Value <= TimeSpan.Zero)
+                        {
+                            return "00:00:00";
+                        }
+
+                        var rt = remainingTime.Value;
+                        return rt.Days > 0
+                            ? $"{rt.Days}d {rt.Hours:00}:{rt.Minutes:00}:{rt.Seconds:00}"
+                            : $"{rt.Hours:00}:{rt.Minutes:00}:{rt.Seconds:00}";
+                    }
+                    return "";
+
+                default:
+                    return "--";
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Converter for formatting completion time based on call status
+    /// </summary>
+    public class CompletionTimeConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            // First value is TotalCompletionTime, second value is Status
+            if (values.Length < 2)
+                return "--";
+
+            TimeSpan? completionTime = values[0] as TimeSpan?;
+            CallStatus? status = values[1] as CallStatus?;
+
+            if (status == null)
+                return "--";
+
+            // Check call status
+            switch (status)
+            {
+                case CallStatus.Closed:
+                case CallStatus.Expired:
+                    if (completionTime.HasValue && completionTime.Value > TimeSpan.Zero)
+                    {
+                        var time = completionTime.Value;
+                        if (time.Days > 0)
+                        {
+                            return $"{time.Days}d {time:hh\\:mm\\:ss}";
+                        }
+                        return time.ToString(@"hh\:mm\:ss");
+                    }
+                    // הסרנו את השורה שמציגה "Admin Canceled"
+                    return "--";
+
+                case CallStatus.Open:
+                case CallStatus.OpenAtRisk:
+                    return ""; // Open call - leave empty
+
+                case CallStatus.InProgress:
+                case CallStatus.InTreatmentAtRisk:
+                    return "--"; // Call in progress
+
+                default:
+                    return "--";
+            }
+        }
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+
+
+
+    /// <summary>
+    /// Converter to check if a call is at risk (for background coloring)
+    /// </summary>
+    //public class CallAtRiskConverter : IValueConverter
+    //    {
+    //        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //        {
+    //            if (value is CallStatus status)
+    //            {
+    //                // Check if the call is at risk
+    //                if (status == CallStatus.OpenAtRisk || status == CallStatus.InTreatmentAtRisk)
+    //                {
+    //                    return Brushes.LightPink; // Light red background
+    //                }
+    //            }
+
+    //            return Brushes.Transparent; // Normal background
+    //        }
+
+    //        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //        {
+    //            throw new NotImplementedException();
+    //        }
+    //    }
+
+    /// <summary>
     /// Interaction logic for CallListWindow.xaml
     /// </summary>
-    public partial class CallListWindow : Window
+    public partial class CallListWindow : Window, INotifyPropertyChanged
     {
         static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
+        private bool _isLoading = false;
+        private static readonly object _dataAccessLock = new object(); // נעילה לגישה לנתונים
+        private CancellationTokenSource _cancellationTokenSource;
+        private bool _isUpdating = false; // מניעת עדכונים מקבילים
+        private System.Threading.Timer _debounceTimer; // טיימר לדחיית ביצוע
+
+        // הוספת מאפיין חדש לסינון לפי שם מתנדב
+        private string _volunteerFilter = string.Empty;
+        public string VolunteerFilter
+        {
+            get { return _volunteerFilter; }
+            set
+            {
+                if (_volunteerFilter != value)
+                {
+                    _volunteerFilter = value;
+                    OnPropertyChanged();
+                    UpdateCallList(); // עדכון הרשימה בכל שינוי בפילטר
+                }
+            }
+        }
+
+        public bool IsLoading
+        {
+            get { return _isLoading; }
+            set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+
+                // עדכון ממשק המשתמש בהתאם למצב הטעינה
+                if (LoadingIndicator != null)
+                {
+                    // תמיד להסתיר את אינדיקטור הטעינה
+                    LoadingIndicator.Visibility = Visibility.Collapsed;
+                }
+
+                if (CallListView != null)
+                {
+                    // תמיד לאפשר את רשימת הקריאות
+                    CallListView.IsEnabled = true;
+                }
+            }
+        }
 
         public IEnumerable<BO.CallInList> CallList
         {
@@ -41,37 +228,107 @@ namespace PL.Call
         public CallTypesCollection CallTypeCollection { get; set; } = new();
         public CallStatusCollection callStatusCollection { get; set; } = new();
 
-       
-
-
-        public void UpdateCallList()
+        // טיפול באירוע שינוי טקסט בשדה סינון המתנדב
+        private void VolunteerFilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            IEnumerable<BO.CallInList> filteredList = s_bl.Call.GetCalls(
-                filterField: null,
-                filterValue: null,
-                sortField: null
-            );
-
-            if (callType != BO.CallType.All)
+            // שימוש בדחיית ביצוע (debounce) כדי למנוע עדכונים מרובים
+            if (_debounceTimer != null)
             {
-                filteredList = filteredList.Where(call => call.Type == callType);
+                _debounceTimer.Dispose();
             }
 
-            if (callStatus != BO.CallStatus.All)
+            _debounceTimer = new System.Threading.Timer(_ =>
             {
-                filteredList = filteredList.Where(call => call.Status == callStatus);
-            }
-
-
-
-            CallList = filteredList.ToList();
-            OnPropertyChanged(nameof(CallList));
+                Dispatcher.Invoke(() =>
+                {
+                    VolunteerFilter = VolunteerFilterTextBox.Text;
+                });
+            }, null, 300, Timeout.Infinite); // השהייה של 300 מילישניות
         }
 
-
-        public void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public async Task UpdateCallListAsync()
         {
-            UpdateCallList();
+            // אם כבר יש עדכון בתהליך, צא מהפונקציה
+            if (_isUpdating) return;
+
+            try
+            {
+                _isUpdating = true;
+                // אין צורך להפעיל את אינדיקטור הטעינה
+
+                // יצירת טוקן ביטול חדש
+                if (_cancellationTokenSource != null)
+                {
+                    _cancellationTokenSource.Cancel();
+                    _cancellationTokenSource.Dispose();
+                }
+                _cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = _cancellationTokenSource.Token;
+
+                // ביצוע פעולת הטעינה בתהליך נפרד
+                IEnumerable<BO.CallInList> filteredList = await Task.Run(() =>
+                {
+                    // שימוש בנעילה לגישה לנתונים
+                    lock (_dataAccessLock)
+                    {
+                        var calls = s_bl.Call.GetCalls(
+                            filterField: null,
+                            filterValue: null,
+                            sortField: null
+                        );
+
+                        if (callType != BO.CallType.All)
+                        {
+                            calls = calls.Where(call => call.Type == callType);
+                        }
+
+                        if (callStatus != BO.CallStatus.All)
+                        {
+                            calls = calls.Where(call => call.Status == callStatus);
+                        }
+
+                        // סינון לפי שם מתנדב אחרון
+                        if (!string.IsNullOrWhiteSpace(VolunteerFilter))
+                        {
+                            calls = calls.Where(call =>
+                                call.LastVolunteer != null &&
+                                call.LastVolunteer.Contains(VolunteerFilter, StringComparison.OrdinalIgnoreCase));
+                        }
+
+                        return calls.ToList();
+                    }
+                }, cancellationToken);
+
+                // בדיקה אם הפעולה בוטלה
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                CallList = filteredList;
+                OnPropertyChanged(nameof(CallList));
+            }
+            catch (OperationCanceledException)
+            {
+                // הפעולה בוטלה, אין צורך בטיפול מיוחד
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading calls: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isUpdating = false;
+            }
+        }
+
+        // גרסה סינכרונית לתאימות לאחור
+        public void UpdateCallList()
+        {
+            _ = UpdateCallListAsync();
+        }
+
+        public async void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            await UpdateCallListAsync();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -85,62 +342,233 @@ namespace PL.Call
         {
             if (d is CallListWindow window)
             {
-                window.UpdateCallList(); 
+                window.UpdateCallList();
             }
         }
+
+        private bool _observerRegistered = false;
+
         public void CallListObserver()
         {
-            UpdateCallList(); 
+            // מניעת עדכונים מרובים במקביל
+            if (!_isUpdating)
+            {
+                UpdateCallList();
+            }
         }
 
-        public void Window_Loaded(object sender, RoutedEventArgs e)
+        public async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            s_bl.Call.AddObserver(CallListObserver);
-            UpdateCallList();
+            // הסתרת אינדיקטור הטעינה באופן מיידי
+            if (LoadingIndicator != null)
+            {
+                LoadingIndicator.Visibility = Visibility.Collapsed;
+            }
+
+            // יצירת מנגנון ביטול פעולות
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            // רישום לאירוע חריגה לא מטופלת
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            if (!_observerRegistered)
+            {
+                s_bl.Call.AddObserver(CallListObserver);
+                _observerRegistered = true;
+            }
+
+            // טעינת הנתונים ללא הפעלת אינדיקטור
+            _isUpdating = true;
+            try
+            {
+                IEnumerable<BO.CallInList> filteredList = await Task.Run(() =>
+                {
+                    lock (_dataAccessLock)
+                    {
+                        var calls = s_bl.Call.GetCalls(
+                            filterField: null,
+                            filterValue: null,
+                            sortField: null
+                        );
+
+                        if (callType != BO.CallType.All)
+                        {
+                            calls = calls.Where(call => call.Type == callType);
+                        }
+
+                        if (callStatus != BO.CallStatus.All)
+                        {
+                            calls = calls.Where(call => call.Status == callStatus);
+                        }
+
+                        // סינון לפי שם מתנדב אחרון
+                        if (!string.IsNullOrWhiteSpace(VolunteerFilter))
+                        {
+                            calls = calls.Where(call =>
+                                call.LastVolunteer != null &&
+                                call.LastVolunteer.Contains(VolunteerFilter, StringComparison.OrdinalIgnoreCase));
+                        }
+
+                        return calls.ToList();
+                    }
+                });
+
+                CallList = filteredList;
+                OnPropertyChanged(nameof(CallList));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading calls: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isUpdating = false;
+            }
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            // הסרת הצופה במקרה של חריגה לא מטופלת
+            try
+            {
+                if (_observerRegistered)
+                {
+                    s_bl.Call.RemoveObserver(CallListObserver);
+                    _observerRegistered = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error removing observer: {ex.Message}");
+            }
         }
 
         public void Window_Closed(object sender, EventArgs e)
         {
-            s_bl.Call.RemoveObserver(CallListObserver);
+            // ביטול כל הפעולות האסינכרוניות שבתהליך
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+
+            // ניקוי טיימר דחיית ביצוע אם קיים
+            if (_debounceTimer != null)
+            {
+                _debounceTimer.Dispose();
+                _debounceTimer = null;
+            }
+
+            // הסרת הצופה
+            try
+            {
+                if (_observerRegistered)
+                {
+                    s_bl.Call.RemoveObserver(CallListObserver);
+                    _observerRegistered = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error removing observer: {ex.Message}");
+            }
+
+            // הסרת רישום לאירוע חריגה לא מטופלת
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         }
 
         public BO.CallInList SelectedCall { get; set; }
-        public void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+
+        public async void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-           
-            if (SelectedCall != null)
+            if (SelectedCall != null && !_isUpdating)
             {
-                new CallWindow(SelectedCall.CallId).Show();
-                UpdateCallList(); 
+                try
+                {
+                    _isUpdating = true;
+
+                    // יצירת החלון ללא טעינת נתונים
+                    var callWindow = new CallWindow();
+
+                    // טעינת הנתונים באופן אסינכרוני
+                    await callWindow.InitializeCallAsync(SelectedCall.CallId);
+
+                    // הצגת החלון רק לאחר טעינת הנתונים
+                    callWindow.Show();
+
+                    // עדכון הרשימה
+                    await UpdateCallListAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error opening call details: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    _isUpdating = false;
+                }
             }
         }
 
         public CallListWindow(int volunteerId)
         {
-            UpdateCallList();
             InitializeComponent();
 
+            // הסתרת אינדיקטור הטעינה באופן מיידי
+            if (LoadingIndicator != null)
+            {
+                LoadingIndicator.Visibility = Visibility.Collapsed;
+            }
+
+            // אתחול ערך ברירת מחדל לפילטר מתנדב
+            _volunteerFilter = string.Empty;
+
+            // רישום לאירועי חלון
+            Loaded += Window_Loaded;
+            Closed += Window_Closed;
         }
+
         public CallListWindow()
         {
-            UpdateCallList();
             InitializeComponent();
+
+            // הסתרת אינדיקטור הטעינה באופן מיידי
+            if (LoadingIndicator != null)
+            {
+                LoadingIndicator.Visibility = Visibility.Collapsed;
+            }
+
+            // אתחול ערך ברירת מחדל לפילטר מתנדב
+            _volunteerFilter = string.Empty;
+
+            // רישום לאירועי חלון
+            Loaded += Window_Loaded;
+            Closed += Window_Closed;
         }
-        private void AddCallButton_Click(object sender, RoutedEventArgs e)
+
+        private async void AddCallButton_Click(object sender, RoutedEventArgs e)
         {
-            var window = new CallWindow(); 
-            window.Show(); 
-            UpdateCallList(); 
+            if (!_isUpdating)
+            {
+                try
+                {
+                    _isUpdating = true;
+
+                    var window = new CallWindow();
+                    window.Show();
+
+                    await UpdateCallListAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error adding call: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    _isUpdating = false;
+                }
+            }
         }
-
     }
-
 }
-
-
-
-
-
-
-
-

@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PL.Call"
         mc:Ignorable="d"
-        Title="Call Details" Height="700" Width="1000"
+        Title="Call Details" Height="520" Width="700"
+        SizeToContent="Height"
         WindowStyle="SingleBorderWindow"
         AllowsTransparency="False"
         ResizeMode="CanResize"
@@ -15,6 +16,12 @@
     <Window.Resources>
         <local:CallTypesCollection x:Key="callTypesCollection" />
         <local:CallStatusCollection x:Key="callStatusCollection" />
+
+        <!-- Converter for Null to "Not defined" -->
+        <local:NullToTextConverter x:Key="NullToTextConverter" DefaultText="Not defined"/>
+
+        <!-- Date Format Converter -->
+        <local:DateFormatConverter x:Key="DateFormatConverter" Format="dd/MM/yyyy HH:mm:ss"/>
 
         <!-- ComboBoxToggleButton Template -->
         <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
@@ -44,15 +51,15 @@
 
         <!-- Style for TextBox -->
         <Style TargetType="TextBox">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="0,5,0,15"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,3,0,8"/>
+            <Setter Property="Padding" Value="8,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                                CornerRadius="6" 
                                 BorderBrush="#E5E7EB"
                                 BorderThickness="1">
                             <ScrollViewer x:Name="PART_ContentHost" Margin="5"/>
@@ -64,14 +71,14 @@
 
         <!-- Style for ComboBox -->
         <Style TargetType="ComboBox">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="0,5,0,15"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,3,0,8"/>
+            <Setter Property="Padding" Value="8,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                                CornerRadius="6" 
                                 BorderBrush="#E5E7EB"
                                 BorderThickness="1">
                             <Grid>
@@ -91,7 +98,7 @@
                                     <Grid Background="White" 
                                           MinWidth="{TemplateBinding ActualWidth}"
                                           MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                        <Border CornerRadius="8" 
+                                        <Border CornerRadius="6" 
                                                 BorderBrush="#E5E7EB"
                                                 BorderThickness="1">
                                             <ScrollViewer SnapsToDevicePixels="True">
@@ -107,37 +114,47 @@
             </Setter>
         </Style>
 
-        <!-- Style for Button -->
-        <Style TargetType="Button">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Background" Value="#3B82F6"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
+        <!-- Call Management Button Style -->
+        <Style x:Key="CallManagementButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="Padding" Value="10"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="8"
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#81D4FA"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#81D4FA"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2563EB"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <!-- Style for Label -->
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="#374151"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
         </Style>
     </Window.Resources>
 
@@ -148,120 +165,153 @@
                            Color="#20000000"/>
         </Border.Effect>
 
-        <Grid Margin="30">
+        <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <!-- Header -->
                 <RowDefinition Height="Auto" />
+                <!-- Main Info Row -->
+                <RowDefinition Height="Auto" />
+                <!-- Description & Buttons Row -->
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="2*" />
-            </Grid.ColumnDefinitions>
 
             <!-- Header -->
-            <Grid Grid.ColumnSpan="2">
-                <TextBlock Text="Call Details" 
-                         FontSize="28" 
-                         FontWeight="Bold" 
-                         Foreground="#111827"/>
-            </Grid>
-
-            <!-- Left Column -->
-            <!-- Left Column -->
-            <Border Grid.Row="1" 
-        Grid.Column="0" 
-        Background="White" 
-        CornerRadius="15"
-        Margin="0,20,20,0"
-        Padding="20">
-                <StackPanel>
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <StackPanel Orientation="Horizontal">
                     <!-- Call Icon -->
-                    <Border Width="180" 
-                Height="180" 
-                CornerRadius="90" 
-                BorderBrush="White" 
-                BorderThickness="2"
-                Margin="0,0,0,20">
-
-
-                        <Image x:Name="CallTypeImage" Stretch="Uniform" />
+                    <Border Width="60" 
+                            Height="60" 
+                            CornerRadius="30" 
+                            Background="#F0F9FF"
+                            BorderBrush="#E3F2FD"
+                            BorderThickness="1"
+                            Margin="0,0,15,0">
+                        <Image x:Name="CallTypeImage" Stretch="Uniform" Margin="10"/>
                     </Border>
 
-                    <!-- Call Type -->
-                    <Label Content="Call Type"/>
-                    <ComboBox x:Name="CallTypeComboBox"
-                  ItemsSource="{Binding Source={StaticResource callTypesCollection}}"
-                  SelectedValue="{Binding CurrentCall.Type, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"
-                  SelectionChanged="CallTypeComboBox_SelectionChanged"/>
-
-                    <!-- Address -->
-                    <Label Content="Address"/>
-                    <TextBox Text="{Binding CurrentCall.FullAddress, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
-
-                    <!-- Start Time -->
-                    <Label Content="Opening Time"/>
-                    <TextBox Text="{Binding CurrentCall.OpeningTime, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}" IsReadOnly="True"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Right Column -->
-            <Border Grid.Row="1"
-                    Grid.Column="1" 
-                    Background="White" 
-                    CornerRadius="15"
-                    Margin="0,20,0,0"
-                    Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Additional Details" 
-                               FontSize="20" 
-                               FontWeight="Bold" 
-                               Margin="0,0,0,20"/>
-
-                    <!-- Deadline -->
-                    <Label Content="Deadline"/>
-                    <TextBox Text="{Binding CurrentCall.MaxCompletionTime, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
-
-                    <!-- Status Type -->
-                    <Label Content="Status Type"/>
-                    <ComboBox ItemsSource="{Binding Source={StaticResource callStatusCollection}}"
-                              SelectedValue="{Binding CurrentCall.Status, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
-
-                    <!-- Description -->
-                    <Label Content="Description"/>
-                    <TextBox Text="{Binding CurrentCall.Description, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"
-                             Height="100" TextWrapping="Wrap" AcceptsReturn="True"/>
-
-                    <!-- Buttons -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                        <Button x:Name="DeleteCallButton"
-                                Click="DeleteCallButton_Click"
-                                Width="40"
-                                Height="40"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                ToolTip="Delete Call"
-                                Margin="0,0,10,0">
-                            <TextBlock Text="🗑" 
-                                       FontSize="20" 
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Center"
-                                       Foreground="Black"/>
-                        </Button>
-                        <Button Content="View Assignments" Padding="5" Click="BtnViewAssignments_Click" Width="126"/>
-
-                        <!--<Button Content="Check assignment past list"
-                                Click="OnOpenActiveCallClick"
-                                Width="180"
-                                Margin="0,0,10,0"/>-->
-
-                        <Button Content="{Binding ButtonText}"
-                                Click="AddOrUpdateButton_Click"
-                                Width="150"/>
+                    <!-- Title with two lines -->
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentCall.Id, StringFormat='Call #{0} Details'}" 
+                                 FontSize="20" 
+                                 FontWeight="Bold" 
+                                 Foreground="#111827"/>
+                        <TextBlock x:Name="FormattedCallType" 
+                                 FontSize="14" 
+                                 FontWeight="Medium" 
+                                 Foreground="#4B5563"
+                                 Margin="0,4,0,0"/>
                     </StackPanel>
                 </StackPanel>
+            </Grid>
+
+            <!-- Main Info Panel -->
+            <Border Grid.Row="1" 
+                    Background="White" 
+                    CornerRadius="10"
+                    Padding="16"
+                    Margin="0,0,0,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Column 1 -->
+                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                        <!-- Call Type -->
+                        <Label Content="Call Type"/>
+                        <ComboBox x:Name="CallTypeComboBox"
+                                  ItemsSource="{Binding Source={StaticResource callTypesCollection}}"
+                                  SelectedValue="{Binding CurrentCall.Type, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"
+                                  SelectionChanged="CallTypeComboBox_SelectionChanged"/>
+
+                        <!-- Status Type -->
+                        <Label Content="Status Type"/>
+                        <ComboBox ItemsSource="{Binding Source={StaticResource callStatusCollection}}"
+                                  SelectedValue="{Binding CurrentCall.Status, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
+                    </StackPanel>
+
+                    <!-- Column 2 -->
+                    <StackPanel Grid.Column="1" Margin="6,0,6,0">
+                        <!-- Address -->
+                        <Label Content="Address"/>
+                        <TextBox Text="{Binding CurrentCall.FullAddress, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
+
+                        <!-- Deadline -->
+                        <Label Content="Deadline"/>
+                        <TextBox Text="{Binding CurrentCall.MaxCompletionTime, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true, TargetNullValue='Not defined', Converter={StaticResource DateFormatConverter}}"/>
+                    </StackPanel>
+
+                    <!-- Column 3 -->
+                    <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                        <!-- Start Time -->
+                        <Label Content="Opening Time"/>
+                        <TextBox Text="{Binding CurrentCall.OpeningTime, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true, Converter={StaticResource DateFormatConverter}}" IsReadOnly="True"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Description & Buttons Panel -->
+            <Border Grid.Row="2" 
+                    Background="White" 
+                    CornerRadius="10"
+                    Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Description -->
+                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                        <Label Content="Description"/>
+                        <TextBox Text="{Binding CurrentCall.Description, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"
+                                 Height="70" TextWrapping="Wrap" AcceptsReturn="True"/>
+                    </StackPanel>
+
+                    <!-- Buttons -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Spacer -->
+                        <Rectangle Grid.Row="0" Fill="Transparent"/>
+
+                        <!-- Action Buttons -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+                            <Button x:Name="DeleteCallButton"
+                                    Click="DeleteCallButton_Click"
+                                    Width="34"
+                                    Height="34"
+                                    Style="{StaticResource CallManagementButtonStyle}"
+                                    ToolTip="Delete Call"
+                                    Margin="0,0,10,0">
+                                <TextBlock Text="🗑" 
+                                           FontSize="16" 
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           Foreground="Black"/>
+                            </Button>
+                            <Button Content="{Binding ButtonText}"
+                                    Style="{StaticResource CallManagementButtonStyle}"
+                                    Click="AddOrUpdateButton_Click"
+                                    Width="90"/>
+                        </StackPanel>
+
+                        <!-- View Assignments Button -->
+                        <Button Grid.Row="2"
+                                Content="View Assignments" 
+                                Style="{StaticResource CallManagementButtonStyle}"
+                                Click="BtnViewAssignments_Click" 
+                                HorizontalAlignment="Right"
+                                Width="134"/>
+                    </Grid>
+                </Grid>
             </Border>
         </Grid>
     </Border>
 </Window>
-

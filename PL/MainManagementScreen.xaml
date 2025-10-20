@@ -1,4 +1,4 @@
-﻿<Window x:Class="PL.MainWindow"
+﻿<Window x:Class="PL.MainManagementScreen"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
         Closed="Window_Closed"

@@ -11,6 +11,9 @@
     <Window.Resources>
         <local:CallStatusCollection x:Key="CallStatusCollection" />
         <local:CallTypesCollection x:Key="CallTypeCollection" />
+        <local:RemainingTimeConverter x:Key="RemainingTimeConverter" />
+        <local:CompletionTimeConverter x:Key="CompletionTimeConverter" />
+
         <DropShadowEffect x:Key="DropShadowEffect" 
                           ShadowDepth="0.855" 
                           Direction="315" 
@@ -155,91 +158,197 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Filter by Status -->
                     <Label Content="Filter Calls By Status:" Grid.Column="0" Grid.Row="0"
-                           Style="{StaticResource ModernLabel}" Grid.ColumnSpan="2" Margin="0,0,0,4"/>
+                   Style="{StaticResource ModernLabel}" Grid.ColumnSpan="2" Margin="0,0,0,4"/>
                     <ComboBox Grid.Column="0" Grid.Row="1"
-                              Style="{StaticResource ModernComboBox}"
-                              ItemsSource="{Binding callStatusCollection}"
-                               SelectionChanged="ComboBox_SelectionChanged"
-                              SelectedValue="{Binding callStatus, Mode=TwoWay}"
-                             Margin="0,4,16,12" Grid.ColumnSpan="2"/>
+                      Style="{StaticResource ModernComboBox}"
+                      ItemsSource="{Binding callStatusCollection}"
+                      SelectionChanged="ComboBox_SelectionChanged"
+                      SelectedValue="{Binding callStatus, Mode=TwoWay}"
+                      Margin="0,4,16,12" Grid.ColumnSpan="2"/>
 
+                    <!-- Filter by Call Type -->
                     <Label Content="Filter Calls By Call Type:" Grid.Column="1" Grid.Row="0"
-                           Style="{StaticResource ModernLabel}" Grid.ColumnSpan="2" Margin="116,0,0,4"/>
+                   Style="{StaticResource ModernLabel}" Grid.ColumnSpan="2" Margin="116,0,0,4"/>
                     <ComboBox Grid.Row="1"
-                              Style="{StaticResource ModernComboBox}"
-                              ItemsSource="{Binding CallTypeCollection}"
-                               SelectionChanged="ComboBox_SelectionChanged"
-                              SelectedValue="{Binding callType, Mode=TwoWay}"
-                               Grid.ColumnSpan="2" Margin="116,4,26,12" Grid.Column="1"/>
+                      Style="{StaticResource ModernComboBox}"
+                      ItemsSource="{Binding CallTypeCollection}"
+                      SelectionChanged="ComboBox_SelectionChanged"
+                      SelectedValue="{Binding callType, Mode=TwoWay}"
+                      Grid.ColumnSpan="2" Margin="116,4,26,12" Grid.Column="1"/>
+
+                    <!-- Filter by Volunteer Name -->
+                    <Label Content="Filter By Last Volunteer:" Grid.Column="0" Grid.Row="2"
+                   Style="{StaticResource ModernLabel}" Grid.ColumnSpan="3" Margin="0,8,0,4"/>
+                    <TextBox x:Name="VolunteerFilterTextBox" 
+                     Grid.Column="0" Grid.Row="3" 
+                     Grid.ColumnSpan="3"
+                     Height="34.2"
+                     Padding="8.55,0"
+                     VerticalContentAlignment="Center"
+                     Margin="0,4,26,12"
+                     TextChanged="VolunteerFilterTextBox_TextChanged"
+                     BorderBrush="#E5E7EB"
+                     BorderThickness="0.855">
+                        <TextBox.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6.84"/>
+                            </Style>
+                        </TextBox.Resources>
+                    </TextBox>
                 </Grid>
             </Border>
 
-            <!-- DataGrid -->
-            <DataGrid Grid.Row="2"
-                      ItemsSource="{Binding CallList}"
-                      SelectedItem="{Binding SelectedCall}"
-                      MouseDoubleClick="ListView_MouseDoubleClick"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      BorderThickness="0.855"
-                      BorderBrush="#E5E7EB"
-                      Background="White"
-                      RowHeaderWidth="0"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto"
-                      EnableRowVirtualization="True"
-                      RowDetailsVisibilityMode="VisibleWhenSelected"
-                      Margin="0,0,0,17.1">
-                <DataGrid.Resources>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#F3F4F6"/>
-                        <Setter Property="Foreground" Value="#111827"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="Padding" Value="8.55,12.825"/>
-                        <Setter Property="BorderThickness" Value="0,0,0.855,0.855"/>
-                        <Setter Property="BorderBrush" Value="#E5E7EB"/>
-                    </Style>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="Padding" Value="8.55,6.84"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="DataGridCell">
-                                    <Border Padding="{TemplateBinding Padding}" BorderThickness="0">
-                                        <ContentPresenter />
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="Background" Value="White"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F3F4F6"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#E5E7EB"/>
-                                <Setter Property="Foreground" Value="#111827"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.Resources>
-                <DataGrid.Columns>
+            <!-- Main Content -->
+            <Grid Grid.Row="2" x:Name="MainContent">
+                <!-- DataGrid -->
+                <DataGrid x:Name="CallListView"
+                          ItemsSource="{Binding CallList}"
+                          SelectedItem="{Binding SelectedCall}"
+                          MouseDoubleClick="ListView_MouseDoubleClick"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          BorderThickness="0.855"
+                          BorderBrush="#E5E7EB"
+                          Background="White"
+                          RowHeaderWidth="0"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          EnableRowVirtualization="True"
+                          RowDetailsVisibilityMode="VisibleWhenSelected"
+                          Margin="0,0,0,17.1"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="#E5E7EB"
+                          VerticalGridLinesBrush="#E5E7EB">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F3F4F6"/>
+                            <Setter Property="Foreground" Value="#111827"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="8.55,12.825"/>
+                            <Setter Property="BorderThickness" Value="0,0,0.855,0.855"/>
+                            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                        </Style>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="8.55,6.84"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Padding="{TemplateBinding Padding}" BorderThickness="0">
+                                            <ContentPresenter />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F3F4F6"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#E5E7EB"/>
+                                    <Setter Property="Foreground" Value="#111827"/>
+                                </Trigger>
 
-                    <DataGridTextColumn Binding="{Binding Id}" Header="Last Assignment Id" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding CallId}" Header="CallId" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding Type}" Header="Type" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding OpeningTime}" Header="Opening Time" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding RemainingTime}" Header="Remaining Time" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding LastVolunteer}" Header="Last Volunteer" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding TotalCompletionTime}" Header="Total Completion Time" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding TotalAssignments}" Header="Total Assignments" Width="Auto" />
-                    <DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="Auto" />
-                </DataGrid.Columns>
-            </DataGrid>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Id}" Header="Last Assignment Id" Width="Auto" />
+                        <DataGridTextColumn Binding="{Binding CallId}" Header="CallId" Width="Auto" />
+                        <DataGridTextColumn Binding="{Binding Type}" Header="Type" Width="Auto" />
+                        <DataGridTextColumn Binding="{Binding OpeningTime, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Header="Opening Time" Width="Auto" />
+
+                        <DataGridTextColumn Header="Remaining Time" Width="Auto">
+                            <DataGridTextColumn.Binding>
+                                <MultiBinding Converter="{StaticResource RemainingTimeConverter}">
+                                    <Binding Path="RemainingTime" />
+                                    <Binding Path="Status" />
+                                    <Binding Path="TotalCompletionTime" />
+                                </MultiBinding>
+                            </DataGridTextColumn.Binding>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="Completed">
+                                            <Setter Property="Foreground" Value="Green" />
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="Admin Canceled">
+                                            <Setter Property="Foreground" Value="#4A5568" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="OpenAtRisk">
+                                            <Setter Property="Foreground" Value="Red" />
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <ColorAnimation 
+                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                From="Red" To="White" Duration="0:0:0.6"
+                AutoReverse="True" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="InTreatmentAtRisk">
+                                            <Setter Property="Foreground" Value="Red" />
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <ColorAnimation 
+                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                From="Red" To="White" Duration="0:0:0.6"
+                AutoReverse="True" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding LastVolunteer}" Header="Last Volunteer" Width="Auto" />
+                        <DataGridTextColumn Header="Total Completion Time" Width="Auto">
+                            <DataGridTextColumn.Binding>
+                                <MultiBinding Converter="{StaticResource CompletionTimeConverter}">
+                                    <Binding Path="TotalCompletionTime" />
+                                    <Binding Path="Status" />
+                                </MultiBinding>
+                            </DataGridTextColumn.Binding>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding TotalAssignments}" Header="Total Assignments" Width="Auto" />
+                        <DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="Auto" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <!-- Loading Indicator -->
+            <Grid x:Name="LoadingIndicator" Grid.Row="0" Grid.RowSpan="4" Visibility="Collapsed" Panel.ZIndex="1000">
+                <Rectangle Fill="#80000000" />
+                <Border Background="White" 
+                        CornerRadius="10" 
+                        Width="200" 
+                        Height="100" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        BorderBrush="#E5E7EB"
+                        BorderThickness="1">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True" Width="150" Height="10" Margin="0,0,0,15" />
+                        <TextBlock Text="Loading data..." 
+                                   Foreground="#374151" 
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Grid>
 
             <!-- Add Call Button -->
             <Button Grid.Row="3"

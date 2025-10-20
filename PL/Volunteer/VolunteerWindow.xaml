@@ -6,11 +6,12 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:PL.Volunteer"
         mc:Ignorable="d"
-        Title="Volunteer Details" Height="700" Width="1000" 
+        Title="Volunteer Details" Height="720" Width="1000" 
         WindowStyle="SingleBorderWindow"
         AllowsTransparency="False"
         ResizeMode="CanResize"
         Background="Transparent"
+        MouseDown="Window_MouseDown"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
     <Window.Resources>
@@ -255,8 +256,34 @@
                  Margin="0,0,0,20"/>
 
 
-                    <Label Content="Current Address"/>
-                    <TextBox Text="{Binding CurrentVolunteer.CurrentAddress, Mode=TwoWay}"/>
+                 
+                        <Label Content="Current Address"/>
+    <TextBox x:Name="AddressTextBox" 
+             Text="{Binding CurrentVolunteer.CurrentAddress, Mode=TwoWay}" 
+             VerticalContentAlignment="Center"
+             HorizontalAlignment="Stretch"
+             Margin="10" 
+             KeyUp="AddressTextBox_KeyUp"/>
+    
+    <Popup x:Name="SuggestionsPopup" 
+           PlacementTarget="{Binding ElementName=AddressTextBox}" 
+           Placement="Bottom"
+           IsOpen="False"
+           Width="{Binding ActualWidth, ElementName=AddressTextBox}"
+           AllowsTransparency="True"
+           StaysOpen="False"
+           Focusable="False">
+        <Border Background="White" 
+                BorderBrush="#E5E7EB" 
+                BorderThickness="1" 
+                CornerRadius="0 0 8 8">
+            <ListBox x:Name="SuggestionsList" 
+                     MaxHeight="200"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     SelectionChanged="SuggestionsList_SelectionChanged"/>
+        </Border>
+    </Popup>
 
                     <Label Content="Role"/>
                     <ComboBox ItemsSource="{Binding volunteerRoleCollection}" 

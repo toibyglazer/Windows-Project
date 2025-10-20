@@ -12,7 +12,7 @@ namespace PL;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window
+public partial class MainManagementScreen : Window
 {
     static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
     public DateTime CurrentTime
@@ -21,7 +21,7 @@ public partial class MainWindow : Window
         set { SetValue(CurrentTimeProperty, value); }
     }
     public static readonly DependencyProperty CurrentTimeProperty =
-        DependencyProperty.Register("CurrentTime", typeof(DateTime), typeof(MainWindow));
+        DependencyProperty.Register("CurrentTime", typeof(DateTime), typeof(MainManagementScreen));
 
     private void btnAddOneMinute_Click(object sender, RoutedEventArgs e)
     {
@@ -109,7 +109,7 @@ public partial class MainWindow : Window
         DependencyProperty.Register(
             "MaxTimeSpanValue",
             typeof(string),     
-            typeof(MainWindow),  
+            typeof(MainManagementScreen),  
             new PropertyMetadata(string.Empty)); 
 
     private void btnUpdateMaxYearRange_Click(object sender, RoutedEventArgs e)
@@ -319,14 +319,25 @@ public partial class MainWindow : Window
         volunteerListWindow.Show();
     }
 
+    //private void CallManagementButton_Click(object sender, RoutedEventArgs e)
+    //{
+
+    //    CallListWindow callListWindow = new CallListWindow();
+    //    callListWindow.Show();
+    //}
     private void CallManagementButton_Click(object sender, RoutedEventArgs e)
     {
+        CallListWindow callListWindow = new CallListWindow
+        {
+            Owner = this, // מקשר את החלון החדש לחלון הראשי
+            WindowStartupLocation = WindowStartupLocation.CenterOwner // ממקם במרכז החלון הראשי
+        };
 
-        CallListWindow callListWindow = new CallListWindow();
-        callListWindow.Show();
+        callListWindow.Show();    // מציג את החלון
+        callListWindow.Activate(); // דואג שהוא יופיע מקדימה
     }
 
-    public MainWindow()
+    public MainManagementScreen()
     {
         InitializeComponent();
     }

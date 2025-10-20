@@ -167,9 +167,15 @@ namespace PL.Volunteer
             // בדיקה אם נבחר מתנדב
             if (SelectedVolunteer != null)
             {
-                // פתיחת חלון במצב רגיל
-                new VolunteerWindow(SelectedVolunteer.Id).Show();
-                UpdateVolunteerList(); // עדכון הרשימה לאחר סגירת החלון
+                var window = new VolunteerWindow(SelectedVolunteer.Id);
+
+                
+                window.Closed += (s, args) =>
+                {
+                    UpdateVolunteerList(); 
+                };
+
+                window.Show();
             }
         }
 
@@ -177,8 +183,14 @@ namespace PL.Volunteer
         {
             // פתיחת חלון תצוגת פריט חדש במצב הוספה
             var window = new VolunteerWindow(); // בנאי ללא פרמטרים עבור הוספה
-            window.Show(); // פתיחה במצב Show כך שהמסך הקודם נשאר פעיל
-            UpdateVolunteerList(); // עדכון הרשימה לאחר סגירת החלון
+
+            // מוסיפים אירוע שיקרה כשהחלון ייסגר
+            window.Closed += (s, args) =>
+            {
+                UpdateVolunteerList(); // עדכון הרשימה לאחר סגירת החלון
+            };
+
+            window.Show();
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

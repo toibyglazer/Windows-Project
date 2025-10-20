@@ -1,4 +1,6 @@
-﻿namespace BlApi;
+﻿using Helpers;
+
+namespace BlApi;
 /// <summary>
 /// Interface for managing volunteer-related operations in the BL layer.
 /// </summary>
@@ -13,14 +15,15 @@
 /// - UpdatePassword: Updates the password of a volunteer, ensuring proper validation of the old password.
 public interface IVolunteer : IObservable //stage 5 הרחבת ממשק
 {
-    BO.VolunteerRole Login(int username, string password);
+    (string Name, BO.VolunteerRole Role) Login(int username, string password);
     IEnumerable<BO.VolunteerInList> GetVolunteersList(bool? isActiveFilter = null, BO.VolunteerSortField? sortField = null);
-    BO.Volunteer GetVolunteerDetails(int volunteerId);
-    void UpdateVolunteer(int volunteerId, BO.Volunteer volunteer, string? managerPassword);
+    Task<BO.Volunteer> GetVolunteerDetailsAsync(int volunteerId);
+    Task UpdateVolunteerAsync(int volunteerId, BO.Volunteer volunteer, string? managerPassword);
     void DeleteVolunteer(int volunteerId);
-    void AddVolunteer(BO.Volunteer volunteer);
+    Task AddVolunteerAsync(BO.Volunteer volunteer);
     //void UpdateVolunteerImage(int volunteerId, string imagePath);
 
     //Addition: Password update function
     void UpdatePassword(int volunteerId, string oldPassword, string newPassword);
+    
 }

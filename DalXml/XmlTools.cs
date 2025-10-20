@@ -15,20 +15,52 @@ static class XMLTools
     }
 
     #region SaveLoadWithXMLSerializer
+    //public static void SaveListToXMLSerializer<T>(List<T> list, string xmlFileName) where T : class
+    //{
+    //    string xmlFilePath = s_xmlDir + xmlFileName;
+
+    //    try
+    //    {
+    //        using FileStream file = new(xmlFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
+    //        new XmlSerializer(typeof(List<T>)).Serialize(file, list);
+    //    }
+    //    catch (DalXMLFileLoadCreateException ex)
+    //    {
+    //        throw new DalXMLFileLoadCreateException($"fail to create xml file: {s_xmlDir + xmlFilePath}, {ex.Message}");
+    //    }
+    //}
     public static void SaveListToXMLSerializer<T>(List<T> list, string xmlFileName) where T : class
     {
         string xmlFilePath = s_xmlDir + xmlFileName;
 
         try
         {
+            // Use FileShare.None to ensure exclusive access to the file
             using FileStream file = new(xmlFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
             new XmlSerializer(typeof(List<T>)).Serialize(file, list);
         }
-        catch (DalXMLFileLoadCreateException ex)
+        catch (Exception ex)
         {
-            throw new DalXMLFileLoadCreateException($"fail to create xml file: {s_xmlDir + xmlFilePath}, {ex.Message}");
+            throw new DalXMLFileLoadCreateException($"fail to create xml file: {xmlFilePath}, {ex.Message}");
         }
     }
+
+    //public static List<T> LoadListFromXMLSerializer<T>(string xmlFileName) where T : class
+    //{
+    //    string xmlFilePath = s_xmlDir + xmlFileName;
+
+    //    try
+    //    {
+    //        if (!File.Exists(xmlFilePath)) return new();
+    //        using FileStream file = new(xmlFilePath, FileMode.Open);
+    //        XmlSerializer x = new(typeof(List<T>));
+    //        return x.Deserialize(file) as List<T> ?? new();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new DalXMLFileLoadCreateException($"fail to load xml file: {xmlFilePath}, {ex.Message}");
+    //    }
+    //}
     public static List<T> LoadListFromXMLSerializer<T>(string xmlFileName) where T : class
     {
         string xmlFilePath = s_xmlDir + xmlFileName;
@@ -36,7 +68,9 @@ static class XMLTools
         try
         {
             if (!File.Exists(xmlFilePath)) return new();
-            using FileStream file = new(xmlFilePath, FileMode.Open);
+
+
+            using FileStream file = new(xmlFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             XmlSerializer x = new(typeof(List<T>));
             return x.Deserialize(file) as List<T> ?? new();
         }

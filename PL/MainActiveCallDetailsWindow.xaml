@@ -1,0 +1,170 @@
+﻿<Window x:Class="PL.MainActiveCallDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PL"
+        mc:Ignorable="d"
+        Title="Active Call Details" 
+        Height="510" Width="535"
+        WindowStartupLocation="CenterScreen"
+        Background="#f4f4f4">
+    <Window.Resources>
+        <local:DistanceConverter x:Key="DistanceConverter"/>
+       
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+        <Style x:Key="FieldValueStyle" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="#F8F8F8"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- New Button Style with Hover Effect -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Margin="10,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F0F0"/>
+                                <Setter Property="BorderBrush" Value="#CCCCCC"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="White" Margin="20" CornerRadius="15" BorderBrush="#E5E7EB" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.1"/>
+        </Border.Effect>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Column -->
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Call Information" FontSize="20" FontWeight="Bold" Margin="0,0,0,20" Foreground="#333333"/>
+
+                        <TextBlock Text="ID" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Id}" Style="{StaticResource FieldValueStyle}"/>
+
+                        <TextBlock Text="Call ID" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding CallId}" Style="{StaticResource FieldValueStyle}"/>
+
+                        <TextBlock Text="Type" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Type}" Style="{StaticResource FieldValueStyle}"/>
+
+                        <TextBlock Text="Description" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Description}" Style="{StaticResource FieldValueStyle}" 
+                                 TextWrapping="Wrap" Height="80" AcceptsReturn="True"/>
+
+                        <TextBlock Text="Full Address" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding FullAddress}" Style="{StaticResource FieldValueStyle}"/>
+                    </StackPanel>
+
+                    <!-- Right Column -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="Time Information" FontSize="20" FontWeight="Bold" Margin="0,0,0,20" Foreground="#333333"/>
+
+                        <TextBlock Text="Opening Time" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding OpeningTime, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" 
+                                 Style="{StaticResource FieldValueStyle}"/>
+
+                        <TextBlock Text="Max Completion Time" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding MaxCompletionTime, StringFormat='{}{0:dd/MM/yyyy HH:mm}', TargetNullValue='N/A'}" 
+                                 Style="{StaticResource FieldValueStyle}"/>
+
+                        <TextBlock Text="Entry Time" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EntryTime, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" 
+                                 Style="{StaticResource FieldValueStyle}"/>
+
+                        <Border Background="#F0F7FF" CornerRadius="8" Padding="15" Margin="0,10" BorderBrush="#E5E7EB" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Distance to Active Call" Style="{StaticResource FieldLabelStyle}"/>
+                                <TextBox Text="{Binding DistanceToActiveCall, Converter={StaticResource DistanceConverter}}" 
+                                         Style="{StaticResource FieldValueStyle}" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Active Call Status" Style="{StaticResource FieldLabelStyle}"/>
+                                <TextBox Text="{Binding activeCallStatus}" 
+                                         Style="{StaticResource FieldValueStyle}" Margin="0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Action Buttons - Spanning Both Columns -->
+                <StackPanel Grid.Row="1" Margin="0,20,0,0">
+                    <TextBlock Text="Assignment Actions" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#333333"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="CompleteButton" 
+                                Content="Complete Assignment" 
+                                Grid.Column="0" 
+                                Margin="0,0,5,0"
+                                Style="{StaticResource ActionButtonStyle}"
+                                Click="CompleteButton_Click"/>
+
+                        <Button x:Name="CancelButton" 
+                                Content="Cancel Assignment" 
+                                Grid.Column="1" 
+                                Margin="5,0,0,0"
+                                Style="{StaticResource ActionButtonStyle}"
+                                Click="CancelButton_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Border>
+</Window>

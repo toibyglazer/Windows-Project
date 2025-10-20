@@ -22,15 +22,240 @@ public class GeoCoordinates
     // Override ToString method to present coordinates in a readable format
     public override string ToString() => $"Latitude: {Latitude}, Longitude: {Longitude}";
 }
+//public static class Tools
+//{
+//    // Creating an HttpClient object for all API calls
+//    private static readonly HttpClient httpClient = new HttpClient();
+
+//    /// <summary>
+//    /// Converts the properties of an object to a formatted string.
+//    /// </summary>
+//    public static string ToStringProperty<T>(this T t, int indentLevel = 0)
+//    {
+//        if (t == null)
+//            return $"{new string(' ', indentLevel)}The provided object is null and has no properties.";
+
+//        Type type = t.GetType();
+//        PropertyInfo[] properties = type.GetProperties();
+
+//        StringBuilder result = new StringBuilder();
+//        string indent = new string(' ', indentLevel);
+//        result.AppendLine($"{indent}{type.Name} Properties:");
+
+//        foreach (PropertyInfo property in properties)
+//        {
+//            object value = property.GetValue(t);
+//            string propertyName = property.Name;
+//            string valueStr = value?.ToString() ?? "null";
+
+//            if (value == null)
+//            {
+//                result.AppendLine($"{indent}  {propertyName}: {valueStr}");
+//            }
+//            else if (value is IEnumerable enumerable && !(value is string))
+//            {
+//                result.AppendLine($"{indent}  {propertyName}:");
+//                foreach (var item in enumerable)
+//                {
+//                    result.AppendLine(item.ToStringProperty(indentLevel + 4));
+//                }
+//            }
+//            else
+//            {
+//                result.AppendLine($"{indent}  {propertyName}: {valueStr}");
+//            }
+//        }
+
+//        return result.ToString();
+//    }
+
+
+//    #region Geocoding
+//    /// <summary>
+//    /// Gets the coordinates of a location by its address using OpenStreetMap API.
+//    /// </summary>
+//    /// <param name="address">The address to get coordinates for.</param>
+//    /// <returns>GeoCoordinates object with latitude and longitude.</returns>
+//    public static GeoCoordinates CallOpenStreetMapApi(string address)
+//    {
+//        try
+//        {
+//            var url = $"https://nominatim.openstreetmap.org/search?format=xml&q={Uri.EscapeDataString(address)}";
+
+//            httpClient.DefaultRequestHeaders.Clear();
+//            httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
+
+//            var request = new HttpRequestMessage(HttpMethod.Get, url);
+//            var response = httpClient.Send(request);
+//            var responseBody = response.Content.ReadAsStringAsync().Result;
+
+//            var doc = XDocument.Parse(responseBody);
+
+//            var place = doc.Root?.Element("place");
+//            if (place != null)
+//            {
+//                return new GeoCoordinates
+//                {
+//                    Latitude = double.Parse(place.Attribute("lat")?.Value ?? "0"),
+//                    Longitude = double.Parse(place.Attribute("lon")?.Value ?? "0")
+//                };
+//            }
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"Failed to get geolocation: {ex.Message}");
+//        }
+
+//        return null;
+//    }
+
+//    /// <summary>
+//    /// Verifies if an address exists in OpenStreetMap systems.
+//    /// </summary>
+//    /// <param name="address">The address to verify.</param>
+//    /// <returns>True if address exists, otherwise throws an exception.</returns>
+//    public static bool VerifyAddressExists(string address)
+//    {
+//        var url = $"https://nominatim.openstreetmap.org/search?format=xml&q={Uri.EscapeDataString(address)}";
+
+//        httpClient.DefaultRequestHeaders.Clear();
+//        httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
+
+//        var request = new HttpRequestMessage(HttpMethod.Get, url);
+//        var response = httpClient.Send(request);
+//        var responseBody = response.Content.ReadAsStringAsync().Result;
+
+//        var doc = XDocument.Parse(responseBody);
+//        var places = doc.Root?.Elements("place");
+
+//        if (places != null && places.Any())
+//        {
+//            return true;
+//        }
+//        throw new Exception("Address not found");
+//    }
+//    #endregion
+
+//    public static bool AreCoordinatesEqual(double lat1, double lon1, double lat2, double lon2, double epsilon = 0.01)
+//    {
+//        // חישוב ההבדל המוחלט בין הקואורדינטות
+//        double latDifference = Math.Abs(lat1 - lat2);
+//        double lonDifference = Math.Abs(lon1 - lon2);
+
+//        // אם ההבדל קטן מהסובלנות, נחזיר true
+//        return latDifference < epsilon && lonDifference < epsilon;
+//    }
+
+//    #region Route Calculator OpenStreetMap
+
+//    /// <summary>
+//    /// Gets the walking route distance between two geographical coordinates.
+//    /// This method uses the OpenStreetMap API to fetch the walking route distance between two points.
+//    /// </summary>
+//    /// <param name="lat1">The latitude of the first point.</param>
+//    /// <param name="lon1">The longitude of the first point.</param>
+//    /// <param name="lat2">The latitude of the second point.</param>
+//    /// <param name="lon2">The longitude of the second point.</param>
+//    /// <returns>The walking route distance in kilometers.</returns>
+//    public static double GetWalkingRouteDistance(double lat1, double lon1, double lat2, double lon2)
+//    {
+//        if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
+//            return 0.0;
+
+
+//        // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
+//        string url = $"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
+
+//        // Create an instance of HttpClient to make the web request
+//        using (HttpClient client = new HttpClient())
+//        {
+//            // Send a GET request to the API
+//            HttpResponseMessage response = client.GetAsync(url).Result;
+
+//            // Check if the response was successful
+//            if (!response.IsSuccessStatusCode)
+//            {
+//                // Throw an exception if the request was unsuccessful
+//                throw new Exception($"Error fetching route distance. Status code: {response.StatusCode}");
+//            }
+
+//            // Read the response content as a string
+//            string json = response.Content.ReadAsStringAsync().Result;
+
+//            // Parse the JSON response to extract the distance in meters
+//            using (JsonDocument jsonDoc = JsonDocument.Parse(json))
+//            {
+//                var distanceMeters = jsonDoc.RootElement.GetProperty("routes")[0].GetProperty("distance").GetDouble();
+//                // Convert distance from meters to kilometers and return it
+//                return distanceMeters / 1000.0;
+//            }
+//        }
+//    }
+
+//    /// <summary>
+//    /// Gets the driving route distance between two geographical coordinates.
+//    /// This method uses the OpenStreetMap API to fetch the driving route distance between two points.
+//    /// </summary>
+//    /// <param name="lat1">The latitude of the first point.</param>
+//    /// <param name="lon1">The longitude of the first point.</param>
+//    /// <param name="lat2">The latitude of the second point.</param>
+//    /// <param name="lon2">The longitude of the second point.</param>
+//    /// <returns>The driving route distance in kilometers.</returns>
+//    public static double GetDrivingRouteDistance(double lat1, double lon1, double lat2, double lon2)
+//    {
+//        if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
+//            return 0.0;
+
+
+//        // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
+//        string url = $"https://routing.openstreetmap.de/routed-car/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
+
+//        // Create an instance of HttpClient to make the web request
+//        using (HttpClient client = new HttpClient())
+//        {
+//            // Send a GET request to the API
+//            HttpResponseMessage response = client.GetAsync(url).Result;
+
+//            // Check if the response was successful
+//            if (!response.IsSuccessStatusCode)
+//            {
+//                // Throw an exception if the request was unsuccessful
+//                throw new Exception($"Error fetching route distance. Status code: {response.StatusCode}");
+//            }
+
+//            // Read the response content as a string
+//            string json = response.Content.ReadAsStringAsync().Result;
+
+//            // Parse the JSON response to extract the distance in meters
+//            using (JsonDocument jsonDoc = JsonDocument.Parse(json))
+//            {
+//                var distanceMeters = jsonDoc.RootElement.GetProperty("routes")[0].GetProperty("distance").GetDouble();
+//                // Convert distance from meters to kilometers and return it
+//                return distanceMeters / 1000.0;
+//            }
+//        }
+//    }
+//    #endregion
+
+
+//    /// <summary>
+//    /// Checks if two geographical coordinates are identical.
+//    /// </summary>
+//    private static bool AreCoordinatesEqual(double lat1, double lon1, double lat2, double lon2)
+//    {
+//        return lat1 == lat2 && lon1 == lon2;
+//    }
+//}
+
+
 public static class Tools
 {
-    // Creating an HttpClient object for all API calls
     private static readonly HttpClient httpClient = new HttpClient();
 
-    /// <summary>
-    /// Converts the properties of an object to a formatted string.
-    /// </summary>
-    public static string ToStringProperty<T>(this T t, int indentLevel = 0)
+        /// <summary>
+        /// Converts the properties of an object to a formatted string.
+        /// </summary>
+        public static string ToStringProperty<T>(this T t, int indentLevel = 0)
     {
         if (t == null)
             return $"{new string(' ', indentLevel)}The provided object is null and has no properties.";
@@ -71,12 +296,7 @@ public static class Tools
 
 
     #region Geocoding
-    /// <summary>
-    /// Gets the coordinates of a location by its address using OpenStreetMap API.
-    /// </summary>
-    /// <param name="address">The address to get coordinates for.</param>
-    /// <returns>GeoCoordinates object with latitude and longitude.</returns>
-    public static GeoCoordinates CallOpenStreetMapApi(string address)
+    public static async Task<GeoCoordinates> CallOpenStreetMapApiAsync(string address)
     {
         try
         {
@@ -86,8 +306,8 @@ public static class Tools
             httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            var response = httpClient.Send(request);
-            var responseBody = response.Content.ReadAsStringAsync().Result;
+            var response = await httpClient.SendAsync(request);
+            var responseBody = await response.Content.ReadAsStringAsync();
 
             var doc = XDocument.Parse(responseBody);
 
@@ -109,12 +329,7 @@ public static class Tools
         return null;
     }
 
-    /// <summary>
-    /// Verifies if an address exists in OpenStreetMap systems.
-    /// </summary>
-    /// <param name="address">The address to verify.</param>
-    /// <returns>True if address exists, otherwise throws an exception.</returns>
-    public static bool VerifyAddressExists(string address)
+    public static async Task<bool> VerifyAddressExistsAsync(string address)
     {
         var url = $"https://nominatim.openstreetmap.org/search?format=xml&q={Uri.EscapeDataString(address)}";
 
@@ -122,8 +337,8 @@ public static class Tools
         httpClient.DefaultRequestHeaders.Add("User-Agent", "C# Application");
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        var response = httpClient.Send(request);
-        var responseBody = response.Content.ReadAsStringAsync().Result;
+        var response = await httpClient.SendAsync(request);
+        var responseBody = await response.Content.ReadAsStringAsync();
 
         var doc = XDocument.Parse(responseBody);
         var places = doc.Root?.Elements("place");
@@ -138,103 +353,47 @@ public static class Tools
 
     public static bool AreCoordinatesEqual(double lat1, double lon1, double lat2, double lon2, double epsilon = 0.01)
     {
-        // חישוב ההבדל המוחלט בין הקואורדינטות
         double latDifference = Math.Abs(lat1 - lat2);
         double lonDifference = Math.Abs(lon1 - lon2);
-
-        // אם ההבדל קטן מהסובלנות, נחזיר true
         return latDifference < epsilon && lonDifference < epsilon;
     }
 
     #region Route Calculator OpenStreetMap
-    /// <summary>
-    /// Gets the walking route distance between two geographical coordinates.
-    /// This method uses the OpenStreetMap API to fetch the walking route distance between two points.
-    /// </summary>
-    /// <param name="lat1">The latitude of the first point.</param>
-    /// <param name="lon1">The longitude of the first point.</param>
-    /// <param name="lat2">The latitude of the second point.</param>
-    /// <param name="lon2">The longitude of the second point.</param>
-    /// <returns>The walking route distance in kilometers.</returns>
-    public static double GetWalkingRouteDistance(double lat1, double lon1, double lat2, double lon2)
+    public class RouteCalculator
     {
-        if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
-            return 0.0;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
-
-        // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
-        string url = $"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
-
-        // Create an instance of HttpClient to make the web request
-        using (HttpClient client = new HttpClient())
+        public static async Task<double> GetRouteDistanceAsync(double lat1, double lon1, double lat2, double lon2, string mode)
         {
-            // Send a GET request to the API
-            HttpResponseMessage response = client.GetAsync(url).Result;
+            if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
+                return 0.0;
 
-            // Check if the response was successful
+            string url = $"https://routing.openstreetmap.de/routed-{mode}/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
-            {
-                // Throw an exception if the request was unsuccessful
                 throw new Exception($"Error fetching route distance. Status code: {response.StatusCode}");
-            }
 
-            // Read the response content as a string
-            string json = response.Content.ReadAsStringAsync().Result;
-
-            // Parse the JSON response to extract the distance in meters
+            string json = await response.Content.ReadAsStringAsync();
             using (JsonDocument jsonDoc = JsonDocument.Parse(json))
             {
                 var distanceMeters = jsonDoc.RootElement.GetProperty("routes")[0].GetProperty("distance").GetDouble();
-                // Convert distance from meters to kilometers and return it
                 return distanceMeters / 1000.0;
             }
         }
-    }
 
-    /// <summary>
-    /// Gets the driving route distance between two geographical coordinates.
-    /// This method uses the OpenStreetMap API to fetch the driving route distance between two points.
-    /// </summary>
-    /// <param name="lat1">The latitude of the first point.</param>
-    /// <param name="lon1">The longitude of the first point.</param>
-    /// <param name="lat2">The latitude of the second point.</param>
-    /// <param name="lon2">The longitude of the second point.</param>
-    /// <returns>The driving route distance in kilometers.</returns>
-    public static double GetDrivingRouteDistance(double lat1, double lon1, double lat2, double lon2)
-    {
-        if (AreCoordinatesEqual(lat1, lon1, lat2, lon2))
-            return 0.0;
+        public static Task<double> GetWalkingRouteDistanceAsync(double lat1, double lon1, double lat2, double lon2)
+            => GetRouteDistanceAsync(lat1, lon1, lat2, lon2, "foot");
 
-
-        // Construct the URL for the OpenStreetMap routing API, using the provided coordinates
-        string url = $"https://routing.openstreetmap.de/routed-car/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
-
-        // Create an instance of HttpClient to make the web request
-        using (HttpClient client = new HttpClient())
-        {
-            // Send a GET request to the API
-            HttpResponseMessage response = client.GetAsync(url).Result;
-
-            // Check if the response was successful
-            if (!response.IsSuccessStatusCode)
-            {
-                // Throw an exception if the request was unsuccessful
-                throw new Exception($"Error fetching route distance. Status code: {response.StatusCode}");
-            }
-
-            // Read the response content as a string
-            string json = response.Content.ReadAsStringAsync().Result;
-
-            // Parse the JSON response to extract the distance in meters
-            using (JsonDocument jsonDoc = JsonDocument.Parse(json))
-            {
-                var distanceMeters = jsonDoc.RootElement.GetProperty("routes")[0].GetProperty("distance").GetDouble();
-                // Convert distance from meters to kilometers and return it
-                return distanceMeters / 1000.0;
-            }
-        }
+        public static Task<double> GetDrivingRouteDistanceAsync(double lat1, double lon1, double lat2, double lon2)
+            => GetRouteDistanceAsync(lat1, lon1, lat2, lon2, "car");
     }
     #endregion
+
+    private static bool AreCoordinatesEqual(double lat1, double lon1, double lat2, double lon2)
+    {
+        return lat1 == lat2 && lon1 == lon2;
+    }
 
 
     #region Password Hashing and Verification Management Using PBKDF2
@@ -432,6 +591,10 @@ public static class Tools
 
 
     }
+}
 
-}    
+
+
+
+    
 

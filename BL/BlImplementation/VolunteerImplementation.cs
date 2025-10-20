@@ -14,41 +14,14 @@ public class VolunteerImplementation : IVolunteer
 
     /// <summary>
     /// Logs in a volunteer by validating their username and password.
-    /// Implements a lockout mechanism after 5 failed login attempts, with a 3-minute lockout period.
-    /// This is an additional security feature to prevent brute-force attacks and improve system security.
     /// </summary>
     /// <param name="username">The unique identifier for the volunteer.</param>
     /// <param name="password">The password entered by the volunteer.</param>
-    /// <returns>The volunteer's role if login is successful.</returns>
-    /// <exception cref="BO.BlLockoutException">Thrown if the volunteer is locked out due to too many failed login attempts.</exception>
+    /// <returns>The volunteer's name and role if login is successful.</returns>
     /// <exception cref="BO.BlDoesNotExistException">Thrown if the volunteer does not exist in the database.</exception>
     /// <exception cref="BO.BlInvalidPasswordException">Thrown if the password entered is incorrect.</exception>
-    private static Dictionary<int, (int FailedAttempts, DateTime? LockoutEndTime)> loginAttempts
-        = new Dictionary<int, (int FailedAttempts, DateTime? LockoutEndTime)>();
-
-    public BO.VolunteerRole Login(int username, string password)
+    public (string Name, BO.VolunteerRole Role) Login(int username, string password)
     {
-        // *** Check for previous failed login attempts ***
-        // If there are any past login failures, check if the volunteer is currently locked out.
-        if (loginAttempts.ContainsKey(username))
-        {
-            var (failedAttempts, lockoutEndTime) = loginAttempts[username];
-
-            // *** Lockout Check ***
-            // If the volunteer is locked out (the lockout time hasn't passed), throw an exception.
-            if (lockoutEndTime.HasValue && lockoutEndTime > DateTime.Now)
-            {
-                throw new BO.BlLockoutException($"Volunteer with ID {username} is locked out until {lockoutEndTime.Value}.");
-            }
-
-            // *** Reset Failed Attempts After Lockout Time Expires ***
-            // If the lockout period has expired, reset the failed attempts counter and clear lockout time.
-            if (lockoutEndTime.HasValue && lockoutEndTime <= DateTime.Now)
-            {
-                loginAttempts[username] = (0, null); // Reset failed attempts and clear lockout
-            }
-        }
-
         // *** Retrieve the Volunteer from the Database ***
         // Look up the volunteer's details using their ID. If not found, throw an exception.
         DO.Volunteer volunteer = _dal.Volunteer.Read(username)
@@ -59,64 +32,121 @@ public class VolunteerImplementation : IVolunteer
         bool isPasswordValid = Tools.PasswordHasher.VerifyPassword(password, volunteer.Password);
         if (!isPasswordValid)
         {
-            // *** Initialize Failed Attempt Counter ***
-            // If it's the first failed attempt, initialize the counter.
-            if (!loginAttempts.ContainsKey(username))
-            {
-                loginAttempts[username] = (1, null); // First failed attempt, no lockout yet
-            }
-            else
-            {
-                // *** Increment Failed Attempts ***
-                var (failedAttempts, lockoutEndTime) = loginAttempts[username];
-                failedAttempts++;
-
-                // *** Lockout After 5 Failed Attempts ***
-                // If 5 failed attempts are reached, lock the volunteer out for 3 minutes.
-                if (failedAttempts >= 5)
-                {
-                    lockoutEndTime = DateTime.Now.AddMinutes(3); // Set lockout time for 3 minutes
-                    loginAttempts[username] = (failedAttempts, lockoutEndTime);
-
-                    throw new BO.BlLockoutException($"Volunteer with ID {username} is now locked out until {lockoutEndTime.Value}.");
-                }
-                else
-                {
-                    // If attempts are less than 5, simply update the counter without lockout.
-                    loginAttempts[username] = (failedAttempts, null);
-                }
-            }
-
             // *** Incorrect Password Handling ***
             // If the password is invalid, throw an exception.
             throw new BO.BlInvalidPasswordException($"Invalid password for Volunteer with ID {username}");
         }
 
-        // *** Clear Previous Login Attempts on Successful Login ***
-        // If login is successful, remove the volunteer from the failed attempts dictionary.
-        if (loginAttempts.ContainsKey(username))
-        {
-            loginAttempts.Remove(username);
-        }
-
-        // *** Return the Volunteer Role ***
-        // If login is successful, return the role of the volunteer.
-        return (BO.VolunteerRole)volunteer.Role;
+        // *** Return the Volunteer Information ***
+        // If login is successful, return the name and role of the volunteer.
+        return (volunteer.FullName, (BO.VolunteerRole)volunteer.Role);
     }
-    public void AddVolunteer(BO.Volunteer volunteer)
+    //private readonly DalApi.IDal _dal = DalApi.Factory.Get;
+
+    ///// <summary>
+    ///// Logs in a volunteer by validating their username and password.
+    ///// Implements a lockout mechanism after 5 failed login attempts, with a 3-minute lockout period.
+    ///// This is an additional security feature to prevent brute-force attacks and improve system security.
+    ///// </summary>
+    ///// <param name="username">The unique identifier for the volunteer.</param>
+    ///// <param name="password">The password entered by the volunteer.</param>
+    ///// <returns>The volunteer's role if login is successful.</returns>
+    ///// <exception cref="BO.BlLockoutException">Thrown if the volunteer is locked out due to too many failed login attempts.</exception>
+    ///// <exception cref="BO.BlDoesNotExistException">Thrown if the volunteer does not exist in the database.</exception>
+    ///// <exception cref="BO.BlInvalidPasswordException">Thrown if the password entered is incorrect.</exception>
+    //private static Dictionary<int, (int FailedAttempts, DateTime? LockoutEndTime)> loginAttempts
+    //    = new Dictionary<int, (int FailedAttempts, DateTime? LockoutEndTime)>();
+
+    //public (string Name, BO.VolunteerRole Role) Login(int username, string password)
+    //{
+
+    //    // *** Check for previous failed login attempts ***
+    //    // If there are any past login failures, check if the volunteer is currently locked out.
+    //    if (loginAttempts.ContainsKey(username))
+    //    {
+    //        var (failedAttempts, lockoutEndTime) = loginAttempts[username];
+
+    //        // *** Lockout Check ***
+    //        // If the volunteer is locked out (the lockout time hasn't passed), throw an exception.
+    //        if (lockoutEndTime.HasValue && lockoutEndTime > DateTime.Now)
+    //        {
+    //            throw new BO.BlLockoutException($"Volunteer with ID {username} is locked out until {lockoutEndTime.Value}.");
+    //        }
+
+    //        // *** Reset Failed Attempts After Lockout Time Expires ***
+    //        // If the lockout period has expired, reset the failed attempts counter and clear lockout time.
+    //        if (lockoutEndTime.HasValue && lockoutEndTime <= DateTime.Now)
+    //        {
+    //            loginAttempts[username] = (0, null); // Reset failed attempts and clear lockout
+    //        }
+    //    }
+
+    //    // *** Retrieve the Volunteer from the Database ***
+    //    // Look up the volunteer's details using their ID. If not found, throw an exception.
+    //    DO.Volunteer volunteer = _dal.Volunteer.Read(username)
+    //        ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {username} does not exist.");
+
+    //    // *** Validate the Password ***
+    //    // Check if the entered password matches the stored password hash.
+    //    bool isPasswordValid = Tools.PasswordHasher.VerifyPassword(password, volunteer.Password);
+    //    if (!isPasswordValid)
+    //    {
+    //        // *** Initialize Failed Attempt Counter ***
+    //        // If it's the first failed attempt, initialize the counter.
+    //        if (!loginAttempts.ContainsKey(username))
+    //        {
+    //            loginAttempts[username] = (1, null); // First failed attempt, no lockout yet
+    //        }
+    //        else
+    //        {
+    //            // *** Increment Failed Attempts ***
+    //            var (failedAttempts, lockoutEndTime) = loginAttempts[username];
+    //            failedAttempts++;
+
+    //            // *** Lockout After 5 Failed Attempts ***
+    //            // If 5 failed attempts are reached, lock the volunteer out for 3 minutes.
+    //            if (failedAttempts >= 5)
+    //            {
+    //                lockoutEndTime = DateTime.Now.AddMinutes(3); // Set lockout time for 3 minutes
+    //                loginAttempts[username] = (failedAttempts, lockoutEndTime);
+
+    //                throw new BO.BlLockoutException($"Volunteer with ID {username} is now locked out until {lockoutEndTime.Value}.");
+    //            }
+    //            else
+    //            {
+    //                // If attempts are less than 5, simply update the counter without lockout.
+    //                loginAttempts[username] = (failedAttempts, null);
+    //            }
+    //        }
+
+    //        // *** Incorrect Password Handling ***
+    //        // If the password is invalid, throw an exception.
+    //        throw new BO.BlInvalidPasswordException($"Invalid password for Volunteer with ID {username}");
+    //    }
+
+    //    // *** Clear Previous Login Attempts on Successful Login ***
+    //    // If login is successful, remove the volunteer from the failed attempts dictionary.
+    //    if (loginAttempts.ContainsKey(username))
+    //    {
+    //        loginAttempts.Remove(username);
+    //    }
+
+    //    // *** Return the Volunteer Role ***
+    //    // If login is successful, return the role of the volunteer.
+    //    return (volunteer.FullName, (BO.VolunteerRole)volunteer.Role);
+    //}
+    public async Task AddVolunteerAsync(BO.Volunteer volunteer)
     {
-        volunteer.Password = VolunteerManager.GeneratePassword();
+        //volunteer.Password = VolunteerManager.GeneratePassword();
 
         // Validate the input volunteer object to ensure all required data is correct and complete.
-        Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
-        DO.Volunteer DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteerAdd(volunteer);
+        await Helpers.VolunteerManager.ValidateVolunteerDataAsync(volunteer);
+        DO.Volunteer DOvolunteer = await Helpers.VolunteerManager.ConvertToDOVolunteerAddAsync(volunteer);
 
         try
         {
             _dal.Volunteer.Create(DOvolunteer);
-            VolunteerManager.SendEmailNewVolunteer.SendStaticEmail(volunteer.Email, volunteer.FullName, volunteer.Password);
             VolunteerManager.Observers.NotifyListUpdated(); //stage 5  
-
         }
         catch (DO.DalAlreadyExistsException ex)
         {
@@ -125,7 +155,7 @@ public class VolunteerImplementation : IVolunteer
     }
 
 
-    public BO.Volunteer GetVolunteerDetails(int volunteerId)
+    public async Task<BO.Volunteer> GetVolunteerDetailsAsync(int volunteerId)
     {
         try
         {
@@ -143,7 +173,7 @@ public class VolunteerImplementation : IVolunteer
                     DO.Call? activeCall = _dal.Call.Read(activeCallId.Value)
                         ?? throw new BO.BlDoesNotExistException($"Call with ID {activeCallId.Value} does not exist.");
 
-                    callInProgress = Helpers.VolunteerManager.CreateCallInProgress(volunteer, activeCall, activeCallId.Value, volunteerId);
+                    callInProgress = await Helpers.VolunteerManager.CreateCallInProgressAsync(volunteer, activeCall, activeCallId.Value, volunteerId);
                 }
                 catch (DO.DalDoesNotExistException ex)
                 {
@@ -200,49 +230,24 @@ public class VolunteerImplementation : IVolunteer
     /// <exception cref="BO.BlAccessDeniedException">
     /// Thrown if the update is unauthorized or the provided password is incorrect.
     /// </exception>
-    public void UpdateVolunteer(int volunteerId, BO.Volunteer volunteer, string managerPassword = null)
+    public async Task UpdateVolunteerAsync(int volunteerId, BO.Volunteer volunteer, string managerPassword = null)
     {
         DO.Volunteer DOvolunteer = _dal.Volunteer.Read(volunteerId)
             ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
 
-        // Validate permissions based on the role and IDs.
-        // Volunteer cannot update another volunteer's details.
-        if (DOvolunteer.Role == DO.VolunteerRole.Volunteer && volunteer.Id != volunteerId)
-            throw new BO.BlAccessDeniedException("You are not authorized to update another volunteer's details.");
-
-        //  Validate password for volunteer updating their own details.
-        if (!(Tools.PasswordHasher.IsHashed(volunteer.Password))
-            && DOvolunteer.Role == DO.VolunteerRole.Volunteer
-            && volunteer.Id == volunteerId)
-        {
-            if (!(Tools.PasswordHasher.VerifyPassword(volunteer.Password, DOvolunteer.Password)))
-                throw new BO.BlAccessDeniedException("The password you entered is incorrect.");
-        }
-
-        // Validate manager password if the role is manager.
-        if (DOvolunteer.Role == DO.VolunteerRole.Manager)
-        {
-            if (string.IsNullOrEmpty(managerPassword) ||
-                !Tools.PasswordHasher.VerifyPassword(managerPassword, DOvolunteer.Password))
-            {
-                throw new BO.BlAccessDeniedException("Manager password is incorrect. You cannot update the volunteer's details.");
-            }
-        }
+     
+      
 
         // Ensure that volunteers cannot change their role or activity status.
         if (DOvolunteer.Role != (DO.VolunteerRole)volunteer.Role && DOvolunteer.Role == DO.VolunteerRole.Volunteer)
             throw new BO.BlAccessDeniedException("You are not allowed to change your role, only the manager.");
 
-        if (DOvolunteer.IsActive != volunteer.IsActive && DOvolunteer.Role == DO.VolunteerRole.Volunteer)
-            throw new BO.BlAccessDeniedException("You are not allowed to change your activity, only the manager.");
+       
+        if (volunteer.CurrentAddress != DOvolunteer.CurrentAddress)
+            await Helpers.VolunteerManager.ValidateAddressAsync(volunteer.CurrentAddress);
 
-        bool addressChangeCheck=false;
-        if(volunteer.CurrentAddress!= DOvolunteer.CurrentAddress)
-            addressChangeCheck=true; 
-
-        
         Helpers.VolunteerManager.ValidateVolunteerData(volunteer);
-        DOvolunteer = Helpers.VolunteerManager.ConvertToDOVolunteer(volunteer);
+        DOvolunteer = await Helpers.VolunteerManager.ConvertToDOVolunteerAsync(volunteer);
 
         try
         {
@@ -257,6 +262,10 @@ public class VolunteerImplementation : IVolunteer
         {
             throw new BO.BlDoesNotExistException($"Volunteer retrieval failed: {ex.Message}", ex);
         }
+        catch(BO.AddressValidationException ex)
+        {
+            throw new BO.BlDoesNotExistException($"Address Validation Error: {ex.Message}");
+        }
     }
     public void DeleteVolunteer(int volunteerId)
     {
@@ -266,16 +275,16 @@ public class VolunteerImplementation : IVolunteer
 
         try
         {
-            // Step 2: Check if the volunteer has handled calls in the past or has an active call.
+            // Step 2: Check if the volunteer has handled calls in the past, has an active call, or has cancelled calls.
             bool hasHandledCalls = Helpers.VolunteerManager.GetTotalHandledCalls(volunteerId) > 0;
             bool hasActiveCall = Helpers.VolunteerManager.GetActiveCallId(volunteerId) != null;
+            bool hasCancelledCalls = Helpers.VolunteerManager.GetTotalCancelledCalls(volunteerId) > 0;
 
             // Step 3: If the volunteer meets the criteria for deletion, delete them.
-            if (!hasHandledCalls && !hasActiveCall)
+            if (!hasHandledCalls && !hasActiveCall && !hasCancelledCalls)
             {
                 _dal.Volunteer.Delete(volunteerId);
                 VolunteerManager.Observers.NotifyListUpdated();  //stage 5  	
-
             }
             else
             {
@@ -332,6 +341,8 @@ public class VolunteerImplementation : IVolunteer
         _dal.Volunteer.Update(DOvolunteer);
     }
 
+
+
     #region Stage 5
     public void AddObserver(Action listObserver) =>
     VolunteerManager.Observers.AddListObserver(listObserver); //stage 5
@@ -342,47 +353,5 @@ public class VolunteerImplementation : IVolunteer
     public void RemoveObserver(int id, Action observer) =>
     VolunteerManager.Observers.RemoveObserver(id, observer); //stage 5
     #endregion Stage 5
-
-
-
-
-
-    /// <summary>
-    /// Updates the profile image path for a specific volunteer.
-    /// </summary>
-    /// <param name="volunteerId">The unique identifier of the volunteer.</param>
-    ///// <param name="imagePath">The path to the new profile image.</param>
-    //public void UpdateVolunteerImage(int volunteerId, string imagePath)
-    //{
-        
-    //        // קריאה ועדכון מתנדב
-    //        DO.Volunteer volunteer = _dal.Volunteer.Read(volunteerId)
-    //            ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
-
-    //        //VolunteerManager.ValidateImageProfilePath(imagePath);
-    //        //DO.Volunteer updatedVolunteer = VolunteerManager.UpdateImageDoVolunteer(volunteer, imagePath);
-
-    //    try
-    //    {
-    //        _dal.Volunteer.Update(updatedVolunteer);
-    //        VolunteerManager.Observers.NotifyItemUpdated(volunteerId);  //stage 5
-            
-    //    }
-    //    catch (BO.BlDoesNotExistException ex)
-    //    {
-            
-    //        throw;
-    //    }
-    //    catch (BO.BlUpdateException ex)
-    //    {
-    //        throw;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw new BO.BlUpdateException("Unexpected error occurred while updating volunteer image.", ex);
-    //    }
-    //}
-
-
 
 }

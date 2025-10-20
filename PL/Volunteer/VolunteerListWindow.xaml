@@ -211,21 +211,24 @@
             </Border>
 
             <!-- DataGrid -->
-            <DataGrid Grid.Row="2"
-                  ItemsSource="{Binding VolunteerList}"
-                  SelectedItem="{Binding SelectedVolunteer}"
-                  AutoGenerateColumns="True"
-                  CanUserAddRows="False"
-                  IsReadOnly="True"
-                  BorderThickness="0.855"
-                  BorderBrush="#E5E7EB"
-                  Background="White"
-                  RowHeaderWidth="0"
-                  VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Auto"
-                  MouseDoubleClick="lsvVolunteersList_MouseDoubleClick"
-                  SelectionChanged="DataGrid_SelectionChanged" 
-                  Margin="0,0,0,17.1">
+          <DataGrid Grid.Row="2"
+          ItemsSource="{Binding VolunteerList}"
+          SelectedItem="{Binding SelectedVolunteer}"
+          AutoGenerateColumns="True"
+          CanUserAddRows="False"
+          IsReadOnly="True"
+          BorderThickness="0.855"
+          BorderBrush="#E5E7EB"
+          Background="White"
+          RowHeaderWidth="0"
+          VerticalScrollBarVisibility="Auto"
+          HorizontalScrollBarVisibility="Auto"
+          MouseDoubleClick="lsvVolunteersList_MouseDoubleClick"
+          SelectionChanged="DataGrid_SelectionChanged" 
+          Margin="0,0,0,17.1"
+          GridLinesVisibility="All"
+          HorizontalGridLinesBrush="#E5E7EB"
+          VerticalGridLinesBrush="#E5E7EB">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="Background" Value="#F3F4F6"/>

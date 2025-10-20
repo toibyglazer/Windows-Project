@@ -1,4 +1,8 @@
-﻿namespace BlApi;
+﻿using BO;
+using Helpers;
+using System.Threading.Tasks;
+
+namespace BlApi;
 /// <summary>
 /// Interface for managing call-related operations in the BL layer.
 /// </summary>
@@ -22,14 +26,19 @@ public interface ICall :IObservable //stage 5 הרחבת ממשק
     IEnumerable<BO.CallInList> GetCalls(BO.CallInListField? filterField = null, object? filterValue = null, BO.CallInListField? sortField = null);
     BO.Call GetCallDetailsById(int callId);
 
-    void UpdateCallDetails(BO.Call call);
+    Task UpdateCallDetailsAsync(BO.Call call);
     void DeleteCall(int callId);
 
-    void AddCall(BO.Call call);
+    Task AddCallAsync(BO.Call call);
     IEnumerable<BO.ClosedCallInList> GetClosedCallsByVolunteer(int volunteerId, BO.CallType? callTypeFilter = null, BO.ClosedCallSortField? sortByField = null);
-    IEnumerable<BO.OpenCallInList> GetOpenCallsByVolunteer(int volunteerId, BO.CallType? callTypeFilter = null, BO.OpenCallSortField? sortByField = null);
+    Task<IEnumerable<BO.OpenCallInList>> GetOpenCallsByVolunteerAsync(int volunteerId, BO.CallType? callTypeFilter = null, BO.OpenCallSortField? sortByField = null);
+    Task<Dictionary<int, GeoCoordinates>> GetCoordinatesForCallsAsync(IEnumerable<BO.OpenCallInList> calls);
+
+
 
     void CompleteAssignment(int volunteerId, int assignmentId);
-    void CancelAssignment(int volunteerId, int assignmentId);
+    Task CancelAssignmentAsync(int volunteerId, int assignmentId);
     void AssignCallToVolunteer(int volunteerId, int callId);
+
+    
 }

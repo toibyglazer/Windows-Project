@@ -7,8 +7,15 @@ namespace Helpers;
 using System.Drawing;
 using System.Net;
 using System.Net.Mail;
+using System.Text.Json;
 using BlApi;
 using DO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 
 internal static class VolunteerManager
@@ -114,7 +121,7 @@ internal static class VolunteerManager
     public static int? GetActiveCallId(int volunteerId)
     {
         DO.Assignment? activeAssignment = s_dal.Assignment.ReadAll()
-            .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
+            .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null && a.CompletionType==null);
 
         // Returns the CallId of the active assignment, or null if no active assignment is found.
         return activeAssignment?.CallId;
@@ -153,27 +160,28 @@ internal static class VolunteerManager
     /// </summary>
     /// <param name="volunteer">The business object representing a volunteer.</param>
     /// <returns>A data object representing the volunteer, ready to be saved to the database.</returns>
-    public static DO.Volunteer ConvertToDOVolunteer(BO.Volunteer volunteer)
+    public static async Task<DO.Volunteer> ConvertToDOVolunteerAsync(BO.Volunteer volunteer)
     {
         DO.Volunteer DOvolunteer = s_dal.Volunteer.Read(volunteer.Id);
 
         bool addressChangeCheck = !string.IsNullOrEmpty(volunteer.CurrentAddress) &&
                            volunteer.CurrentAddress != DOvolunteer.CurrentAddress;
 
-        double? longitude = null;
-        double? latitude = null;
+        //double? longitude = null;
+        //double? latitude = null;
+        double? longitude = DOvolunteer.Longitude;
+        double? latitude = DOvolunteer.Latitude;
         if (addressChangeCheck)
         {
             // If the volunteer has a current address, retrieve geographical coordinates (latitude and longitude).
             if (!string.IsNullOrEmpty(volunteer.CurrentAddress))
             {
                 // Calling an external API (OpenStreetMap) to get latitude and longitude based on the address.
-                GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
+                GeoCoordinates geoCoordinates = await Tools.CallOpenStreetMapApiAsync(volunteer.CurrentAddress);
                 longitude = geoCoordinates.Longitude;
                 latitude = geoCoordinates.Latitude;
             }
         }
-
 
         // Ensure that the volunteer's password is hashed. If not, hash it before saving.
         var hashedPassword = volunteer.Password;
@@ -191,31 +199,30 @@ internal static class VolunteerManager
             Email = volunteer.Email,
             Password = hashedPassword, // Store the hashed password in the database.
             CurrentAddress = volunteer.CurrentAddress,
-            Latitude = addressChangeCheck ? latitude : volunteer.Latitude, // Store latitude.
-            Longitude = addressChangeCheck ? longitude : volunteer.Longitude, // Store longitude.
+            //Latitude = addressChangeCheck ? latitude : volunteer.Latitude, // Store latitude.
+            //Longitude = addressChangeCheck ? longitude : volunteer.Longitude, // Store longitude.
+            Latitude = latitude, // Store latitude.
+            Longitude = longitude, // Store longitude.
             Role = (DO.VolunteerRole)volunteer.Role, // Convert the volunteer's role to a data object enum.
             IsActive = volunteer.IsActive, // Store the volunteer's activity status.
             MaxDistance = volunteer.MaxDistance, // Store the volunteer's maximum distance for service.
             DistanceType = (DO.DistanceType)volunteer.DistanceType, // Convert the distance type to a data object enum.
-            //ImageProfilePath= volunteer.ImageProfilePath
+                                                                    //ImageProfilePath= volunteer.ImageProfilePath
         };
     }
-    public static DO.Volunteer ConvertToDOVolunteerAdd(BO.Volunteer volunteer)
+    public static async Task<DO.Volunteer> ConvertToDOVolunteerAddAsync(BO.Volunteer volunteer)
     {
-
         double? longitude = null;
         double? latitude = null;
-
 
         // If the volunteer has a current address, retrieve geographical coordinates (latitude and longitude).
         if (!string.IsNullOrEmpty(volunteer.CurrentAddress))
         {
             // Calling an external API (OpenStreetMap) to get latitude and longitude based on the address.
-            GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(volunteer.CurrentAddress);
+            GeoCoordinates geoCoordinates = await Tools.CallOpenStreetMapApiAsync(volunteer.CurrentAddress);
             longitude = geoCoordinates.Longitude;
             latitude = geoCoordinates.Latitude;
         }
-
 
         // Ensure that the volunteer's password is hashed. If not, hash it before saving.
         var hashedPassword = volunteer.Password;
@@ -239,7 +246,7 @@ internal static class VolunteerManager
             IsActive = volunteer.IsActive, // Store the volunteer's activity status.
             MaxDistance = volunteer.MaxDistance, // Store the volunteer's maximum distance for service.
             DistanceType = (DO.DistanceType)volunteer.DistanceType, // Convert the distance type to a data object enum.
-            //ImageProfilePath= volunteer.ImageProfilePath
+                                                                    //ImageProfilePath= volunteer.ImageProfilePath
         };
     }
     //public static DO.Volunteer UpdateImageDoVolunteer(DO.Volunteer volunteer, string path)
@@ -260,10 +267,12 @@ internal static class VolunteerManager
     /// <param name="activeCallId">The ID of the active call.</param>
     /// <param name="volunteerId">The ID of the volunteer handling the call.</param>
     /// <returns>A CallInProgress object containing details about the active call and its status.</returns>
-    public static BO.CallInProgress CreateCallInProgress(DO.Volunteer volunteer, DO.Call activeCall, int activeCallId, int volunteerId)
+    public static async Task<BO.CallInProgress> CreateCallInProgressAsync(DO.Volunteer volunteer, DO.Call activeCall, int activeCallId, int volunteerId)
     {
-        // Calculate the distance between the volunteer and the active call based on their settings
-        double distance = CalculateDistance(volunteer, activeCall, volunteer.DistanceType);
+        double distance = 0;
+        if (volunteer.Latitude != null && volunteer.Longitude != null)
+            // Calculate the distance between the volunteer and the active call based on their settings
+            distance = await CalculateDistanceAsync(volunteer, activeCall, volunteer.DistanceType);
 
         // Return a new CallInProgress object with the relevant details
         return new BO.CallInProgress
@@ -271,7 +280,7 @@ internal static class VolunteerManager
             Id = GetActiveAssignmentId(volunteerId),
             CallId = activeCallId,
             Type = (BO.CallType)activeCall.Type,
-            Description= activeCall.Description,
+            Description = activeCall.Description,
             FullAddress = activeCall.FullAddress,
             OpeningTime = activeCall.OpeningTime,
             MaxCompletionTime = activeCall.MaxCompletionTime,
@@ -362,7 +371,7 @@ internal static class VolunteerManager
             ValidatePhoneNumber(volunteer.PhoneNumber); // Phone number must match a specific pattern.
             ValidateEmail(volunteer.Email); // Email must follow the correct format.
             ValidatePassword(volunteer.Password); // Password must meet complexity requirements.
-            ValidateAddress(volunteer.CurrentAddress); // Address must be complete and valid.
+            //await ValidateAddressAsync(volunteer.CurrentAddress); // Address must be complete and valid.
             TryParseAndValidateRole(volunteer.Role.ToString()); // Role must be a valid enum.
             ValidateMaxDistance(volunteer.MaxDistance); // Max distance must be a positive number.
             ValidateDistanceType(volunteer.DistanceType.ToString()); // Distance type must be valid.
@@ -373,12 +382,49 @@ internal static class VolunteerManager
             throw HandleValidationException(ex);
         }
     }
-
+    public static async Task ValidateVolunteerDataAsync(BO.Volunteer volunteer)
+    {
+        try
+        {
+            // Each field should pass validation to ensure integrity.
+            ValidateId(volunteer.Id); // ID must be positive and valid.
+            ValidateFullName(volunteer.FullName); // Full name must not be empty.
+            ValidatePhoneNumber(volunteer.PhoneNumber); // Phone number must match a specific pattern.
+            ValidateEmail(volunteer.Email); // Email must follow the correct format.
+            ValidatePassword(volunteer.Password); // Password must meet complexity requirements.
+            await ValidateAddressAsync(volunteer.CurrentAddress); // Address must be complete and valid.
+            TryParseAndValidateRole(volunteer.Role.ToString()); // Role must be a valid enum.
+            ValidateMaxDistance(volunteer.MaxDistance); // Max distance must be a positive number.
+            ValidateDistanceType(volunteer.DistanceType.ToString()); // Distance type must be valid.
+        }
+        catch (Exception ex)
+        {
+            // Handle all validation errors uniformly by throwing a custom exception.
+            throw HandleValidationException(ex);
+        }
+    }
     /// <summary>
     /// Handles exceptions thrown during the validation process and returns a more specific exception.
     /// </summary>
     /// <param name="ex">The exception to be handled.</param>
     /// <returns>A new exception with a custom message based on the type of the original exception.</returns>
+    //private static Exception HandleValidationException(Exception ex)
+    //{
+    //    return ex switch
+    //    {
+    //        InvalidIdException => new InvalidIdException($"ID Validation Error: {ex.Message}"),
+    //        InvalidFullNameException => new InvalidFullNameException($"Full Name Validation Error: {ex.Message}"),
+    //        InvalidPhoneNumberException => new InvalidPhoneNumberException($"Phone Number Validation Error: {ex.Message}"),
+    //        InvalidEmailException => new InvalidEmailException($"Email Validation Error: {ex.Message}"),
+    //        PasswordValidationException => new PasswordValidationException($"Password Validation Error: {ex.Message}"),
+    //        AddressValidationException => new AddressValidationException($"Address Validation Error: {ex.Message}"),
+    //        InvalidCoordinatesException => new InvalidCoordinatesException($"Coordinates Validation Error: {ex.Message}"),
+    //        InvalidRoleException => new InvalidRoleException($"Role Validation Error: {ex.Message}"),
+    //        InvalidMaxDistanceException => new InvalidMaxDistanceException($"Max Distance Validation Error: {ex.Message}"),
+    //        InvalidDistanceTypeException => new InvalidDistanceTypeException($"Distance Type Validation Error: {ex.Message}"),
+    //        _ => new Exception($"Unexpected Error: {ex.Message}", ex),
+    //    };
+    //}
     private static Exception HandleValidationException(Exception ex)
     {
         return ex switch
@@ -388,7 +434,12 @@ internal static class VolunteerManager
             InvalidPhoneNumberException => new InvalidPhoneNumberException($"Phone Number Validation Error: {ex.Message}"),
             InvalidEmailException => new InvalidEmailException($"Email Validation Error: {ex.Message}"),
             PasswordValidationException => new PasswordValidationException($"Password Validation Error: {ex.Message}"),
+
+            // חלק הכתובת המעודכן
             AddressValidationException => new AddressValidationException($"Address Validation Error: {ex.Message}"),
+            HttpRequestException => new AddressValidationException($"Network Error During Address Validation: {ex.Message}"),
+            JsonException => new AddressValidationException($"Error Processing Address Data: {ex.Message}"),
+
             InvalidCoordinatesException => new InvalidCoordinatesException($"Coordinates Validation Error: {ex.Message}"),
             InvalidRoleException => new InvalidRoleException($"Role Validation Error: {ex.Message}"),
             InvalidMaxDistanceException => new InvalidMaxDistanceException($"Max Distance Validation Error: {ex.Message}"),
@@ -396,7 +447,6 @@ internal static class VolunteerManager
             _ => new Exception($"Unexpected Error: {ex.Message}", ex),
         };
     }
-
     /// <summary>
     /// Validates the volunteer's ID, ensuring it is a positive number and a valid Israeli ID.
     /// </summary>
@@ -493,34 +543,114 @@ internal static class VolunteerManager
             throw new PasswordValidationException("Password must contain at least one special character (e.g., !@#$%^&*).");
     }
 
-    /// <summary>
-    /// Validates the volunteer's address to ensure it follows the required structure and exists.
-    /// </summary>
-    /// <param name="address">The address to validate.</param>
-    public static void ValidateAddress(string? address)
+    ///// <summary>
+    ///// Validates the volunteer's address to ensure it follows the required structure and exists.
+    ///// </summary>
+    ///// <param name="address">The address to validate.</param>
+    //public static async Task ValidateAddressAsync(string? address)
+    //{
+    //    // Address must be structured correctly and match real-world existence.
+    //    if (string.IsNullOrWhiteSpace(address))
+    //        return;
+
+    //    var parts = address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+    //                       .Select(p => p.Trim())
+    //                       .ToArray();
+
+    //    if (parts.Length < 3)
+    //        throw new AddressValidationException("Address must include at least Street, City, and Country.");
+    //    if (parts.Any(p => p.Length < 2))
+    //        throw new AddressValidationException("Each part of the address must be at least 2 characters long.");
+    //    if (!await Tools.VerifyAddressExistsAsync(address))
+    //        throw new AddressValidationException("Address does not exist in reality.");
+    //}
+
+
+   
+
+/// <summary>
+/// Validates the volunteer's address to ensure it exists in OpenStreetMap.
+/// </summary>
+/// <param name="address">The address to validate.</param>
+public static async Task ValidateAddressAsync(string? address)
+{
+    // Skip validation if address is empty
+    if (string.IsNullOrWhiteSpace(address))
+        return;
+
+    // Basic validation for minimum length
+    if (address.Length < 5)
+        throw new AddressValidationException("Address is too short. Please provide a complete address.");
+
+    try
     {
-        // Address must be structured correctly and match real-world existence.
-        if (string.IsNullOrWhiteSpace(address))
-            return;
+        // Check if the address exists in OpenStreetMap
+        bool addressExists = await VerifyAddressInOpenStreetMapAsync(address);
 
-        var parts = address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                           .Select(p => p.Trim())
-                           .ToArray();
-
-        if (parts.Length < 3)
-            throw new AddressValidationException("Address must include at least Street, City, and Country.");
-        if (parts.Any(p => p.Length < 2))
-            throw new AddressValidationException("Each part of the address must be at least 2 characters long.");
-        if (!Tools.VerifyAddressExists(address))
-            throw new AddressValidationException("Address does not exist in reality.");
+        if (!addressExists)
+            throw new AddressValidationException("Address could not be found in OpenStreetMap. Please provide a valid address.");
     }
+    catch (HttpRequestException ex)
+    {
+        // Handle network errors
+        throw new AddressValidationException($"Could not verify address due to network error: {ex.Message}");
+    }
+    catch (JsonException ex)
+    {
+        // Handle JSON parsing errors
+        throw new AddressValidationException($"Could not process address verification response: {ex.Message}");
+    }
+    catch (Exception ex) when (!(ex is AddressValidationException))
+    {
+        // Handle any other unexpected errors
+        throw new AddressValidationException($"Address validation failed: {ex.Message}");
+    }
+}
 
-    /// <summary>
-    /// Validates the coordinates (latitude and longitude) to ensure they fall within valid ranges.
-    /// </summary>
-    /// <param name="latitude">The latitude to validate.</param>
-    /// <param name="longitude">The longitude to validate.</param>
-    public static void ValidateLatitudeLongitude(double? latitude, double? longitude)
+/// <summary>
+/// Verifies if an address exists in OpenStreetMap using the Nominatim API.
+/// </summary>
+/// <param name="address">The address to verify.</param>
+/// <returns>True if the address exists, false otherwise.</returns>
+private static async Task<bool> VerifyAddressInOpenStreetMapAsync(string address)
+{
+    using (var httpClient = new HttpClient())
+    {
+        // Add required User-Agent header for Nominatim API
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "VolunteerManagementSystem/1.0");
+
+        // Encode the address for URL
+        string encodedAddress = Uri.EscapeDataString(address);
+
+        // Build the Nominatim API URL
+        string url = $"https://nominatim.openstreetmap.org/search?format=json&q={encodedAddress}&limit=1";
+
+        // Send the request
+        var response = await httpClient.GetStringAsync(url);
+
+        // Parse the JSON response
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var results = JsonSerializer.Deserialize<List<NominatimSearchResult>>(response, options);
+
+        // If we got at least one result, the address exists
+        return results != null && results.Count > 0;
+    }
+}
+
+/// <summary>
+/// Class representing a result from Nominatim search API
+/// </summary>
+private class NominatimSearchResult
+{
+    public string PlaceId { get; set; }
+    public string DisplayName { get; set; }
+}
+/// <summary>
+/// Validates the coordinates (latitude and longitude) to ensure they fall within valid ranges.
+/// </summary>
+/// <param name="latitude">The latitude to validate.</param>
+/// <param name="longitude">The longitude to validate.</param>
+public static void ValidateLatitudeLongitude(double? latitude, double? longitude)
     {
         // Latitude and longitude must be within valid geographical ranges.
         if (latitude.HasValue && (latitude < -90 || latitude > 90))
@@ -604,7 +734,7 @@ internal static class VolunteerManager
     /// <returns>The calculated distance between the volunteer and the call.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the volunteer's latitude or longitude is null.</exception>
     /// <exception cref="ArgumentException">Thrown if an unsupported distance type is provided.</exception>
-    public static double CalculateDistance(DO.Volunteer volunteer, DO.Call call, DO.DistanceType distanceType)
+    public static async Task<double> CalculateDistanceAsync(DO.Volunteer volunteer, DO.Call call, DO.DistanceType distanceType)
     {
         double distance = 0;
         double latitude = volunteer.Latitude ?? throw new InvalidOperationException("Latitude is null");
@@ -619,13 +749,13 @@ internal static class VolunteerManager
                 break;
 
             case DO.DistanceType.Driving:
-                // Calculate the distance using a walking route.
-                distance = Tools.GetWalkingRouteDistance(latitude, longitude, call.Latitude, call.Longitude);
+                // Calculate the distance using a driving route.
+                distance = await Tools.RouteCalculator.GetDrivingRouteDistanceAsync(latitude, longitude, call.Latitude, call.Longitude);
                 break;
 
             case DO.DistanceType.Walking:
-                // Calculate the distance using a driving route.
-                distance = Tools.GetDrivingRouteDistance(latitude, longitude, call.Latitude, call.Longitude);
+                // Calculate the distance using a walking route.
+                distance = await Tools.RouteCalculator.GetWalkingRouteDistanceAsync(latitude, longitude, call.Latitude, call.Longitude);
                 break;
 
             default:
@@ -721,7 +851,7 @@ internal static class VolunteerManager
         private const string SenderEmail = "toibymichalminiproject@gmail.com";
         private const string SenderPassword = "iwge idji gbtj lomm";
 
-        public static void SendStaticEmail(string recipientEmail, string volunteerFullName, string generatedPassword)
+        public static async Task SendStaticEmailAsync(string recipientEmail, string volunteerFullName, string generatedPassword)
         {
             if (string.IsNullOrEmpty(recipientEmail))
             {
@@ -731,18 +861,15 @@ internal static class VolunteerManager
             try
             {
                 using (var smtpClient = new SmtpClient(SmtpHost, SmtpPort))
+                using (var mailMessage = new MailMessage())
                 {
                     smtpClient.Credentials = new NetworkCredential(SenderEmail, SenderPassword);
                     smtpClient.EnableSsl = true;
 
-                    var mailMessage = new MailMessage
-                    {
-                        From = new MailAddress(SenderEmail, "Volunteer Support Team"),
-                        Subject = "Welcome to Our Volunteer Family!",
-                        IsBodyHtml = true
-                    };
-
-                    string body = $@"
+                    mailMessage.From = new MailAddress(SenderEmail, "Volunteer Support Team");
+                    mailMessage.Subject = "Welcome to Our Volunteer Family!";
+                    mailMessage.IsBodyHtml = true;
+                    mailMessage.Body = $@"
 <html>
     <head>
         <style>
@@ -756,31 +883,31 @@ internal static class VolunteerManager
             }}
             .email-container {{
                 width: 100%;
-                max-width: 500px; /* הקטנת הרוחב המקסימלי */
+                max-width: 500px;
                 margin: 0 auto;
-                padding: 20px; /* הקטנת הריפוד */
-                background-image: url('https://pnghq.com/wp-content/uploads/pnghq.com-confetti-png-free-download.png');
+                padding: 20px;
+                background-image: url('https://pnghq.com/wp-content/uploads/pnghq.com-confetti-png-free-download.png'); 
                 background-repeat: repeat;
-                background-size: 150px 150px; /* הקטנת גודל הרקע */
+                background-size: 150px 150px;
                 background-position: center;
                 background-color: #f0f0f0;
             }}
             .content {{
                 background-color: rgba(255, 255, 255, 0.9);
-                padding: 15px; /* הקטנת הריפוד */
-                border-radius: 8px; /* הקטנת הרדיוס */
+                padding: 15px;
+                border-radius: 8px;
                 box-shadow: 0 0 8px rgba(0,0,0,0.1);
             }}
             h2 {{
-                color: #4a5568; /* שינוי צבע הכותרת לשחור */
+                color: #4a5568;
                 text-align: center;
                 padding: 15px 0;
-                font-size: 20px; /* הקטנת גודל הפונט */
+                font-size: 20px;
                 font-weight: bold;
                 margin-top: 0;
             }}
             p {{
-                font-size: 14px; /* הקטנת גודל הפונט */
+                font-size: 14px;
                 color: #4a5568;
             }}
             .highlight {{
@@ -791,7 +918,7 @@ internal static class VolunteerManager
                 border-radius: 4px;
             }}
             .footer {{
-                font-size: 12px; /* הקטנת גודל הפונט */
+                font-size: 12px;
                 text-align: center;
                 margin-top: 20px;
                 color: #718096;
@@ -821,9 +948,10 @@ internal static class VolunteerManager
     </body>
 </html>";
 
-                    mailMessage.Body = body;
                     mailMessage.To.Add(recipientEmail);
-                    smtpClient.Send(mailMessage);
+
+                    // שליחה אסינכרונית
+                    await smtpClient.SendMailAsync(mailMessage).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -832,6 +960,7 @@ internal static class VolunteerManager
             }
         }
     }
+
 
 }
 

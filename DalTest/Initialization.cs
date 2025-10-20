@@ -31,7 +31,7 @@ public static class Initialization
     "Moshe Mizrahi",
     "Tamar Kaplan",
     "Yosef Goldstein",
-    "Esther Ben-Shimon",
+    "Dani Brening",
     "Avi Rosenberg",
     "Hila Sharabi",
     "Noam Azulai",
@@ -225,16 +225,42 @@ public static class Initialization
             }
         
     }
-   
+
 
     //private static string GetImagePathForVolunteer(int volunteerId)
     //{
     //    string imageDirectory = "ProfileImage";
     //    return Path.Combine(imageDirectory, $"{volunteerId}.jpg");
     //}
-   
+    public static DateTime GetRandomDateTimeBetween(DateTime fromDate, DateTime toDate)
+    {
+        if (fromDate >= toDate.AddSeconds(-2))
+            throw new ArgumentException("טווח זמנים קצר מדי – חייבים לפחות שתי שניות הפרש.");
 
-static private void createCall()
+        Random rand = new Random();
+        double totalSeconds = (toDate - fromDate).TotalSeconds;
+        int secondsToAdd = rand.Next(1, (int)totalSeconds - 1);
+        return fromDate.AddSeconds(secondsToAdd);
+    }
+    public static DateTime[] openingTimesTreated = new DateTime[15];
+    public static DateTime[] completionTimesTreated = new DateTime[15];
+
+    public static DateTime[] openingTimes_Cancelled = new DateTime[5];
+    public static DateTime?[] completionTimes_Cancelled = new DateTime?[5];
+
+    public static DateTime[] openingTimes_Admin = new DateTime[6];
+    public static DateTime[] completionTimes_Admin = new DateTime[6];
+
+    public static DateTime[] openingTimes_Expired = new DateTime[10];
+    public static DateTime[] completionTimes_Expired = new DateTime[10];
+
+    public static DateTime[] openingTimes = new DateTime[14];
+    public static DateTime[] completionTimes = new DateTime[14];
+
+    public static DateTime[] AllOpeningTimes = new DateTime[56];
+    public static DateTime?[] AllMaxCompletionTimes = new DateTime?[56];
+
+    static private void createCall()
     {
        
 
@@ -307,7 +333,7 @@ static private void createCall()
     "9 Begin, Be'er Sheva, Israel",
     "20 Rothschild Boulevard, Tel Aviv, Israel",
     "9 HaYehudim, Jerusalem, Israel",
-    "9 Independence, Ashdod, Israel",
+    "15 Rothschild Boulevard, Tel Aviv, Israel",
     "5 HaGefen, Nahariya, Israel",
     "17 Jabotinsky, Ramat Gan, Israel",
     "4 Jerusalem, Holon, Israel",
@@ -388,47 +414,146 @@ static private void createCall()
     34.7818, 34.7818, 35.3955, 34.8015, 34.8291,
     34.7740
 };
-        /*Enum.GetValues(typeof(DO.CallType)).Length*/
+
+
+
+        int[] callIds = Enumerable.Range(56, 112).ToArray();
         DO.CallType[] callTypes = new DO.CallType[Descriptions.Length];
         for (int i = 0; i < Descriptions.Length; i++)
         {
-            callTypes[i] = (DO.CallType)s_rand.Next(11);
+            callTypes[i] = (DO.CallType)s_rand.Next(Enum.GetValues(typeof(DO.CallType)).Length);
         }
 
-        DateTime start = new(s_dal.Config.Clock.Year - 2, 1, 1);
-        int[] callIds = Enumerable.Range(56, 112).ToArray();
-            for (int i = 0; i < Descriptions.Length; i++)
-            {
-                DateTime startTime = start.AddDays(-s_rand.Next(1, 30));
-                DateTime? deadline = s_rand.NextDouble() < 0.5 ? (DateTime?)startTime.AddHours(s_rand.Next(1, 72)) : null;
+        DateTime fixedOpeningTime = new DateTime(2025, 4, 1, 8, 0, 0); // זמן פתיחה אחיד לכל ה־15
+        DateTime now = s_dal.Config.Clock;
+
+        DateTime[] openingTimesTreated = new DateTime[15]; // הקריאות שטופלו
+        DateTime[] maxCompletionTimesTreated = new DateTime[15];
 
 
-                var call = new Call
-                   (
-                       Id: callIds[i],
-                       Type: callTypes[i],
-                       FullAddress: Addresses[i],
-                       Latitude: latitudes[i],
-                       Longitude: longitudes[i],
-                       OpeningTime: startTime,
-                       Description: Descriptions[i],
-                       MaxCompletionTime: deadline
-                   );
-                s_dal!.Call.Create(call); //stage 2
-               
-            }
-        
+        for (int i = 0; i < 15; i++)
+        {
+            DateTime maxCompletionTime = GetRandomDateTimeBetween(fixedOpeningTime, now);
+            AllOpeningTimes[i] = fixedOpeningTime;
+            AllMaxCompletionTimes[i] = maxCompletionTime;
+
+            var call = new Call(
+                Id: callIds[i],
+                Type: callTypes[i],
+                FullAddress: Addresses[i],
+                Latitude: latitudes[i],
+                Longitude: longitudes[i],
+                OpeningTime: fixedOpeningTime,
+                Description: Descriptions[i],
+                MaxCompletionTime: maxCompletionTime
+            );
+
+            s_dal!.Call.Create(call);
+        }
+
+
+        DateTime baseTime = now.AddDays(-30);
+        for (int i = 15; i < 20; i++)
+        {
+            DateTime openingTime = GetRandomDateTimeBetween(baseTime, now.AddDays(-1));
+            DateTime maxCompletionTime = GetRandomDateTimeBetween(openingTime.AddMinutes(2), now);
+
+            AllOpeningTimes[i] = openingTime;
+            AllMaxCompletionTimes[i] = maxCompletionTime;
+
+            var call = new Call(
+                Id: callIds[i],
+                Type: callTypes[i],
+                FullAddress: Addresses[i],
+                Latitude: latitudes[i],
+                Longitude: longitudes[i],
+                OpeningTime: openingTime,
+                Description: Descriptions[i],
+                MaxCompletionTime: maxCompletionTime
+            );
+
+            s_dal!.Call.Create(call);
+        }
+
+        for (int i = 20; i < 26; i++)
+        {
+            DateTime openingTime = now.AddDays(-s_rand.Next(1, 30));
+            DateTime maxCompletionTime = GetRandomDateTimeBetween(openingTime, now);
+
+            AllOpeningTimes[i] = openingTime;
+            AllMaxCompletionTimes[i] = maxCompletionTime;
+
+            var call = new Call(
+                Id: callIds[i],
+                Type: callTypes[i],
+                FullAddress: Addresses[i],
+                Latitude: latitudes[i],
+                Longitude: longitudes[i],
+                OpeningTime: openingTime,
+                Description: Descriptions[i],
+                MaxCompletionTime: maxCompletionTime
+            );
+
+            s_dal!.Call.Create(call);
+        }
+        for (int i = 26; i < 36; i++)
+        {
+            DateTime openingTime = now.AddDays(-s_rand.Next(1, 100));
+            DateTime maxCompletionTime = GetRandomDateTimeBetween(openingTime, now);
+
+            AllOpeningTimes[i] = openingTime;
+            AllMaxCompletionTimes[i] = maxCompletionTime;
+
+            var call = new Call(
+                Id: callIds[i],
+                Type: callTypes[i],
+                FullAddress: Addresses[i],
+                Latitude: latitudes[i],
+                Longitude: longitudes[i],
+                OpeningTime: openingTime,
+                Description: Descriptions[i],
+                MaxCompletionTime: maxCompletionTime
+            );
+
+            s_dal!.Call.Create(call);
+        }
+
+
+        for (int i = 36; i < 56; i++)
+        {
+            DateTime openingTime = now.AddDays(-s_rand.Next(1, 30));
+            DateTime maxCompletionTime = GetRandomDateTimeBetween(now, now.AddDays(30));
+
+            AllOpeningTimes[i] = openingTime;
+            AllMaxCompletionTimes[i] = maxCompletionTime;
+
+            var call = new Call(
+                Id: callIds[i],
+                Type: callTypes[i],
+                FullAddress: Addresses[i],
+                Latitude: latitudes[i],
+                Longitude: longitudes[i],
+                OpeningTime: openingTime,
+                Description: Descriptions[i],
+                MaxCompletionTime: maxCompletionTime
+            );
+
+            s_dal!.Call.Create(call);
+        }
+
+
     }
     /// <summary>
     /// Creates and initializes a predefined set of Assignment objects with varying completion types.
     /// Assignments are created for specific volunteer IDs, and the completion type is determined based on their index.
     /// </summary>
+
     private static void createAssignment()
     {
 
 
 
-            int[] callIds = Enumerable.Range(1, 56).ToArray();
+        int[] callIds = Enumerable.Range(1, 56).ToArray();
         int[] volunteerIds = new int[]
 {
     735927006, 985810993, 553026436, 614562379,
@@ -459,152 +584,196 @@ static private void createCall()
     912011889, 680412384, 434477790, 705204873,
     901234567, 294703103, 255335531, 345210678
 };
-        DateTime[] completionTimes = new DateTime[]
-       {
-            new DateTime(2024, 12, 30, 8, 0, 0),
-            new DateTime(2024, 12, 30, 9, 15, 0),
-            new DateTime(2024, 12, 30, 10, 30, 0),
-            new DateTime(2024, 12, 30, 11, 45, 0),
-            new DateTime(2024, 12, 30, 13, 0, 0),
-            new DateTime(2024, 12, 30, 14, 15, 0),
-            new DateTime(2024, 12, 30, 15, 30, 0),
-            new DateTime(2024, 12, 30, 16, 45, 0),
-            new DateTime(2024, 12, 30, 18, 0, 0),
-            new DateTime(2024, 12, 30, 19, 15, 0),
-            new DateTime(2024, 12, 30, 20, 30, 0),
-            new DateTime(2024, 12, 30, 21, 45, 0),
-            new DateTime(2024, 12, 30, 23, 0, 0),
-            new DateTime(2024, 12, 31, 0, 15, 0),
-            new DateTime(2024, 12, 31, 1, 30, 0),
-            new DateTime(2024, 12, 31, 2, 45, 0),
-            new DateTime(2024, 12, 31, 4, 0, 0),
-            new DateTime(2024, 12, 31, 5, 15, 0),
-            new DateTime(2024, 12, 31, 6, 30, 0),
-            new DateTime(2024, 12, 31, 7, 45, 0),
-            new DateTime(2024, 12, 31, 9, 0, 0),
-            new DateTime(2024, 12, 31, 10, 15, 0),
-            new DateTime(2024, 12, 31, 11, 30, 0),
-            new DateTime(2024, 12, 31, 12, 45, 0),
-            new DateTime(2024, 12, 31, 14, 0, 0),
-            new DateTime(2024, 12, 31, 15, 15, 0),
-            new DateTime(2024, 12, 31, 16, 30, 0),
-            new DateTime(2024, 12, 31, 17, 45, 0),
-            new DateTime(2024, 12, 31, 19, 0, 0),
-            new DateTime(2024, 12, 31, 20, 15, 0),
-            new DateTime(2024, 12, 31, 21, 30, 0),
-            new DateTime(2024, 12, 31, 22, 45, 0),
-            new DateTime(2024, 12, 31, 23, 59, 59),
-            new DateTime(2025, 1, 1, 1, 0, 0),
-            new DateTime(2025, 1, 1, 2, 15, 0),
-            new DateTime(2025, 1, 1, 3, 30, 0),
-            new DateTime(2025, 1, 1, 4, 45, 0),
-            new DateTime(2025, 1, 1, 6, 0, 0),
-            new DateTime(2025, 1, 1, 7, 15, 0),
-            new DateTime(2025, 1, 1, 8, 30, 0),
-            new DateTime(2025, 1, 1, 9, 45, 0),
-            new DateTime(2025, 1, 1, 11, 0, 0),
-            new DateTime(2025, 1, 1, 12, 15, 0),
-            new DateTime(2025, 1, 1, 13, 30, 0),
-            new DateTime(2025, 1, 1, 14, 45, 0),
-            new DateTime(2025, 1, 1, 16, 0, 0),
-            new DateTime(2025, 1, 1, 17, 15, 0),
-            new DateTime(2025, 1, 1, 18, 30, 0),
-            new DateTime(2025, 1, 1, 19, 45, 0),
-            new DateTime(2025, 1, 1, 21, 0, 0)
-       };
-        DateTime[] completionTimesNull = new DateTime[]
-{
-    new DateTime(2023, 1, 1, 8, 0, 0),
-    new DateTime(2023, 1, 11, 10, 0, 0),
-    new DateTime(2023, 1, 21, 12, 0, 0),
-    new DateTime(2023, 1, 31, 14, 0, 0),
-    new DateTime(2023, 2, 10, 16, 0, 0),
-    new DateTime(2023, 2, 20, 18, 0, 0),
-    new DateTime(2023, 3, 2, 20, 0, 0)
-};
-        // Get the next available assignment ID.
-        //int assignmentId = s_dal.Config.NextAssignmentId;
-        int assignmentId =0;
 
+        int assignmentId = 0;
+        DateTime now = s_dal.Config.Clock;
 
-        // Create assignments with CompletionType.Treated for the first 15 volunteers.
         for (int i = 0; i < 15; i++)
-            {
-                Assignment a = new Assignment(
-                    Id: assignmentId,
-                    CallId: callIds[i],
-                    VolunteerId: volunteerIds[i],
-                    EntryTime: s_dal.Config.Clock,
-                    CompletionTime: completionTimes[i],
-                    CompletionType: AssignmentCompletionType.Treated
-                );
-                s_dal!.Assignment.Create(a); //stage 2
+        {
+            DateTime openingTime = AllOpeningTimes[i];
+            DateTime? maxCompletionTime = AllMaxCompletionTimes[i] ?? now;
 
+            // כניסה לאחר זמן פתיחה
+            TimeSpan timeSinceOpening = maxCompletionTime.Value - openingTime;
+            DateTime entryTime;
+
+            if (timeSinceOpening.TotalMinutes >= 1)
+            {
+                int maxOffset = (int)Math.Min(30, timeSinceOpening.TotalMinutes);
+                int offset = s_rand.Next(1, maxOffset + 1);
+                entryTime = openingTime.AddMinutes(offset);
+            }
+            else
+            {
+                entryTime = openingTime.AddSeconds(1);
             }
 
-            // Create assignments with CompletionType.VolunteerCancelled for the next set of volunteers.
-            for (int i = 15; i < 29; i++)
-            {
-                Assignment a = new Assignment(
-                    Id: assignmentId,
-                    CallId: callIds[i],
-                    VolunteerId: volunteerIds[i],
-                    EntryTime: s_dal.Config.Clock,
-                    CompletionTime: completionTimes[i],
-                    CompletionType: AssignmentCompletionType.VolunteerCancelled
-                );
-                s_dal!.Assignment.Create(a); //stage 2
-            }
+            // סיום הטיפול לאחר הכניסה אבל לפני זמן המקסימום
+            DateTime completionTime = GetRandomDateTimeBetween(entryTime.AddSeconds(1), maxCompletionTime.Value);
 
-            // Create assignments with CompletionType.AdminCancelled for the next set of volunteers.
-            for (int i = 29; i < 40; i++)
-            {
-                Assignment a = new Assignment(
-                    Id: assignmentId,
-                    CallId: callIds[i],
-                    VolunteerId: volunteerIds[i],
-                    EntryTime: s_dal.Config.Clock,
-                    CompletionTime: completionTimes[i],
-                    CompletionType: AssignmentCompletionType.AdminCancelled
-                );
-                s_dal!.Assignment.Create(a); //stage 2
-            }
-
-            // Create assignments with CompletionType.Expired for the remaining volunteers.
-            for (int i = 40; i < 45; i++)
-            {
-                Assignment a = new Assignment(
-                    Id: assignmentId,
-                    CallId: callIds[i],
-                    VolunteerId: volunteerIds[i],
-                    EntryTime: s_dal.Config.Clock,
-                    CompletionTime: completionTimes[i],
-                    CompletionType: AssignmentCompletionType.Expired
-                );
-                s_dal!.Assignment.Create(a); //stage 2
-                
-            }
-        int j = 0;
-        for (int i = 45; i < 50; i++)
-            {
-            
             Assignment a = new Assignment(
-              Id: assignmentId,
-              CallId: callIds[i],
-              VolunteerId: volunteerIds[i],
-              EntryTime: completionTimesNull[j++],
-              CompletionTime: null,
-              CompletionType: null
-          );
+                Id: assignmentId++,
+                CallId: callIds[i],
+                VolunteerId: volunteerIds[i],
+                EntryTime: entryTime,
+                CompletionTime: completionTime,
+                CompletionType: AssignmentCompletionType.Treated
+            );
 
-            s_dal!.Assignment.Create(a); //stage 2
-
-
+            s_dal!.Assignment.Create(a);
         }
+       
+        for (int i = 15; i < 20; i++)
+        {
+            DateTime openingTime = AllOpeningTimes[i];
+            DateTime maxTime = AllMaxCompletionTimes[i] ?? now;
+            DateTime entryTime = GetRandomDateTimeBetween(openingTime.AddMinutes(1), maxTime.AddMinutes(-1));
+
+            Assignment a = new Assignment(
+                Id: assignmentId++,
+                CallId: callIds[i],
+                VolunteerId: volunteerIds[i],
+                EntryTime: entryTime,
+                CompletionTime: null, // לא הושלם
+                CompletionType: AssignmentCompletionType.VolunteerCancelled
+            );
+
+            s_dal!.Assignment.Create(a);
+        }
+
+        for (int i = 20; i < 26; i++)
+        {
+            DateTime openingTime = AllOpeningTimes[i];
+            DateTime maxTime = AllMaxCompletionTimes[i] ?? now;
+            DateTime entryTime = GetRandomDateTimeBetween(openingTime.AddMinutes(1), maxTime.AddMinutes(-1));
+
+            Assignment a = new Assignment(
+                Id: assignmentId++,
+                CallId: callIds[i],
+                VolunteerId: volunteerIds[i],
+                EntryTime: entryTime,
+                CompletionTime: null, // עדיין ממתין לאישור
+                CompletionType: AssignmentCompletionType.AdminCancelled
+            );
+
+            s_dal!.Assignment.Create(a);
+        }
+        for (int i = 26; i < 36; i++)
+        {
+            DateTime openingTime = AllOpeningTimes[i];
+            DateTime maxTime = AllMaxCompletionTimes[i] ?? now;
+            DateTime entryTime = GetRandomDateTimeBetween(openingTime.AddMinutes(1), maxTime.AddMinutes(-1));
+
+            Assignment a = new Assignment(
+                Id: assignmentId++,
+                CallId: callIds[i],
+                VolunteerId: volunteerIds[i],
+                EntryTime: entryTime,
+                CompletionTime: null, // פג תוקף - לא טופל
+                CompletionType: AssignmentCompletionType.Expired
+            );
+
+            s_dal!.Assignment.Create(a);
+        }
+        // הקצאות לקריאות פתוחות
+        for (int i = 36; i < 45; i++)
+        {
+            DateTime openingTime = AllOpeningTimes[i];
+
+            // נוודא שזמן ההקצאה יהיה לפחות דקה אחרי הפתיחה
+            DateTime entryTime = openingTime.AddMinutes(s_rand.Next(1, 30));
+
+            Assignment a = new Assignment(
+                Id: assignmentId++,
+                CallId: callIds[i],
+                VolunteerId: volunteerIds[i],
+                EntryTime: entryTime,
+                CompletionTime: null,             // עדיין לא הסתיים
+                CompletionType: null              // עדיין לא ידוע
+            );
+
+            s_dal!.Assignment.Create(a);
+        }
+
+
+
+        //DateTime entryTimeFromPast = new DateTime(2025, 04, 03, 3, 28, 0);
+        //DateTime currentTime = s_dal.Config.Clock;
+
+        //for (int i = 0; i < 15; i++)
+        //{
+        //    Assignment a = new Assignment(
+        //        Id: assignmentId,
+        //        CallId: callIds[i],
+        //        VolunteerId: volunteerIds[i],
+        //        EntryTime: entryTimeFromPast,
+        //        CompletionTime: GetRandomDateTimeBetween(entryTimeFromPast, currentTime),
+        //        CompletionType: AssignmentCompletionType.Treated
+        //    );
+        //    s_dal!.Assignment.Create(a);
+        //}
+
+        //// Create assignments with CompletionType.VolunteerCancelled for the next set of volunteers.
+        //for (int i = 15; i < 29; i++)
+        //    {
+        //        Assignment a = new Assignment(
+        //            Id: assignmentId,
+        //            CallId: callIds[i],
+        //            VolunteerId: volunteerIds[i],
+        //            EntryTime: entryTimeFromPast,
+        //            CompletionTime: GetRandomDateTimeBetween(entryTimeFromPast, currentTime),
+        //            CompletionType: AssignmentCompletionType.VolunteerCancelled
+        //        );
+        //        s_dal!.Assignment.Create(a); //stage 2
+        //    }
+
+        //    // Create assignments with CompletionType.AdminCancelled for the next set of volunteers.
+        //    for (int i = 29; i < 40; i++)
+        //    {
+        //        Assignment a = new Assignment(
+        //            Id: assignmentId,
+        //            CallId: callIds[i],
+        //            VolunteerId: volunteerIds[i],
+        //            EntryTime: entryTimeFromPast,
+        //            CompletionTime: GetRandomDateTimeBetween(entryTimeFromPast, currentTime),
+        //            CompletionType: AssignmentCompletionType.AdminCancelled
+        //        );
+        //        s_dal!.Assignment.Create(a); //stage 2
+        //    }
+
+        //    // Create assignments with CompletionType.Expired for the remaining volunteers.
+        //    for (int i = 40; i < 45; i++)
+        //    {
+        //        Assignment a = new Assignment(
+        //            Id: assignmentId,
+        //            CallId: callIds[i],
+        //            VolunteerId: volunteerIds[i],
+        //            EntryTime: entryTimeFromPast,
+        //            CompletionTime: GetRandomDateTimeBetween(entryTimeFromPast, currentTime),
+        //            CompletionType: AssignmentCompletionType.Expired
+        //        );
+        //        s_dal!.Assignment.Create(a); //stage 2
+
+        //    }
+        ////int j = 0;
+        //for (int i = 45; i < 50; i++)
+        //    {
+
+        //    Assignment a = new Assignment(
+        //      Id: assignmentId,
+        //      CallId: callIds[i],
+        //      VolunteerId: volunteerIds[i],
+        //      EntryTime: s_dal.Config.Clock.AddHours(-9),
+        //      CompletionTime: null,
+        //      CompletionType: null
+        //  );
+
+        //    s_dal!.Assignment.Create(a); //stage 2
+        //}
 
     }
 
-    
+
     /// <summary>
     /// Initializes and configures the DAL (Data Access Layer) objects, 
     /// resets configuration and clears existing data, then populates lists for Volunteers, Calls, and Assignments.
@@ -633,6 +802,8 @@ static private void createCall()
          createAssignment();
 
     }
+
+  
 }
 public static class PasswordHasher
 {
@@ -677,6 +848,9 @@ public static class PasswordHasher
         }
         return salt;
     }
+
+    
+
 }
 
 

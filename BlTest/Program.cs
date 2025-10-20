@@ -175,7 +175,7 @@ namespace BlTest
                             TestGetVolunteerDetails();
                             break;
                         case VolunteerMenuOption.UpdateVolunteerDetails:
-                            TestUpdateVolunteer();
+                            TestUpdateVolunteerAsync();
                             break;
                         case VolunteerMenuOption.UpdatePassword:
                             TestUpdatePassword();
@@ -341,7 +341,7 @@ namespace BlTest
                 Console.WriteLine($"Unexpected error: {ex.GetType().Name} - {ex.Message}");
             }
         }
-        private static void TestGetVolunteerDetails()
+        private static async Task TestGetVolunteerDetails()
         {
             Console.WriteLine("\n---Volunteer Details---");
 
@@ -355,7 +355,7 @@ namespace BlTest
                 }
 
 
-                BO.Volunteer volunteerDetails = s_bl.Volunteer.GetVolunteerDetails(volunteerId);
+                BO.Volunteer volunteerDetails = await s_bl.Volunteer.GetVolunteerDetailsAsync(volunteerId);
 
                 var maxDistance = volunteerDetails.MaxDistance.HasValue ? volunteerDetails.MaxDistance.Value.ToString() : "Not provided";
                 Console.WriteLine("Volunteer Details:");
@@ -397,7 +397,7 @@ namespace BlTest
                 Console.WriteLine($"Error: {ex.Message}");
             }
         }
-        public static void TestUpdateVolunteer()
+        public static async Task TestUpdateVolunteerAsync()
         {
             Console.WriteLine("\n---Update Volunteer---");
             Console.WriteLine();
@@ -419,7 +419,8 @@ namespace BlTest
             BO.Volunteer RequestVolunteer;
             try
             {
-                RequestVolunteer = s_bl.Volunteer.GetVolunteerDetails(volunteerId)
+                // Updated to use async version
+                RequestVolunteer = await s_bl.Volunteer.GetVolunteerDetailsAsync(volunteerId)
                     ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
                 Console.WriteLine($"Volunteer request found: {RequestVolunteer.FullName}.");
             }
@@ -455,7 +456,8 @@ namespace BlTest
             BO.Volunteer originalVolunteer;
             try
             {
-                originalVolunteer = s_bl.Volunteer.GetVolunteerDetails(id)
+                // Updated to use async version
+                originalVolunteer = await s_bl.Volunteer.GetVolunteerDetailsAsync(id)
                     ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {id} does not exist.");
                 Console.WriteLine($"Volunteer found: {originalVolunteer.FullName}");
             }
@@ -565,7 +567,7 @@ namespace BlTest
           
             try
             {
-                s_bl.Volunteer.UpdateVolunteer(volunteerId, updatedVolunteer, managerPassword);
+                await s_bl.Volunteer.UpdateVolunteerAsync(volunteerId, updatedVolunteer, managerPassword);
                 Console.WriteLine("Volunteer updated successfully.");
             }
             catch (BO.BlDoesNotExistException ex)
@@ -602,7 +604,7 @@ namespace BlTest
                 Console.WriteLine($"Unexpected error: {ex.GetType().Name} - {ex.Message}");
             }
         }
-        public static void TestAddVolunteer()
+        public static async Task TestAddVolunteer()
         {
             Console.WriteLine("\n---Add New Volunteer---");
             // Volunteer ID
@@ -730,7 +732,7 @@ namespace BlTest
             // Add Volunteer
             try
             {
-                s_bl.Volunteer.AddVolunteer(volunteer);
+                await s_bl.Volunteer.AddVolunteerAsync(volunteer);
                 Console.WriteLine($"Volunteer '{fullName}' was successfully added.");
             }
             catch (Exception ex)
@@ -1048,7 +1050,7 @@ namespace BlTest
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
-        public static void TestUpdateCallDetails()
+        public static async Task TestUpdateCallDetails()
         {
             Console.WriteLine("\n--- Test Update Call Details ---");
             try
@@ -1149,7 +1151,7 @@ namespace BlTest
                         Console.WriteLine($"- {field.Key}");
                     }
 
-                    s_bl.Call.UpdateCallDetails(callToUpdate);
+                    await s_bl.Call.UpdateCallDetailsAsync(callToUpdate);
                     Console.WriteLine("Call details updated successfully!");
                 }
                 else
@@ -1210,7 +1212,7 @@ namespace BlTest
                 Console.WriteLine($"An error occurred during the test: {ex.Message}");
             }
         }
-        public static void TestAddCall()
+        public static async Task TestAddCall()
         {
             Console.WriteLine("\n--- Add New Call ---");
             try
@@ -1266,8 +1268,8 @@ namespace BlTest
                     }
                     Console.Write("Enter the Description (Optional) or press Enter to skip:");
                     newCall.Description = Console.ReadLine()?.Trim();
-                    s_bl.Call.AddCall(newCall);
-                    Console.WriteLine("Call added successfully.");
+                await s_bl.Call.AddCallAsync(newCall);
+                Console.WriteLine("Call added successfully.");
                
             }
 
@@ -1366,7 +1368,7 @@ namespace BlTest
                 HandleException(ex);
             }
         }
-        public static void TestGetOpenCallsByVolunteer()
+        public static async Task TestGetOpenCallsByVolunteer()
         {
             Console.WriteLine("\n--- Retrieve Open Calls by Volunteer with Optional Filtering and Sorting ---");
             try
@@ -1438,7 +1440,7 @@ namespace BlTest
 
 
 
-                var openCalls = s_bl.Call.GetOpenCallsByVolunteer(volunteerId, callTypeFilter, sortByField);
+                var openCalls = await s_bl.Call.GetOpenCallsByVolunteerAsync(volunteerId, callTypeFilter, sortByField);
                 if (openCalls.Any())
                 {
                     foreach (var call in openCalls)
@@ -1510,7 +1512,7 @@ namespace BlTest
                 Console.WriteLine($"Unexpected error: {ex.Message}");
             }
         }
-        public static void TestCancelAssignment()
+        public static async Task TestCancelAssignment()
         {
             Console.WriteLine("\n--- Cancel Assignment for Volunteer ---");
             Console.Write("Enter Volunteer ID:");
@@ -1532,8 +1534,8 @@ namespace BlTest
             try
             {
                 // קריאה לפונקציה לביטול ההקצאה
-                s_bl.Call.CancelAssignment(volunteerId, assignmentId);
-                
+                await s_bl.Call.CancelAssignmentAsync(volunteerId, assignmentId);
+
                 Console.WriteLine($"Assignment {assignmentId} has been successfully canceled by Volunteer {volunteerId}.");
             }
             catch (BO.BlDoesNotExistException ex)

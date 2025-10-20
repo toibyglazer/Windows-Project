@@ -102,58 +102,115 @@ internal static class CallManager
     /// <summary>
     /// Calculates the status of a call based on its current data and associated assignments.
     /// </summary>
+    //public static BO.CallStatus CalculateCallStatus(DO.Call doCall)
+    //{
+
+    //    DO.Assignment assignment = s_dal.Assignment.Read(a => a.CallId == doCall.Id); // Fetches the assignment for the call
+
+    //    AdminImplementation admin = new AdminImplementation();
+    //    var riskTimeRange = admin.GetRiskTimeRange(); // Defines the time range for considering a call "at risk"
+    //    var systemClock = admin.GetSystemClock(); // Gets the current system time
+
+    //    if (assignment == null) // Case 1: No assignment exists
+    //    {
+    //        if (doCall.MaxCompletionTime == null)
+    //            return CallStatus.Open; // Call is always open if no MaxCompletionTime is defined
+
+    //        if ((doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
+    //            return CallStatus.OpenAtRisk; // Call is open but at risk
+
+    //        return CallStatus.Open; // Call is open
+    //    }
+    //    else
+    //    {
+    //        if (assignment.CompletionTime == null) // Case 2: Assignment exists but no CompletionTime
+    //        {
+    //            if (doCall.MaxCompletionTime != null &&
+    //                (doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
+    //            {
+    //                return CallStatus.InTreatmentAtRisk; // Call is in treatment but at risk
+    //            }
+
+    //            return CallStatus.InProgress; // Call is in progress
+    //        }
+
+    //        // Case 3: Assignment completed
+    //        if (assignment.CompletionType == DO.AssignmentCompletionType.Treated
+    //            || assignment.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled
+    //            || assignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
+    //        {
+    //            return CallStatus.Closed; // Call is closed
+    //        }
+
+    //        // Case 4: Call expired
+    //        if (doCall.MaxCompletionTime != null && systemClock > doCall.MaxCompletionTime)
+    //        {
+    //            return CallStatus.Expired; // Call expired
+    //        }
+    //        if (assignment.CompletionType == DO.AssignmentCompletionType.Expired)
+    //        {
+    //            return CallStatus.Expired; // Call explicitly marked as expired
+    //        }
+    //    }
+
+    //    throw new InvalidOperationException("Unknown call status."); // Failsafe for unexpected cases
+    //}
     public static BO.CallStatus CalculateCallStatus(DO.Call doCall)
     {
-        DO.Assignment assignment = s_dal.Assignment.Read(a => a.CallId == doCall.Id); // Fetches the assignment for the call
-
+        var assignments = s_dal.Assignment.ReadAll(a => a.CallId == doCall.Id).ToList();
         AdminImplementation admin = new AdminImplementation();
-        var riskTimeRange = admin.GetRiskTimeRange(); // Defines the time range for considering a call "at risk"
-        var systemClock = admin.GetSystemClock(); // Gets the current system time
+        var riskTimeRange = admin.GetRiskTimeRange();
+        var now = admin.GetSystemClock();
 
-        if (assignment == null) // Case 1: No assignment exists
-        {
-            if (doCall.MaxCompletionTime == null)
-                return CallStatus.Open; // Call is always open if no MaxCompletionTime is defined
+        bool expiredByTime = doCall.MaxCompletionTime != null && now >= doCall.MaxCompletionTime;
+        bool isAtRisk = doCall.MaxCompletionTime != null &&
+                        (doCall.MaxCompletionTime - now <= riskTimeRange);
 
-            if ((doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
-                return CallStatus.OpenAtRisk; // Call is open but at risk
+        bool hasActiveAssignment = assignments.Any(a =>
+            a.CompletionTime == null && a.CompletionType == null);
 
-            return CallStatus.Open; // Call is open
-        }
-        else
-        {
-            if (assignment.CompletionTime == null) // Case 2: Assignment exists but no CompletionTime
-            {
-                if (doCall.MaxCompletionTime != null &&
-                    (doCall.MaxCompletionTime - systemClock) <= riskTimeRange)
-                {
-                    return CallStatus.InTreatmentAtRisk; // Call is in treatment but at risk
-                }
+        bool anyTreatedOrAdminCancelled = assignments.Any(a =>
+            a.CompletionType == DO.AssignmentCompletionType.Treated ||
+            a.CompletionType == DO.AssignmentCompletionType.AdminCancelled);
 
-                return CallStatus.InProgress; // Call is in progress
-            }
+        bool allVolunteerCancelled = assignments.Any() &&
+                                     assignments.All(a => a.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled);
 
-            // Case 3: Assignment completed
-            if (assignment.CompletionType == DO.AssignmentCompletionType.Treated
-                || assignment.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled
-                || assignment.CompletionType == DO.AssignmentCompletionType.AdminCancelled)
-            {
-                return CallStatus.Closed; // Call is closed
-            }
+        bool explicitlyExpired = assignments.Any(a =>
+            a.CompletionType == DO.AssignmentCompletionType.Expired);
 
-            // Case 4: Call expired
-            if (doCall.MaxCompletionTime != null && systemClock > doCall.MaxCompletionTime)
-            {
-                return CallStatus.Expired; // Call expired
-            }
-            if (assignment.CompletionType == DO.AssignmentCompletionType.Expired)
-            {
-                return CallStatus.Expired; // Call explicitly marked as expired
-            }
-        }
+        bool anyTreated = assignments.Any(a => a.CompletionType == DO.AssignmentCompletionType.Treated);
 
-        throw new InvalidOperationException("Unknown call status."); // Failsafe for unexpected cases
+        // 1. יש לפחות טיפול או ביטול ע"י מנהל
+        if (anyTreatedOrAdminCancelled)
+            return BO.CallStatus.Closed;
+
+        // 2. פג תוקף
+        if (expiredByTime)
+            return BO.CallStatus.Expired;
+
+        // 3. הקצאה פעילה
+        if (hasActiveAssignment)
+            return isAtRisk ? BO.CallStatus.InTreatmentAtRisk : BO.CallStatus.InProgress;
+
+        // 4. כולם ביטלו
+        if (!assignments.Any() || allVolunteerCancelled)
+            return isAtRisk ? BO.CallStatus.OpenAtRisk : BO.CallStatus.Open;
+
+        // 5. פג תוקף מפורש
+        if (explicitlyExpired)
+            return BO.CallStatus.Expired;
+
+        // 6. אין אף אחת שטופלה
+        if (!anyTreated)
+            return isAtRisk ? BO.CallStatus.OpenAtRisk : BO.CallStatus.Open;
+
+        // 7. ברירת מחדל
+        return BO.CallStatus.Open;
     }
+
+
+
 
     /// <summary>
     /// Periodically updates the statuses of all calls in the system.
@@ -190,7 +247,7 @@ internal static class CallManager
                 else
                 {
                     // Update the last active assignment with "Expired Cancellation"
-                    var assignment = assignments.LastOrDefault(a => !a.CompletionTime.HasValue);
+                    var assignment = assignments.LastOrDefault(a => !a.CompletionTime.HasValue && a.CompletionType == null);
                     if (assignment != null)
                     {
                         var updatedAssignment = assignment with
@@ -198,6 +255,7 @@ internal static class CallManager
                             CompletionTime = systemClock,
                             CompletionType = DO.AssignmentCompletionType.Expired
                         };
+
 
                         s_dal.Assignment.Update(updatedAssignment);
                         Observers.NotifyItemUpdated(updatedAssignment.Id); //stage 5
@@ -269,37 +327,77 @@ internal static class CallManager
     /// <summary>
     /// Calculates the remaining time for a call, based on its MaxCompletionTime.
     /// </summary>
+    //public static TimeSpan? CalculateRemainingTime(DO.Call call)
+    //{
+    //    if (call.MaxCompletionTime.HasValue)
+    //    {
+    //        var remaining = call.MaxCompletionTime.Value - DateTime.Now;
+    //        return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero; // ensures non-negative time
+    //    }
+    //    return null; // If MaxCompletionTime is null, return null
+    //}
+    /// <summary>
+    /// Calculates the remaining time for a call, based on its MaxCompletionTime.
+    /// </summary>
+    //public static TimeSpan? CalculateRemainingTime(DO.Call call)
+    //{
+    //    if (call.MaxCompletionTime.HasValue)
+    //    {
+    //        // וודא שזה DateTime
+    //        var remaining = call.MaxCompletionTime.Value - DateTime.Now;
+    //        return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero; // ensures non-negative time
+    //    }
+    //    return null; // If MaxCompletionTime is null, return null
+    //}
     public static TimeSpan? CalculateRemainingTime(DO.Call call)
     {
         if (call.MaxCompletionTime.HasValue)
         {
             var remaining = call.MaxCompletionTime.Value - DateTime.Now;
-            return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero; // ensures non-negative time
+
+            // אם הזמן שנותר יותר קטן מ-0, חזור null כי הוא פג תוקף
+            if (remaining <= TimeSpan.Zero)
+            {
+                return TimeSpan.Zero; // הזמן פג תוקף
+            }
+
+            // אם הזמן גדול מ-0, החזר אותו
+            return remaining;
         }
-        return null; // If MaxCompletionTime is null, return null
+        return null; // אם אין זמן סיום, החזר null
     }
 
     /// <summary>
     /// Calculates the completion time for a specific assignment, based on whether the completion type is 'Treated'.
     /// </summary>
+    //public static TimeSpan? CalculateCompletionTime(DO.Assignment assignment, DO.Call call)
+    //{
+    //    if (assignment.CompletionType == DO.AssignmentCompletionType.Treated)
+    //    {
+    //        return assignment.CompletionTime.Value - call.OpeningTime;
+    //    }
+    //    return null;
+    //}
+    /// <summary>
+    /// Calculates the completion time for a specific assignment, based on whether the completion type is 'Treated'.
+    /// </summary>
     public static TimeSpan? CalculateCompletionTime(DO.Assignment assignment, DO.Call call)
     {
-        if (assignment.CompletionType == DO.AssignmentCompletionType.Treated)
+        if (assignment.CompletionType == DO.AssignmentCompletionType.Treated && assignment.CompletionTime.HasValue)
         {
             return assignment.CompletionTime.Value - call.OpeningTime;
         }
         return null;
     }
-
     /// <summary>
     /// Gets the count of assignments for a specific call.
     /// </summary>
     public static int GetAssignmentCount(DO.Call call)
     {
 
-      return s_dal.Assignment
-     .ReadAll(a => a.CallId == call.Id )
-     .Count();
+        return s_dal.Assignment
+       .ReadAll(a => a.CallId == call.Id)
+       .Count();
 
 
     }
@@ -350,10 +448,14 @@ internal static class CallManager
     /// <summary>
     /// Converts a BO.Call object to a DO.Call object, including geolocation data.
     /// </summary>
-    public static DO.Call ConvertToDOCall(BO.Call call)
+    public static async Task<DO.Call> ConvertToDOCallAsync(BO.Call call)
     {
         // Get geolocation (latitude and longitude) for the full address of the call
-        GeoCoordinates geoCoordinates = Tools.CallOpenStreetMapApi(call.FullAddress);
+        GeoCoordinates geoCoordinates = await Tools.CallOpenStreetMapApiAsync(call.FullAddress);
+        if (geoCoordinates == null)
+            throw new Exception("Unable to retrieve geolocation.");
+
+
         double longitude = geoCoordinates.Longitude;
         double latitude = geoCoordinates.Latitude;
 
@@ -373,19 +475,15 @@ internal static class CallManager
     /// <summary>
     /// Validates the data of a BO.Call object, ensuring the latitude, longitude, call type, address, and max end time are valid.
     /// </summary>
-    public static void ValidateCallData(BO.Call call)
+    public static async Task ValidateCallDataAsync(BO.Call call)
     {
         try
         {
-            //// Validate if latitude and longitude are present
-            //if (call.Latitude == null || call.Longitude == null)
-            //    throw new InvalidOperationException("Latitude and Longitude must not be null. This indicates an unexpected issue.");
-
             // Validate the call type string by trying to parse it
             TryParseAndValidateCallType(call.Type.ToString());
 
             // Validate the address to ensure it has proper format
-            ValidateAddress(call.FullAddress);
+            await ValidateAddressAsync(call.FullAddress); // Call the async method
 
             // Validate the max completion time to ensure it is later than opening time
             ValidateMaxEndTime(call.OpeningTime, call.MaxCompletionTime);
@@ -396,6 +494,7 @@ internal static class CallManager
             throw HandleValidationException(ex);
         }
     }
+
 
     /// <summary>
     /// Handles validation exceptions and provides custom error messages based on the exception type.
@@ -424,7 +523,8 @@ internal static class CallManager
     /// <summary>
     /// Validates the address to ensure it has a proper format (Street, City, Country) and exists.
     /// </summary>
-    public static void ValidateAddress(string? address)
+
+    public static async Task ValidateAddressAsync(string? address)
     {
         // If the address is null or empty, consider it valid
         if (string.IsNullOrWhiteSpace(address))
@@ -443,8 +543,8 @@ internal static class CallManager
         if (street.Length < 2 || city.Length < 2 || country.Length < 2)
             throw new AddressValidationException("Each part of the address must be at least 2 characters long");
 
-        // Verify that the address exists in reality
-        if (!Tools.VerifyAddressExists(address))
+        // Verify that the address exists in reality (asynchronous call)
+        if (!await Tools.VerifyAddressExistsAsync(address))
             throw new AddressValidationException("Address does not exist in reality");
     }
 
@@ -479,10 +579,10 @@ internal static class CallManager
     /// <summary>
     /// Converts a BO.Call object and a DO.Volunteer object to an OpenCallInList object, including the calculated distance.
     /// </summary>
-    public static OpenCallInList ConvertToOpenCallInList(BO.Call call, DO.Volunteer volunteer, DO.DistanceType distanceType)
+    public static async Task<OpenCallInList> ConvertToOpenCallInListAsync(BO.Call call, DO.Volunteer volunteer, DO.DistanceType distanceType)
     {
-        // Calculate the distance between the volunteer and the call based on the specified distance type
-        double distance = CalculateDistance(volunteer, call, distanceType);
+        // Calculate the distance asynchronously between the volunteer and the call based on the specified distance type
+        double distance = await CalculateDistanceAsync(volunteer, call, distanceType);
 
         // Return a new OpenCallInList object with the relevant data
         return new OpenCallInList
@@ -496,6 +596,7 @@ internal static class CallManager
             DistanceToActiveCall = distance // Add the calculated distance to the active call
         };
     }
+
 
     /// <summary>
     /// Converts a DO.Assignment object to a ClosedCallInList object.
@@ -523,35 +624,18 @@ internal static class CallManager
     /// <summary>
     /// Calculates the distance between a volunteer and a call based on the specified distance type (Aerial, Driving, Walking).
     /// </summary>
-    public static double CalculateDistance(DO.Volunteer volunteer, BO.Call call, DO.DistanceType distanceType)
+    public static async Task<double> CalculateDistanceAsync(DO.Volunteer volunteer, BO.Call call, DO.DistanceType distanceType)
     {
-        double distance = 0;
-
-        // Ensure the volunteer has valid latitude and longitude
         double latitude = volunteer.Latitude ?? throw new InvalidOperationException("Latitude is null");
         double longitude = volunteer.Longitude ?? throw new InvalidOperationException("Longitude is null");
 
-        // Calculate the distance based on the specified distance type
-        switch (distanceType)
+        return distanceType switch
         {
-            case DO.DistanceType.Aerial:
-                distance = CalculateAerialDistance(latitude, longitude, call.Latitude, call.Longitude);
-                break;
-
-            case DO.DistanceType.Driving:
-                distance = Tools.GetWalkingRouteDistance(latitude, longitude, call.Latitude, call.Longitude);
-                break;
-
-            case DO.DistanceType.Walking:
-                distance = Tools.GetDrivingRouteDistance(latitude, longitude, call.Latitude, call.Longitude);
-                break;
-
-            default:
-                // Throw an exception for unsupported distance types
-                throw new ArgumentException("Unsupported distance type");
-        }
-
-        return distance;
+            DO.DistanceType.Aerial => CalculateAerialDistance(latitude, longitude, call.Latitude, call.Longitude),
+            DO.DistanceType.Driving => await RouteCalculator.GetDrivingRouteDistanceAsync(latitude, longitude, call.Latitude, call.Longitude),
+            DO.DistanceType.Walking => await RouteCalculator.GetWalkingRouteDistanceAsync(latitude, longitude, call.Latitude, call.Longitude),
+            _ => throw new ArgumentException("Unsupported distance type")
+        };
     }
 
     /// <summary>
@@ -594,7 +678,6 @@ internal static class CallManager
         return degrees * (Math.PI / 180.0);
     }
 
-
     /// <summary>
     /// Service for sending emails
     /// </summary>
@@ -604,7 +687,8 @@ internal static class CallManager
         private const int SmtpPort = 587;
         private const string SenderEmail = "toibymichalminiproject@gmail.com";
         private const string SenderPassword = "iwge idji gbtj lomm";
-        public static void SendEmailWithAttachment(string recipientEmail, string subject, string body, string attachmentPath)
+
+        public static async Task SendEmailWithAttachmentAsync(string recipientEmail, string subject, string body, string attachmentPath)
         {
             try
             {
@@ -616,7 +700,7 @@ internal static class CallManager
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(SenderEmail,"Support Team"),
+                    From = new MailAddress(SenderEmail, "Support Team"),
                     Subject = subject,
                     IsBodyHtml = true
                 };
@@ -625,21 +709,18 @@ internal static class CallManager
 
                 if (!string.IsNullOrEmpty(attachmentPath) && File.Exists(attachmentPath))
                 {
-                    // צריבת התמונה למייל
                     var inlineImage = new LinkedResource(attachmentPath, "image/png")
                     {
                         ContentId = "MapImage"
                     };
 
-                    // יצירת תוכן HTML עם תמונה מקושרת
                     var alternateView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
                     alternateView.LinkedResources.Add(inlineImage);
 
                     mailMessage.AlternateViews.Add(alternateView);
                 }
 
-                // הוספת האייקון לאימייל
-                var mapImageGenerator = new MapImageGenerator("", "", "", ""); // זה לא משנה איזה ערכים תעביר כאן
+                var mapImageGenerator = new MapImageGenerator("", "", "", "");
                 string iconPath = mapImageGenerator.GetIconPath();
                 if (iconPath != null)
                 {
@@ -653,7 +734,7 @@ internal static class CallManager
                     mailMessage.AlternateViews.Add(alternateViewWithIcon);
                 }
 
-                smtpClient.Send(mailMessage);
+                await smtpClient.SendMailAsync(mailMessage); // Changed to async method
                 Console.WriteLine($"Email sent successfully to {recipientEmail}");
             }
             catch (SmtpException ex)
@@ -671,8 +752,7 @@ internal static class CallManager
             return Regex.Replace(callType.ToString(), "(?<!^)([A-Z])", " $1");
         }
 
-
-        public static void SendEmailToVolunteersForNewCall(BO.Call call)
+        public static async Task SendEmailToVolunteersForNewCallAsync(BO.Call call)
         {
             var volunteers = s_dal.Volunteer.ReadAll();
 
@@ -683,7 +763,7 @@ internal static class CallManager
                     continue;
                 }
 
-                double distance = CalculateDistance(volunteer, call, volunteer.DistanceType);
+                double distance = await CalculateDistanceAsync(volunteer, call, volunteer.DistanceType);
                 if (distance <= volunteer.MaxDistance && !string.IsNullOrWhiteSpace(volunteer.Email))
                 {
                     var mapGenerator = new MapImageGenerator(volunteer.Latitude.ToString(), volunteer.Longitude.ToString(),
@@ -703,7 +783,7 @@ internal static class CallManager
             }}
             .email-container {{
                 width: 100%;
-                max-width: 650px; /* הגדלת רוחב הקונטיינר */
+                max-width: 650px;
                 margin: 0 auto;
                 padding: 20px;
                 background-color: #f9f9f9;
@@ -712,8 +792,8 @@ internal static class CallManager
             }}
             h2 {{
                 color: #007BFF;
-display: flex;
-    align-items: center;
+                display: flex;
+                align-items: center;
             }}
             p {{
                 font-size: 16px;
@@ -724,41 +804,34 @@ display: flex;
             }}
             .icon {{
                 width: 24px;
-                 height:auto;
+                height: auto;
                 vertical-align: text-bottom;
                 margin-right: 10px;
             }}
-           .map-image {{width: 100%; /* מאפשר גמישות בגודל */
-    max-width: 400px; /* מגבלת גודל סבירה */
-    height: auto;
-    margin-top: 10px; /* הפחתת המרווח */
-}}
-.call-type-highlight {{color: blue;
-  
-  
-  
-  
-}}
+            .map-image {{
+                width: 100%;
+                max-width: 400px;
+                height: auto;
+                margin-top: 10px;
+            }}
+            .call-type-highlight {{
+                color: blue;
+            }}
         </style>
     </head>
     <body>
         <div class='email-container'>
-        <h2 style='text-align: center; max-width: 90%; word-break: break-word;'>
- <span>
-  <img class='icon' src='cid:MapIcon' alt='Map Icon' style='display: inline; vertical-align: text-bottom; margin-right: 10px;' />
-  New call of type <span class='call-type-highlight'>{FormatCallType(call.Type)}</span> has been opened in your locale
-</span>
-
-</h2>
-
-
+            <h2 style='text-align: center; max-width: 90%; word-break: break-word;'>
+                <span>
+                    <img class='icon' src='cid:MapIcon' alt='Map Icon' style='display: inline; vertical-align: text-bottom; margin-right: 10px;' />
+                    New call of type <span class='call-type-highlight'>{FormatCallType(call.Type)}</span> has been opened in your locale
+                </span>
+            </h2>
             <p><span class='highlight'>Exact Address:</span> {call.FullAddress}</p>
-
-         <!-- תמונה מיד אחרי הכתובת -->
-         <div style='text-align: center; margin-top: 5px;'>
-            <h3>Here's the location map for the call:</h3>
-            <img src='cid:MapImage' alt='Call Location Map' class='map-image' /> 
-         </div>";
+            <div style='text-align: center; margin-top: 5px;'>
+                <h3>Here's the location map for the call:</h3>
+                <img src='cid:MapImage' alt='Call Location Map' class='map-image' />
+            </div>";
 
                     if (!string.IsNullOrWhiteSpace(call.Description))
                     {
@@ -780,23 +853,21 @@ display: flex;
     </body>
 </html>";
 
-
-
-                    SendEmailWithAttachment(volunteer.Email, subject, body, mapImagePath);
+                    await SendEmailWithAttachmentAsync(volunteer.Email, subject, body, mapImagePath);
                 }
             }
         }
 
-        public static void SendCancellationEmailToVolunteer(int assignmentId)
+        public static async Task SendCancellationEmailToVolunteerAsync(int assignmentId)
         {
             DO.Assignment assignment = s_dal.Assignment.Read(assignmentId)
-                 ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} does not exist.");
+                ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} does not exist.");
 
             DO.Call call = s_dal.Call.Read(assignment.CallId)
                 ?? throw new BO.BlDoesNotExistException($"Call with ID {assignment.CallId} does not exist.");
 
             DO.Volunteer volunteer = s_dal.Volunteer.Read(assignment.VolunteerId)
-                 ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {assignment.VolunteerId} does not exist.");
+                ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {assignment.VolunteerId} does not exist.");
 
             BO.Call callDetailsEmail = ConvertCallToBO(call);
 
@@ -829,7 +900,6 @@ display: flex;
             }}
             h2 {{
                 color: #d9534f;
-                
             }}
             p {{
                 font-size: 16px;
@@ -861,16 +931,14 @@ display: flex;
                     Call Manager Cancellation Message
                 </span>
             </h2>
-        
-        <p style='font-size: 16px; color: #555;'>
-            <span class='highlight'>Dear Volunteer,</span> 
-            Please be informed that the call you were assigned to has been 
-            <span class='highlight' style='color: #d9534f;'>cancelled</span> by the manager.
-        </p>
-        <br>
-
-        <p class='details'><span class='highlight'>Call Type:</span> {FormatCallType(callDetailsEmail.Type)}</p>
-        <p class='details'><span class='highlight'>Full Address:</span> {callDetailsEmail.FullAddress}</p>";
+            <p style='font-size: 16px; color: #555;'>
+                <span class='highlight'>Dear Volunteer,</span> 
+                Please be informed that the call you were assigned to has been 
+                <span class='highlight' style='color: #d9534f;'>cancelled</span> by the manager.
+            </p>
+            <br>
+            <p class='details'><span class='highlight'>Call Type:</span> {FormatCallType(callDetailsEmail.Type)}</p>
+            <p class='details'><span class='highlight'>Full Address:</span> {callDetailsEmail.FullAddress}</p>";
 
             if (!string.IsNullOrWhiteSpace(callDetailsEmail.Description))
             {
@@ -879,28 +947,25 @@ display: flex;
             }
 
             body += $@"
-            <p class='details'><span class='highlight'>Call Status:</span> {FormatCallStatus(callDetailsEmail.Status)}</p>
+        <p class='details'><span class='highlight'>Call Status:</span> {FormatCallStatus(callDetailsEmail.Status)}</p>
 
-          <p class='highlight' style='font-size: 16px; margin-top: 16px;'>
+        <p class='highlight' style='font-size: 16px; margin-top: 16px;'>
             We apologize for any inconvenience caused. Thank you for your service.
         </p>
-</div>
-    </body>
+    </div>
+</body>
 </html>";
 
-            // שליחת המייל למתנדב
-            SendEmailWithImage(volunteer.Email, subject, body);
+            await SendEmailWithImageAsync(volunteer.Email, subject, body);
         }
+
         public static string FormatCallStatus(BO.CallStatus status)
         {
-            // המרה למחרוזת
             string statusString = status.ToString();
-
-            // הוספת רווח לפני כל אות גדולה שאינה בתחילת המילה
             return Regex.Replace(statusString, "(?<!^)([A-Z])", " $1");
         }
 
-        public static void SendEmailWithImage(string recipientEmail, string subject, string body)
+        public static async Task SendEmailWithImageAsync(string recipientEmail, string subject, string body)
         {
             if (string.IsNullOrWhiteSpace(recipientEmail))
             {
@@ -917,7 +982,6 @@ display: flex;
                     mail.Subject = subject;
                     mail.IsBodyHtml = true;
 
-                    // שימוש בנתיב יחסי ליצירת התמונה
                     string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Helpers", "Images");
                     string imagePath = Path.Combine(directoryPath, "cancel-close-10374.png");
 
@@ -935,27 +999,389 @@ display: flex;
 
                     var altView = AlternateView.CreateAlternateViewFromString(body, Encoding.UTF8, MediaTypeNames.Text.Html);
                     altView.LinkedResources.Add(linkedResource);
+
                     mail.AlternateViews.Add(altView);
 
-                    using (SmtpClient smtp = new SmtpClient(SmtpHost, SmtpPort))
+                    using (SmtpClient smtpClient = new SmtpClient(SmtpHost, SmtpPort))
                     {
-                        smtp.Credentials = new NetworkCredential(SenderEmail, SenderPassword);
-                        smtp.EnableSsl = true;
+                        smtpClient.Credentials = new NetworkCredential(SenderEmail, SenderPassword);
+                        smtpClient.EnableSsl = true;
 
-                        smtp.Send(mail);
-                        Console.WriteLine($"Email successfully sent to {recipientEmail}");
+                        await smtpClient.SendMailAsync(mail);
                     }
+
+                    Console.WriteLine($"Cancellation email sent successfully to {recipientEmail}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to send email: {ex.Message}");
+                Console.WriteLine($"Error occurred while sending email: {ex.Message}");
             }
         }
-
-
     }
 }
+
+//    /// <summary>
+//    /// Service for sending emails
+//    /// </summary>
+//    public static class EmailService
+//    {
+//        private const string SmtpHost = "smtp.gmail.com";
+//        private const int SmtpPort = 587;
+//        private const string SenderEmail = "toibymichalminiproject@gmail.com";
+//        private const string SenderPassword = "iwge idji gbtj lomm";
+//        public static void SendEmailWithAttachment(string recipientEmail, string subject, string body, string attachmentPath)
+//        {
+//            try
+//            {
+//                using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
+//                {
+//                    Credentials = new NetworkCredential(SenderEmail, SenderPassword),
+//                    EnableSsl = true
+//                };
+
+//                var mailMessage = new MailMessage
+//                {
+//                    From = new MailAddress(SenderEmail,"Support Team"),
+//                    Subject = subject,
+//                    IsBodyHtml = true
+//                };
+
+//                mailMessage.To.Add(recipientEmail);
+
+//                if (!string.IsNullOrEmpty(attachmentPath) && File.Exists(attachmentPath))
+//                {
+//                    // צריבת התמונה למייל
+//                    var inlineImage = new LinkedResource(attachmentPath, "image/png")
+//                    {
+//                        ContentId = "MapImage"
+//                    };
+
+//                    // יצירת תוכן HTML עם תמונה מקושרת
+//                    var alternateView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+//                    alternateView.LinkedResources.Add(inlineImage);
+
+//                    mailMessage.AlternateViews.Add(alternateView);
+//                }
+
+//                // הוספת האייקון לאימייל
+//                var mapImageGenerator = new MapImageGenerator("", "", "", ""); // זה לא משנה איזה ערכים תעביר כאן
+//                string iconPath = mapImageGenerator.GetIconPath();
+//                if (iconPath != null)
+//                {
+//                    var iconResource = new LinkedResource(iconPath, "image/png")
+//                    {
+//                        ContentId = "MapIcon"
+//                    };
+
+//                    var alternateViewWithIcon = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+//                    alternateViewWithIcon.LinkedResources.Add(iconResource);
+//                    mailMessage.AlternateViews.Add(alternateViewWithIcon);
+//                }
+
+//                smtpClient.Send(mailMessage);
+//                Console.WriteLine($"Email sent successfully to {recipientEmail}");
+//            }
+//            catch (SmtpException ex)
+//            {
+//                Console.WriteLine($"SMTP error while sending email to {recipientEmail}: {ex.Message}");
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine($"General error while sending email to {recipientEmail}: {ex.Message}");
+//            }
+//        }
+
+//        public static string FormatCallType(BO.CallType callType)
+//        {
+//            return Regex.Replace(callType.ToString(), "(?<!^)([A-Z])", " $1");
+//        }
+
+
+//        public static void SendEmailToVolunteersForNewCall(BO.Call call)
+//        {
+//            var volunteers = s_dal.Volunteer.ReadAll();
+
+//            foreach (var volunteer in volunteers)
+//            {
+//                if (volunteer.Latitude == null || volunteer.Longitude == null || volunteer.MaxDistance == null)
+//                {
+//                    continue;
+//                }
+
+//                double distance = CalculateDistance(volunteer, call, volunteer.DistanceType);
+//                if (distance <= volunteer.MaxDistance && !string.IsNullOrWhiteSpace(volunteer.Email))
+//                {
+//                    var mapGenerator = new MapImageGenerator(volunteer.Latitude.ToString(), volunteer.Longitude.ToString(),
+//                                                             call.Latitude.ToString(), call.Longitude.ToString());
+//                    string mapImagePath = mapGenerator.GenerateMapImage();
+
+//                    string subject = $"New call type: {FormatCallType(call.Type)} is now available in your locale";
+
+//                    string body = $@"
+//<html>
+//    <head>
+//        <style>
+//            body {{
+//                font-family: Arial, sans-serif;
+//                line-height: 1.6;
+//                color: #333;
+//            }}
+//            .email-container {{
+//                width: 100%;
+//                max-width: 650px; /* הגדלת רוחב הקונטיינר */
+//                margin: 0 auto;
+//                padding: 20px;
+//                background-color: #f9f9f9;
+//                border-radius: 8px;
+//                border: 1px solid #ddd;
+//            }}
+//            h2 {{
+//                color: #007BFF;
+//display: flex;
+//    align-items: center;
+//            }}
+//            p {{
+//                font-size: 16px;
+//            }}
+//            .highlight {{
+//                font-weight: bold;
+//                color: #555;
+//            }}
+//            .icon {{
+//                width: 24px;
+//                 height:auto;
+//                vertical-align: text-bottom;
+//                margin-right: 10px;
+//            }}
+//           .map-image {{width: 100%; /* מאפשר גמישות בגודל */
+//    max-width: 400px; /* מגבלת גודל סבירה */
+//    height: auto;
+//    margin-top: 10px; /* הפחתת המרווח */
+//}}
+//.call-type-highlight {{color: blue;
+
+
+
+
+//}}
+//        </style>
+//    </head>
+//    <body>
+//        <div class='email-container'>
+//        <h2 style='text-align: center; max-width: 90%; word-break: break-word;'>
+// <span>
+//  <img class='icon' src='cid:MapIcon' alt='Map Icon' style='display: inline; vertical-align: text-bottom; margin-right: 10px;' />
+//  New call of type <span class='call-type-highlight'>{FormatCallType(call.Type)}</span> has been opened in your locale
+//</span>
+
+//</h2>
+
+
+//            <p><span class='highlight'>Exact Address:</span> {call.FullAddress}</p>
+
+//         <!-- תמונה מיד אחרי הכתובת -->
+//         <div style='text-align: center; margin-top: 5px;'>
+//            <h3>Here's the location map for the call:</h3>
+//            <img src='cid:MapImage' alt='Call Location Map' class='map-image' /> 
+//         </div>";
+
+//                    if (!string.IsNullOrWhiteSpace(call.Description))
+//                    {
+//                        body += $@"
+//        <p><span class='highlight'>Description:</span> {call.Description}</p>";
+//                    }
+
+//                    body += $@"
+//        <p><span class='highlight'>Opening Time:</span> {call.OpeningTime}</p>";
+
+//                    if (call.MaxCompletionTime.HasValue)
+//                    {
+//                        body += $@"
+//        <p><span class='highlight'>Max Completion Time:</span> {call.MaxCompletionTime.Value.ToString("yyyy-MM-dd HH:mm")}</p>";
+//                    }
+
+//                    body += $@"
+//        </div>
+//    </body>
+//</html>";
+
+
+
+//                    SendEmailWithAttachment(volunteer.Email, subject, body, mapImagePath);
+//                }
+//            }
+//        }
+
+//        public static void SendCancellationEmailToVolunteer(int assignmentId)
+//        {
+//            DO.Assignment assignment = s_dal.Assignment.Read(assignmentId)
+//                 ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} does not exist.");
+
+//            DO.Call call = s_dal.Call.Read(assignment.CallId)
+//                ?? throw new BO.BlDoesNotExistException($"Call with ID {assignment.CallId} does not exist.");
+
+//            DO.Volunteer volunteer = s_dal.Volunteer.Read(assignment.VolunteerId)
+//                 ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {assignment.VolunteerId} does not exist.");
+
+//            BO.Call callDetailsEmail = ConvertCallToBO(call);
+
+//            if (string.IsNullOrWhiteSpace(volunteer.Email))
+//            {
+//                Console.WriteLine("The volunteer does not have a current email in the system.");
+//                return;
+//            }
+
+//            string subject = $"Important Update: Your {FormatCallType(callDetailsEmail.Type)} Call has been Cancelled";
+
+//            string body = $@"
+//<html>
+//    <head>
+//        <style>
+//            body {{
+//                font-family: Arial, sans-serif;
+//                line-height: 1.6;
+//                color: #333;
+//                background-color: #f9f9f9;
+//                padding: 20px;
+//            }}
+//            .email-container {{
+//                max-width: 610px;
+//                margin: 0 auto;
+//                padding: 20px;
+//                background-color: #f9f9f9;
+//                border-radius: 8px;
+//                border: 1px solid #ddd;
+//            }}
+//            h2 {{
+//                color: #d9534f;
+
+//            }}
+//            p {{
+//                font-size: 16px;
+//                color: #333;
+//                margin: 8px 0;
+//            }}
+//            .highlight {{
+//                font-weight: bold;
+//                color: #555;
+//                margin-right: 4px;
+//            }}
+//            .details {{
+//                margin: 4px 0;
+//                font-size: 15px;
+//            }}
+//            .icon {{
+//                width: 30px;
+//                height: auto;
+//                vertical-align: text-bottom;
+//                margin-right: 10px;
+//            }}
+//        </style>
+//    </head>
+//    <body>
+//        <div class='email-container'>
+//            <h2 style='text-align: center; max-width: 90%; word-break: break-word;'>
+//                <span>
+//                    <img class='icon' src='cid:WarningIcon' alt='Warning icon' style='display: inline; vertical-align: text-bottom; margin-right: 10px;' />
+//                    Call Manager Cancellation Message
+//                </span>
+//            </h2>
+
+//        <p style='font-size: 16px; color: #555;'>
+//            <span class='highlight'>Dear Volunteer,</span> 
+//            Please be informed that the call you were assigned to has been 
+//            <span class='highlight' style='color: #d9534f;'>cancelled</span> by the manager.
+//        </p>
+//        <br>
+
+//        <p class='details'><span class='highlight'>Call Type:</span> {FormatCallType(callDetailsEmail.Type)}</p>
+//        <p class='details'><span class='highlight'>Full Address:</span> {callDetailsEmail.FullAddress}</p>";
+
+//            if (!string.IsNullOrWhiteSpace(callDetailsEmail.Description))
+//            {
+//                body += $@"
+//            <p class='details'><span class='highlight'>Description:</span> {callDetailsEmail.Description}</p>";
+//            }
+
+//            body += $@"
+//            <p class='details'><span class='highlight'>Call Status:</span> {FormatCallStatus(callDetailsEmail.Status)}</p>
+
+//          <p class='highlight' style='font-size: 16px; margin-top: 16px;'>
+//            We apologize for any inconvenience caused. Thank you for your service.
+//        </p>
+//</div>
+//    </body>
+//</html>";
+
+//            // שליחת המייל למתנדב
+//            SendEmailWithImage(volunteer.Email, subject, body);
+//        }
+//        public static string FormatCallStatus(BO.CallStatus status)
+//        {
+//            // המרה למחרוזת
+//            string statusString = status.ToString();
+
+//            // הוספת רווח לפני כל אות גדולה שאינה בתחילת המילה
+//            return Regex.Replace(statusString, "(?<!^)([A-Z])", " $1");
+//        }
+
+//        public static void SendEmailWithImage(string recipientEmail, string subject, string body)
+//        {
+//            if (string.IsNullOrWhiteSpace(recipientEmail))
+//            {
+//                Console.WriteLine("Invalid recipient email.");
+//                return;
+//            }
+
+//            try
+//            {
+//                using (MailMessage mail = new MailMessage())
+//                {
+//                    mail.From = new MailAddress(SenderEmail, "Support Team");
+//                    mail.To.Add(recipientEmail);
+//                    mail.Subject = subject;
+//                    mail.IsBodyHtml = true;
+
+//                    // שימוש בנתיב יחסי ליצירת התמונה
+//                    string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Helpers", "Images");
+//                    string imagePath = Path.Combine(directoryPath, "cancel-close-10374.png");
+
+//                    if (!File.Exists(imagePath))
+//                    {
+//                        Console.WriteLine("Image file not found.");
+//                        return;
+//                    }
+
+//                    var linkedResource = new LinkedResource(imagePath)
+//                    {
+//                        ContentId = "WarningIcon",
+//                        ContentType = new ContentType(MediaTypeNames.Image.Png)
+//                    };
+
+//                    var altView = AlternateView.CreateAlternateViewFromString(body, Encoding.UTF8, MediaTypeNames.Text.Html);
+//                    altView.LinkedResources.Add(linkedResource);
+//                    mail.AlternateViews.Add(altView);
+
+//                    using (SmtpClient smtp = new SmtpClient(SmtpHost, SmtpPort))
+//                    {
+//                        smtp.Credentials = new NetworkCredential(SenderEmail, SenderPassword);
+//                        smtp.EnableSsl = true;
+
+//                        smtp.Send(mail);
+//                        Console.WriteLine($"Email successfully sent to {recipientEmail}");
+//                    }
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine($"Failed to send email: {ex.Message}");
+//            }
+//        }
+
+
+//    }
+//}
 
 
 

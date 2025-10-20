@@ -9,21 +9,3 @@ using System.Windows;
                                                 //(used if a resource is not found in the page,
                                                 // app, or any theme specific resource dictionaries)
 )]
-//using PL.Volunteer;
-
-//using System.Windows;
-
-//namespace PL
-//{
-//    public partial class App : Application
-//    {
-//        protected override void OnStartup(StartupEventArgs e)
-//        {
-//            base.OnStartup(e);
-
-
-//            var window = new MainWindow();
-//            window.Show();
-//        }
-//    }
-//}
