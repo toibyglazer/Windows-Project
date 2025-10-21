@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PL.Volunteer"
         Title="Volunteer List"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
         Width="921.6"
         Height="614.4"
         

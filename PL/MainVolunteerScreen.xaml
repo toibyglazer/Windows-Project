@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PL"
         mc:Ignorable="d"
         Title="My Volunteer Profile" Height="615" Width="860"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
         SizeToContent="Height"
        
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">

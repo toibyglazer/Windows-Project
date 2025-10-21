@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PL"
         mc:Ignorable="d"
-        Title="Select Open Call" Height="600" Width="1000"
+        Title="Select Open Call"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
+        Height="600" Width="1000"
         SizeToContent="Width"
         WindowStartupLocation="CenterScreen"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">

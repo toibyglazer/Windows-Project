@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using PL.Volunteer;
@@ -136,6 +137,11 @@ namespace PL.Call
             }
         }
 
+        // Address suggestions service and debounce fields (reuse Volunteer implementation)
+        private readonly NominatimService _nominatimService;
+        private System.Threading.Timer _debounceTimer;
+        private int _requestCounter = 0;
+
         public CallWindow() : this(0)
         {
         }
@@ -146,6 +152,7 @@ namespace PL.Call
             {
                 ButtonText = id == 0 ? "Add" : "Update";
                 Id = id;
+                _nominatimService = new NominatimService();
 
                 if (id != 0)
                 {
@@ -162,15 +169,15 @@ namespace PL.Call
                     CurrentCall = new BO.Call()
                     {
                         Id = 0, // מזהה ברירת מחדל
-                        Type = CallType.None, // בהנחה ש-General הוא ערך מתאים
-                        Description = string.Empty, // תיאור ריק כברירת מחדל
-                        FullAddress = null, // כתובת ברירת מחדל
-                        Latitude = 0.0, // קו רוחב ברירת מחדל
-                        Longitude = 0.0, // קו אורך ברירת מחדל
-                        OpeningTime = DateTime.Now, // זמן פתיחה הוא הזמן הנוכחי
-                        MaxCompletionTime = null, // ללא זמן סיום ברירת מחדל
-                        Status = CallStatus.Open, // בהנחה ש-Pending הוא ערך מתאים
-                        callAssignInList = null, // רשימה ריקה
+                        Type = CallType.None,
+                        Description = string.Empty,
+                        FullAddress = null,
+                        Latitude = 0.0,
+                        Longitude = 0.0,
+                        OpeningTime = DateTime.Now,
+                        MaxCompletionTime = null,
+                        Status = CallStatus.Open,
+                        callAssignInList = null,
                     };
                 }
 
@@ -241,6 +248,23 @@ namespace PL.Call
             if (CurrentCall?.Id != 0)
             {
                 s_bl.Call.AddObserver(CurrentCall.Id, UpdateCallData);
+            }
+
+            // Set UI button visibility based on Add / Update mode
+            try
+            {
+                bool isAddMode = CurrentCall == null || CurrentCall.Id == 0;
+
+                DeleteCallButton.Visibility = isAddMode ? Visibility.Collapsed : Visibility.Visible;
+                ViewAssignmentsButton.Visibility = isAddMode ? Visibility.Collapsed : Visibility.Visible;
+
+                // Ensure Add/Update button shows only Add or Update text (binding already handles content)
+                AddUpdateButton.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                // ignore visibility errors but log if necessary
+                System.Diagnostics.Debug.WriteLine($"Error setting button visibility: {ex.Message}");
             }
         }
 
@@ -413,6 +437,79 @@ namespace PL.Call
                 {
                     FormattedCallType.Text = FormatCallType(selectedCallType.ToString());
                 }
+            }
+        }
+
+        // --- Address suggestions handlers (copied/adapted from VolunteerWindow) ---
+        private void AddressTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(AddressTextBox.Text))
+            {
+                SuggestionsPopup.IsOpen = false;
+                return;
+            }
+
+            int currentRequest = ++_requestCounter;
+
+            // Cancel previous timer if exists
+            _debounceTimer?.Dispose();
+
+            // Create new timer with delay
+            _debounceTimer = new System.Threading.Timer(async _ =>
+            {
+                await Dispatcher.InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        // Send request to Nominatim for address suggestions
+                        var addresses = await _nominatimService.GetAddressSuggestionsAsync(AddressTextBox.Text, currentRequest);
+
+                        // Show results in ListBox only if there are results
+                        if (addresses.Count > 0)
+                        {
+                            SuggestionsList.ItemsSource = addresses;
+                            SuggestionsPopup.IsOpen = true;
+                        }
+                        else
+                        {
+                            SuggestionsPopup.IsOpen = false;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Hide suggestions on error
+                        SuggestionsPopup.IsOpen = false;
+                    }
+                });
+            }, null, 500, System.Threading.Timeout.Infinite); // 500ms delay for better performance
+        }
+
+        private void SuggestionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SuggestionsList.SelectedItem != null)
+            {
+                // Set the selected address to the text box
+                AddressTextBox.Text = SuggestionsList.SelectedItem.ToString();
+
+                // Update the address in the current call object
+                if (CurrentCall != null)
+                {
+                    CurrentCall.FullAddress = AddressTextBox.Text;
+                    OnPropertyChanged(nameof(CurrentCall));
+                }
+
+                // Hide the suggestions popup
+                SuggestionsPopup.IsOpen = false;
+            }
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (SuggestionsPopup.IsOpen &&
+                !SuggestionsList.IsMouseOver &&
+                !AddressTextBox.IsMouseOver)
+            {
+                SuggestionsPopup.IsOpen = false;
             }
         }
     }

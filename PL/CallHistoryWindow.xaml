@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PL"
         mc:Ignorable="d"
-        Title="Call History" Height="600" Width="Auto"
+        Title="Call History"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
+        Height="600" Width="Auto"
         SizeToContent="Width"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 

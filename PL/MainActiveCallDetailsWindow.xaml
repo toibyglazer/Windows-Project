@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PL"
         mc:Ignorable="d"
         Title="Active Call Details" 
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
         Height="510" Width="535"
         WindowStartupLocation="CenterScreen"
         Background="#f4f4f4">

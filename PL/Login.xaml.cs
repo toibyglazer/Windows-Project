@@ -45,14 +45,7 @@ public partial class Login : Window
     public Login()
     {
         InitializeComponent();
-        try
-        {
-            Icon = new BitmapImage(new Uri("Icons/Icon4.ico", UriKind.Relative));
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error loading icon: {ex.Message}");
-        }
+        // removed explicit Icon assignment so App.xaml global style controls the window icon
     }
 
     private async void Login_Click(object sender, RoutedEventArgs e)

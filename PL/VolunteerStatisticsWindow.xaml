@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PL"
         mc:Ignorable="d"
         Title="Volunteer Statistics" Height="520" Width="800"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
         Background="#F9F9F9"
         WindowStartupLocation="CenterScreen"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">

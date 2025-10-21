@@ -68,9 +68,9 @@
 	  <Content Include="Icons\FoodPreparation.png">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="Icons\Icon4.ico">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
+	  <Resource Include="Icons\Icon4.ico">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
 	  <Content Include="Icons\KitPreparation.png">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>

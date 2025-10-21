@@ -60,26 +60,26 @@ namespace PL
             throw new NotImplementedException();
         }
     }
-    public class EnumDisplayConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value == null)
-                return string.Empty;
+    //public class EnumDisplayConverter : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        if (value == null)
+    //            return string.Empty;
 
-            // Get the enum value as string
-            string enumString = value.ToString();
+    //        // Get the enum value as string
+    //        string enumString = value.ToString();
 
-            // Insert spaces before capital letters (except the first one)
-            string result = Regex.Replace(enumString, @"(?<!^)([A-Z])", " $1");
+    //        // Insert spaces before capital letters (except the first one)
+    //        string result = Regex.Replace(enumString, @"(?<!^)([A-Z])", " $1");
 
-            return result;
-        }
+    //        return result;
+    //    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 
 }

@@ -5,12 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PL.Call"
         mc:Ignorable="d"
-        Title="Call Details" Height="520" Width="700"
+        Title="Call Details"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
+        Height="520" Width="700"
         SizeToContent="Height"
         WindowStyle="SingleBorderWindow"
         AllowsTransparency="False"
         ResizeMode="CanResize"
         Background="Transparent"
+        MouseDown="Window_MouseDown"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
     <Window.Resources>
@@ -236,7 +239,29 @@
                     <StackPanel Grid.Column="1" Margin="6,0,6,0">
                         <!-- Address -->
                         <Label Content="Address"/>
-                        <TextBox Text="{Binding CurrentCall.FullAddress, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
+                        <TextBox x:Name="AddressTextBox"
+                                 Text="{Binding CurrentCall.FullAddress, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"
+                                 KeyUp="AddressTextBox_KeyUp"/>
+
+                        <Popup x:Name="SuggestionsPopup"
+                               PlacementTarget="{Binding ElementName=AddressTextBox}"
+                               Placement="Bottom"
+                               IsOpen="False"
+                               Width="{Binding ActualWidth, ElementName=AddressTextBox}"
+                               AllowsTransparency="True"
+                               StaysOpen="False"
+                               Focusable="False">
+                            <Border Background="White"
+                                    BorderBrush="#E5E7EB"
+                                    BorderThickness="1"
+                                    CornerRadius="0 0 8 8">
+                                <ListBox x:Name="SuggestionsList"
+                                         MaxHeight="200"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         SelectionChanged="SuggestionsList_SelectionChanged"/>
+                            </Border>
+                        </Popup>
 
                         <!-- Deadline -->
                         <Label Content="Deadline"/>
@@ -296,14 +321,16 @@
                                            HorizontalAlignment="Center"
                                            Foreground="Black"/>
                             </Button>
-                            <Button Content="{Binding ButtonText}"
+                            <Button x:Name="AddUpdateButton"
+                                    Content="{Binding ButtonText}"
                                     Style="{StaticResource CallManagementButtonStyle}"
                                     Click="AddOrUpdateButton_Click"
                                     Width="90"/>
                         </StackPanel>
 
                         <!-- View Assignments Button -->
-                        <Button Grid.Row="2"
+                        <Button x:Name="ViewAssignmentsButton"
+                                Grid.Row="2"
                                 Content="View Assignments" 
                                 Style="{StaticResource CallManagementButtonStyle}"
                                 Click="BtnViewAssignments_Click" 

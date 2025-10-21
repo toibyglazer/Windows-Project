@@ -1,5 +1,4 @@
-﻿namespace BlImplementation;
-using BlApi;
+﻿using BlApi;
 using BO;
 using Dal;
 using DalApi;
@@ -10,9 +9,11 @@ using System.Collections.Generic;
 using System.Data;
 using static Helpers.CallManager;
 using BlCall = BlApi.ICall;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-
-
+namespace BlImplementation;
 /// <summary>
 /// The ICall interface defines methods for managing calls within the system.
 /// It includes functionality for retrieving, updating, adding, and deleting calls,
@@ -157,7 +158,7 @@ internal class CallImplementation : BlCall
               ?? throw new BO.BlDoesNotExistException($"Call with ID {callId} does not exist.");
 
         BO.Call boCall = Helpers.CallManager.ConvertCallToBO(call);
-        CallManager.Observers.NotifyItemUpdated(callId);
+        // NOTE: removed NotifyItemUpdated here — reads should NOT notify observers.
         return boCall;
 
     }
@@ -323,71 +324,6 @@ internal class CallImplementation : BlCall
 
         return sortedOpenCallInList;
     }
-
-    //public async Task<IEnumerable<OpenCallInList>> GetOpenCallsByVolunteerAsync(int volunteerId, BO.CallType? callTypeFilter = null, OpenCallSortField? sortByField = null)
-    //{
-    //    // Retrieve the volunteer from the database.
-    //    var volunteer = s_dal.Volunteer.Read(volunteerId)
-    //        ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} not found.");
-
-    //    // Ensure the volunteer has provided a valid address for displaying the calls.
-    //    if (string.IsNullOrEmpty(volunteer.CurrentAddress) || volunteer.Latitude == null || volunteer.Longitude == null)
-    //        throw new InvalidOperationException("Can't display the open calls list because a valid address hasn't been set. Please enter a valid address first, and then you'll be able to view the open calls list");
-
-    //    var allCalls = s_dal.Call.ReadAll();
-    //    var allOpenCalls = allCalls.Select(call => Helpers.CallManager.ConvertCallToBO(call))
-    //                               .Where(call => call.Status == BO.CallStatus.Open || call.Status == BO.CallStatus.OpenAtRisk);
-
-    //    if (callTypeFilter.HasValue)
-    //    {
-    //        allOpenCalls = allOpenCalls.Where(call => call.Type == callTypeFilter.Value);
-    //    }
-
-    //    // Convert the filtered open calls to OpenCallInList asynchronously
-    //    var allOpenCallInList = await Task.WhenAll(
-    //        allOpenCalls.Select(call => Helpers.CallManager.ConvertToOpenCallInListAsync(call, volunteer, volunteer.DistanceType))
-    //    );
-
-    //    // --- New part: Include cancelled calls by this volunteer ---
-    //    var allAssignments = s_dal.Assignment.ReadAll();
-
-    //    var cancelledCallIdsByVolunteer = allAssignments
-    //        .Where(a => a.VolunteerId == volunteerId && a.CompletionType == DO.AssignmentCompletionType.VolunteerCancelled)
-    //        .Select(a => a.CallId)
-    //        .Distinct()
-    //        .ToList();
-
-    //    var cancelledCalls = allCalls
-    //        .Where(call => cancelledCallIdsByVolunteer.Contains(call.Id))
-    //        .Select(call => Helpers.CallManager.ConvertCallToBO(call));
-
-    //    if (callTypeFilter.HasValue)
-    //    {
-    //        cancelledCalls = cancelledCalls.Where(call => call.Type == callTypeFilter.Value);
-    //    }
-
-    //    var cancelledCallInList = await Task.WhenAll(
-    //        cancelledCalls.Select(call => Helpers.CallManager.ConvertToOpenCallInListAsync(call, volunteer, volunteer.DistanceType))
-    //    );
-
-    //    // Combine open and cancelled calls
-    //    var allCombinedCalls = allOpenCallInList.Concat(cancelledCallInList);
-
-    //    // Sort the combined results
-    //    var sortedCombinedCalls = sortByField switch
-    //    {
-    //        OpenCallSortField.Id => allCombinedCalls.OrderBy(call => call.Id),
-    //        OpenCallSortField.Type => allCombinedCalls.OrderBy(call => call.Type),
-    //        OpenCallSortField.Description => allCombinedCalls.OrderBy(call => call.Description),
-    //        OpenCallSortField.FullAddress => allCombinedCalls.OrderBy(call => call.FullAddress),
-    //        OpenCallSortField.OpeningTime => allCombinedCalls.OrderBy(call => call.OpeningTime),
-    //        OpenCallSortField.MaxCompletionTime => allCombinedCalls.OrderBy(call => call.MaxCompletionTime),
-    //        OpenCallSortField.DistanceToActiveCall => allCombinedCalls.OrderBy(call => call.DistanceToActiveCall),
-    //        _ => allCombinedCalls.OrderBy(call => call.Id),
-    //    };
-
-    //    return sortedCombinedCalls;
-    //}
 
     public async Task<Dictionary<int, GeoCoordinates>> GetCoordinatesForCallsAsync(IEnumerable<OpenCallInList> calls)
     {
