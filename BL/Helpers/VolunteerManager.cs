@@ -305,20 +305,46 @@ internal static class VolunteerManager
         return activeAssignment.Id;
     }
 
+    ///// <summary>
+    ///// Gets the entry time of the active call assignment for the given volunteer.
+    ///// </summary>
+    ///// <param name="volunteerId">The ID of the volunteer.</param>
+    ///// <returns>The entry time of the active assignment.</returns>
+    //public static DateTime GetActiveCallEntryTime(int volunteerId)
+    //{
+    //    // Fetch the active assignment for the volunteer
+    //    DO.Assignment? activeAssignment = s_dal.Assignment.ReadAll()
+    //        .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
+
+    //    // Return the entry time of the active assignment
+    //    return activeAssignment.EntryTime;
+    //}
+
     /// <summary>
-    /// Gets the entry time of the active call assignment for the given volunteer.
+    /// Gets the EntryTime of the most recent (latest) active assignment for the given volunteer
+    /// (active = CompletionTime == null).
     /// </summary>
-    /// <param name="volunteerId">The ID of the volunteer.</param>
-    /// <returns>The entry time of the active assignment.</returns>
+    /// <param name="volunteerId">The volunteer ID.</param>
+    /// <returns>The EntryTime of the latest active assignment.</returns>
     public static DateTime GetActiveCallEntryTime(int volunteerId)
     {
-        // Fetch the active assignment for the volunteer
-        DO.Assignment? activeAssignment = s_dal.Assignment.ReadAll()
-            .FirstOrDefault(a => a.VolunteerId == volunteerId && a.CompletionTime == null);
+        // Bring only open (active) assignments of this volunteer
+        var activeAssignments = s_dal.Assignment.ReadAll(a =>
+            a.VolunteerId == volunteerId && a.CompletionTime == null);
 
-        // Return the entry time of the active assignment
-        return activeAssignment.EntryTime;
+        // Pick the latest by EntryTime (and Id as tie-breaker)
+        var latestActive = activeAssignments
+            .OrderByDescending(a => a.EntryTime)
+            .ThenByDescending(a => a.Id)
+            .FirstOrDefault();
+
+        if (latestActive == null)
+            throw new BO.BlDoesNotExistException(
+                $"No active assignment found for volunteer {volunteerId}.");
+
+        return latestActive.EntryTime;
     }
+
 
     /// <summary>
     /// Determines the status of an active call based on its maximum completion time.

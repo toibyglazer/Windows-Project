@@ -99,6 +99,9 @@ namespace PL
             }
         }
 
+        // Add a public getter so other windows can check which volunteer id this window represents
+        public int VolunteerId => volunteerID;
+
         // טעינת הנתונים באירוע Loaded
         private async void MainVolunteerScreen_Loaded(object sender, RoutedEventArgs e)
         {

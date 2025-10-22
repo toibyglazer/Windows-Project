@@ -122,11 +122,30 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <TextBlock Text="Main Management Screen" 
-                           FontSize="24" 
-                           FontWeight="Bold" 
-                           Foreground="#111827"
-                           Margin="0,0,0,20"/>
+                <Grid Margin="0,0,0,20">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
+
+    <TextBlock Grid.Column="0"
+               Text="Main Management Screen"
+               FontSize="24"
+               FontWeight="Bold"
+               Foreground="#111827"/>
+
+    <!-- Volunteer Mode button: hidden by default, shown only for managers -->
+    <Button x:Name="VolunteerModeButton"
+            Grid.Column="1"
+            Content="Volunteer Mode"
+            Visibility="Collapsed"
+            Margin="8,0,0,0"
+            Height="36"
+            Width="140"
+            Click="VolunteerModeButton_Click"
+            Style="{StaticResource MainActionButton}"
+            HorizontalAlignment="Right"/>
+</Grid>
 
                 <!-- System Clock and Configuration -->
                 <Grid Grid.Row="1" Margin="0,0,0,20">

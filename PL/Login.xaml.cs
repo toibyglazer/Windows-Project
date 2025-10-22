@@ -90,9 +90,11 @@ public partial class Login : Window
             // יצירת החלון החדש לפני סגירת החלון הנוכחי
             Window newWindow = null;
 
+            // When opening the management screen for a Manager, pass the logged-in user's id
             if (userRole == BO.VolunteerRole.Manager)
             {
-                newWindow = new MainManagementScreen();
+                // pass the numeric id so the management screen knows which manager is logged in
+                newWindow = new MainManagementScreen(username);
             }
             else if (userRole == BO.VolunteerRole.Volunteer)
             {

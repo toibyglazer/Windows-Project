@@ -381,22 +381,62 @@ internal class CallImplementation : BlCall
 
         return new GeoCoordinates { Latitude = 31.895049, Longitude = 34.810181 };
     }
+    //public void CompleteAssignment(int volunteerId, int assignmentId)
+    //{
+    //    // Fetch the assignment data from the database.
+    //    var assignment = s_dal.Assignment.Read(assignmentId)
+    //        ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} not found.");
+
+    //    // Ensure that the volunteer attempting to complete the assignment is the one assigned to it.
+    //    if (assignment.VolunteerId != volunteerId)
+    //        throw new BlInvalidRoleException("Only the assigned volunteer can complete this assignment.");
+
+    //    // Check if the assignment is already completed or closed.
+    //    if (assignment.CompletionType != null || assignment.CompletionTime != null)
+    //        throw new InvalidOperationException("The assignment is already closed or completed.");
+
+    //    var updatedAssignment = assignment with
+    //    {
+    //        CompletionTime = DateTime.Now,
+    //        CompletionType = DO.AssignmentCompletionType.Treated
+    //    };
+
+    //    try
+    //    {
+    //        s_dal.Assignment.Update(updatedAssignment);
+    //        CallManager.Observers.NotifyItemUpdated(assignmentId);
+    //        CallManager.Observers.NotifyListUpdated();
+    //    }
+    //    catch (DalDoesNotExistException ex)
+    //    {
+    //        throw new BO.BlDoesNotExistException("An error occurred while updating the assignment.", ex);
+    //    }
+
+    //}
     public void CompleteAssignment(int volunteerId, int assignmentId)
     {
-        // Fetch the assignment data from the database.
-        var assignment = s_dal.Assignment.Read(assignmentId)
-            ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} not found.");
+        // Fetch the latest OPEN assignment for this volunteer
+        var assignment = s_dal.Assignment.ReadAll(a =>
+                a.VolunteerId == volunteerId &&
+                a.CompletionTime == null &&
+                a.CompletionType == null)
+            .OrderByDescending(a => a.EntryTime)
+            .ThenByDescending(a => a.Id)
+            .FirstOrDefault()
+            ?? throw new BO.BlDoesNotExistException(
+                $"No open assignments found for volunteer {volunteerId}.");
 
         // Ensure that the volunteer attempting to complete the assignment is the one assigned to it.
         if (assignment.VolunteerId != volunteerId)
             throw new BlInvalidRoleException("Only the assigned volunteer can complete this assignment.");
 
-        // Check if the assignment is already completed or closed.
+        // Check if the assignment is already completed or closed (defensive; אמור להיות פתוח ממילא)
         if (assignment.CompletionType != null || assignment.CompletionTime != null)
             throw new InvalidOperationException("The assignment is already closed or completed.");
 
         var updatedAssignment = assignment with
         {
+            // אם אתם עובדים עם שעון סימולטיבי, החליפו ל-AdminManager.Now
             CompletionTime = DateTime.Now,
             CompletionType = DO.AssignmentCompletionType.Treated
         };
@@ -404,24 +444,35 @@ internal class CallImplementation : BlCall
         try
         {
             s_dal.Assignment.Update(updatedAssignment);
-            CallManager.Observers.NotifyItemUpdated(assignmentId);
+            CallManager.Observers.NotifyItemUpdated(updatedAssignment.Id);
             CallManager.Observers.NotifyListUpdated();
         }
         catch (DalDoesNotExistException ex)
         {
             throw new BO.BlDoesNotExistException("An error occurred while updating the assignment.", ex);
         }
-
     }
+
     public async Task CancelAssignmentAsync(int volunteerId, int assignmentId)
     {
         // Fetch volunteer data from the database.
         DO.Volunteer volunteer = s_dal.Volunteer.Read(volunteerId)
             ?? throw new BO.BlDoesNotExistException($"Volunteer with ID {volunteerId} does not exist.");
 
-        // Fetch assignment data from the database.
-        var assignment = s_dal.Assignment.Read(assignmentId)
-            ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} not found.");
+        //// Fetch assignment data from the database.
+        //var assignment = s_dal.Assignment.Read(assignmentId)
+        //    ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} not found.");
+
+        // Fetch the latest OPEN assignment for this volunteer
+        var assignment = s_dal.Assignment.ReadAll(a =>
+                a.VolunteerId == volunteerId &&
+                a.CompletionTime == null &&
+                a.CompletionType == null)
+            .OrderByDescending(a => a.EntryTime)
+            .ThenByDescending(a => a.Id)
+            .FirstOrDefault()
+            ?? throw new BO.BlDoesNotExistException(
+                $"No open assignments found for volunteer {volunteerId}.");
 
 
         // Check if the volunteer has the required role (either Manager or the assigned volunteer) to cancel the assignment.

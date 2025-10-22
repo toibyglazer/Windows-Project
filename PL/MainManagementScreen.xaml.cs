@@ -1,30 +1,137 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using BO;                 // שימוש ב-VolunteerRole
 using BlApi;
 using PL.Call;
 using PL.Volunteer;
 
 namespace PL;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainManagementScreen : Window
 {
-    static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
+    static readonly IBl s_bl = Factory.Get();
+
+    // מזהה המשתמש שמחובר כרגע (מוזרם מה-Login)
+    private readonly int _currentUserId;
+
+    #region DP: CurrentTime & MaxTimeSpanValue
+
     public DateTime CurrentTime
     {
-        get { return (DateTime)GetValue(CurrentTimeProperty); }
-        set { SetValue(CurrentTimeProperty, value); }
+        get => (DateTime)GetValue(CurrentTimeProperty);
+        set => SetValue(CurrentTimeProperty, value);
     }
     public static readonly DependencyProperty CurrentTimeProperty =
-        DependencyProperty.Register("CurrentTime", typeof(DateTime), typeof(MainManagementScreen));
+        DependencyProperty.Register(nameof(CurrentTime), typeof(DateTime), typeof(MainManagementScreen));
+
+    public string MaxTimeSpanValue
+    {
+        get => (string)GetValue(MaxTimeSpanValueProperty);
+        set => SetValue(MaxTimeSpanValueProperty, value);
+    }
+    public static readonly DependencyProperty MaxTimeSpanValueProperty =
+        DependencyProperty.Register(nameof(MaxTimeSpanValue), typeof(string), typeof(MainManagementScreen),
+            new PropertyMetadata(string.Empty));
+
+    #endregion
+
+    #region Ctors
+
+    // בנאי ברירת-מחדל (למקרה שנקרא ממקום שלא מעביר מזהה)
+    public MainManagementScreen()
+    {
+        InitializeComponent();
+    }
+
+    // בנאי שמעביר את מזהה המשתמש הנוכחי (מנהל שהוא גם מתנדב)
+    public MainManagementScreen(int currentUserId) : this()
+    {
+        _currentUserId = currentUserId;
+    }
+
+    #endregion
+
+    #region Window Events
+
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            CurrentTime = s_bl.Admin.GetSystemClock();
+            var riskTime = s_bl.Admin.GetRiskTimeRange();
+            MaxTimeSpanValue = riskTime.ToString();
+
+            s_bl.Admin.AddClockObserver(clockObserver);
+            s_bl.Admin.AddConfigObserver(configObserver);
+
+            // הצגת כפתור מצב מתנדב רק אם המשתמש הנוכחי הוא מנהל
+            if (_currentUserId > 0)
+            {
+                try
+                {
+                    var vol = await s_bl.Volunteer.GetVolunteerDetailsAsync(_currentUserId);
+                    VolunteerModeButton.Visibility =
+                        (vol != null && vol.Role == VolunteerRole.Manager)
+                        ? Visibility.Visible
+                        : Visibility.Collapsed;
+                }
+                catch
+                {
+                    VolunteerModeButton.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                VolunteerModeButton.Visibility = Visibility.Collapsed;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error loading data: {ex.Message}", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void Window_Closed(object sender, EventArgs e)
+    {
+        s_bl.Admin.RemoveClockObserver(clockObserver);
+        s_bl.Admin.RemoveConfigObserver(configObserver);
+    }
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        var result = MessageBox.Show("Are you sure you want to close this window?",
+                                     "Confirm Close",
+                                     MessageBoxButton.YesNo,
+                                     MessageBoxImage.Question);
+        if (result == MessageBoxResult.No)
+            e.Cancel = true;
+    }
+
+    #endregion
+
+    #region Observers
+
+    private void clockObserver()
+    {
+        CurrentTime = s_bl.Admin.GetSystemClock();
+    }
+
+    private void configObserver()
+    {
+        var riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
+        MaxTimeSpanValue = riskTimeSpan.ToString();
+    }
+
+    #endregion
+
+    #region Buttons: Clock Advance
 
     private void btnAddOneMinute_Click(object sender, RoutedEventArgs e)
     {
+        // תיקון הטעות שהייתה – כאן צריך לקדם את השעון בדקה
         s_bl.Admin.AdvanceSystemClock(BO.TimeUnit.MINUTE);
     }
 
@@ -48,195 +155,94 @@ public partial class MainManagementScreen : Window
         s_bl.Admin.AdvanceSystemClock(BO.TimeUnit.YEAR);
     }
 
-    private void clockObserver()
-    {
-        CurrentTime = s_bl.Admin.GetSystemClock();
-    }
-    private void configObserver()
-    {
-        TimeSpan riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
-        MaxTimeSpanValue = riskTimeSpan.ToString();
-        
-    }
-    private void Window_Loaded(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-          
-            CurrentTime = s_bl.Admin.GetSystemClock();
-            TimeSpan riskTime = s_bl.Admin.GetRiskTimeRange();
-            MaxTimeSpanValue = riskTime.ToString(); 
-            s_bl.Admin.AddClockObserver(clockObserver);
-            s_bl.Admin.AddConfigObserver(configObserver);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error loading data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-    private void Window_Closed(object sender, EventArgs e)
-    {
-        s_bl.Admin.RemoveClockObserver(clockObserver);
-        s_bl.Admin.RemoveConfigObserver(configObserver);
-    }
-    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-    {
-        var result = MessageBox.Show("Are you sure you want to close this window?",
-                                     "Confirm Close",
-                                     MessageBoxButton.YesNo,
-                                     MessageBoxImage.Question);
+    #endregion
 
-        if (result == MessageBoxResult.No)
-        {
-            e.Cancel = true;
-        }
-    }
-
-
-    public string MaxTimeSpanValue
-    {
-        get
-        {
-            return (string)GetValue(MaxTimeSpanValueProperty);
-        }
-        set
-        {
-            SetValue(MaxTimeSpanValueProperty, value);
-        }
-    }
-
-    public static readonly DependencyProperty MaxTimeSpanValueProperty =
-        DependencyProperty.Register(
-            "MaxTimeSpanValue",
-            typeof(string),     
-            typeof(MainManagementScreen),  
-            new PropertyMetadata(string.Empty)); 
+    #region Update Max Risk Time
 
     private void btnUpdateMaxYearRange_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-          
-            string parsedTimeSpan = MaxTimeSpanValue;
+            string parsed = MaxTimeSpanValue;
 
-            if (IsValidTimeSpanFormat(parsedTimeSpan))
+            if (IsValidTimeSpanFormat(parsed))
             {
-                string StringAfterRepair = CorrectTimeSpanRange(parsedTimeSpan);
-                TimeSpan currentTimeSpan = s_bl.Admin.GetRiskTimeRange();
+                string fixedValue = CorrectTimeSpanRange(parsed);
+                var current = s_bl.Admin.GetRiskTimeRange().ToString();
 
-
-                if (StringAfterRepair == currentTimeSpan.ToString())
+                if (fixedValue == current)
                 {
-                    MessageBox.Show("The value remains unchanged in the configuration. The value will remain as is and no update will be made.",
-                                    "Warning",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Warning);
-
-                    TimeSpan riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
-                    MaxTimeSpanValue = riskTimeSpan.ToString();
+                    MessageBox.Show("The value remains unchanged in the configuration.",
+                                    "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MaxTimeSpanValue = current;
                 }
-
                 else
                 {
-                    TimeSpan timeSpan = TimeSpan.Parse(StringAfterRepair);
-                    s_bl.Admin.SetRiskTimeRange(timeSpan);
+                    var ts = TimeSpan.Parse(fixedValue);
+                    s_bl.Admin.SetRiskTimeRange(ts);
                     MessageBox.Show("The value has been successfully updated! 🎉",
-                "Success",
-                MessageBoxButton.OK,
-                MessageBoxImage.Asterisk);
-
+                                    "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                 }
-
             }
             else
             {
-                MessageBox.Show("Invalid TimeSpan format. Please enter a valid value in the format hh:mm:ss.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                TimeSpan riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
-                MaxTimeSpanValue = riskTimeSpan.ToString();
+                MessageBox.Show("Invalid TimeSpan format. Please use hh:mm:ss.",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MaxTimeSpanValue = s_bl.Admin.GetRiskTimeRange().ToString();
             }
         }
-        
         catch (Exception ex)
         {
-            MessageBox.Show($"Error updating value: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            TimeSpan riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
-            MaxTimeSpanValue = riskTimeSpan.ToString();
+            MessageBox.Show($"Error updating value: {ex.Message}", "Error",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+            MaxTimeSpanValue = s_bl.Admin.GetRiskTimeRange().ToString();
         }
     }
+
     public bool IsValidTimeSpanFormat(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
+        if (string.IsNullOrWhiteSpace(value)) return false;
 
-        string[] parts = value.Split(':');
-        if (parts.Length != 3)
-            return false;
+        var parts = value.Split(':');
+        if (parts.Length != 3) return false;
+        if (parts.Any(p => !p.All(char.IsDigit) || p.Length > 2)) return false;
 
-        foreach (var part in parts)
-        {
-            if (!part.All(char.IsDigit) || part.Length > 2)
-                return false;
-        }
+        int h = int.Parse(parts[0]);
+        int m = int.Parse(parts[1]);
+        int s = int.Parse(parts[2]);
 
-        int hours = int.Parse(parts[0]);
-        int minutes = int.Parse(parts[1]);
-        int seconds = int.Parse(parts[2]);
-
-        if (seconds < 0  || minutes < 0 || hours < 0)
-            return false;
-
-        return true;
+        return !(s < 0 || m < 0 || h < 0);
     }
+
     public string CorrectTimeSpanRange(string value)
     {
-        string[] parts = value.Split(':');
+        var parts = value.Split(':');
+        int h = int.Parse(parts[0]);
+        int m = int.Parse(parts[1]);
+        int s = int.Parse(parts[2]);
 
-        int hours = int.Parse(parts[0]);
-        int minutes = int.Parse(parts[1]);
-        int seconds = int.Parse(parts[2]);
-
-        if (seconds > 59)
+        if (s > 59)
         {
-            int overflowMinutes = seconds / 60; 
-            seconds = seconds % 60;  
-            minutes += overflowMinutes; 
-
-           
-            if (minutes > 59)
-            {
-                int overflowHours = minutes / 60;
-                minutes = minutes % 60;
-                hours += overflowHours;
-            }
+            m += s / 60;
+            s = s % 60;
         }
-
-        if (minutes > 59)
+        if (m > 59)
         {
-            int overflowHours = minutes / 60;
-            minutes = minutes % 60;
-            hours += overflowHours;
-            if(hours>23)
-            {
-                throw new Exception("The number of hours cannot be more than 23.");
-            } 
+            h += m / 60;
+            m = m % 60;
+            if (h > 23) throw new Exception("The number of hours cannot be more than 23.");
         }
-
-        return $"{hours:D2}:{minutes:D2}:{seconds:D2}";  
+        return $"{h:D2}:{m:D2}:{s:D2}";
     }
 
+    #endregion
 
-
-
-
+    #region DB Init/Reset
 
     private void InitializeDB_Click(object sender, RoutedEventArgs e)
     {
-        
-        var result = MessageBox.Show("Are you sure you want to initialize the database? This action will reset all data.",
-                                     "Initialize Database",
-                                     MessageBoxButton.YesNo,
-                                     MessageBoxImage.Warning);
-
+        var result = MessageBox.Show("Are you sure you want to initialize the database? This will reset all data.",
+                                     "Initialize Database", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
 
         try
@@ -245,16 +251,12 @@ public partial class MainManagementScreen : Window
             CloseAllWindowsExceptMain();
             s_bl.Admin.InitializeDatabase();
             MessageBox.Show("The database has been successfully initialized.",
-                            "Success",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+                            "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
             MessageBox.Show($"An error occurred during initialization: {ex.Message}",
-                            "Error",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -262,99 +264,122 @@ public partial class MainManagementScreen : Window
         }
     }
 
-    // מתודה לאיפוס בסיס הנתונים
     private void ResetDB_Click(object sender, RoutedEventArgs e)
     {
-        
-        var result = MessageBox.Show("Are you sure you want to reset the database? This action will clear all data.",
-                                     "Reset Database",
-                                     MessageBoxButton.YesNo,
-                                     MessageBoxImage.Warning);
-
-       
+        var result = MessageBox.Show("Are you sure you want to reset the database? This will clear all data.",
+                                     "Reset Database", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
 
         try
         {
             Mouse.OverrideCursor = Cursors.Wait;
-
             CloseAllWindowsExceptMain();
-
             s_bl.Admin.ResetDatabase();
-
             MessageBox.Show("The database has been successfully reset.",
-                            "Success",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+                            "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
             MessageBox.Show($"An error occurred during reset: {ex.Message}",
-                            "Error",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
-          
             Mouse.OverrideCursor = null;
         }
     }
 
     private void CloseAllWindowsExceptMain()
     {
-        foreach (Window window in Application.Current.Windows)
-        {
-            if (window != this)
-            {
-                window.Close();
-            }
-        }
+        foreach (Window w in Application.Current.Windows)
+            if (w != this) w.Close();
     }
+
+    #endregion
+
+    #region Navigation Buttons
 
     private void VolunteerManagementButton_Click(object sender, RoutedEventArgs e)
     {
-       
-        VolunteerListWindow volunteerListWindow = new VolunteerListWindow();
-        volunteerListWindow.Show();
+        var win = new VolunteerListWindow
+        {
+            Owner = this,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        win.Show();
+        win.Activate();
     }
 
-    //private void CallManagementButton_Click(object sender, RoutedEventArgs e)
-    //{
-
-    //    CallListWindow callListWindow = new CallListWindow();
-    //    callListWindow.Show();
-    //}
     private void CallManagementButton_Click(object sender, RoutedEventArgs e)
     {
-        CallListWindow callListWindow = new CallListWindow
+        var win = new CallListWindow
         {
-            Owner = this, // מקשר את החלון החדש לחלון הראשי
-            WindowStartupLocation = WindowStartupLocation.CenterOwner // ממקם במרכז החלון הראשי
+            Owner = this,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
-
-        callListWindow.Show();    // מציג את החלון
-        callListWindow.Activate(); // דואג שהוא יופיע מקדימה
+        win.Show();
+        win.Activate();
     }
 
-    public MainManagementScreen()
+    #endregion
+
+    #region Volunteer Mode
+
+    private async void VolunteerModeButton_Click(object sender, RoutedEventArgs e)
     {
-        InitializeComponent();
+        try
+        {
+            if (_currentUserId <= 0)
+            {
+                MessageBox.Show("Volunteer identity not available.",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // אימות שיש פרופיל מתנדב
+            BO.Volunteer vol = null;
+            try
+            {
+                vol = await s_bl.Volunteer.GetVolunteerDetailsAsync(_currentUserId);
+            }
+            catch
+            {
+                MessageBox.Show("Volunteer profile not found for this user.",
+                                "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            if (vol == null)
+            {
+                MessageBox.Show("Volunteer profile not found for this user.",
+                                "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // לא לפתוח כפילויות – אם חלון כזה כבר פתוח, נעיר אותו
+            foreach (Window w in Application.Current.Windows)
+            {
+                if (w is MainVolunteerScreen existing /* && existing.VolunteerId == _currentUserId */)
+                {
+                    existing.Activate();
+                    return;
+                }
+            }
+
+            // פתיחת חלון מתנדב למשתמש הנוכחי
+            var vmWin = new MainVolunteerScreen(_currentUserId)
+            {
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            vmWin.Show();
+            vmWin.Activate();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error opening Volunteer Mode: {ex.Message}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
+    #endregion
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
