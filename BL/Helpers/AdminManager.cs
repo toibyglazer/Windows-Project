@@ -1,20 +1,25 @@
 ﻿using BlImplementation;
 using BO;
 using DalApi;
+using System;
+using System.Threading;
+using System.Threading.Tasks; // ← חדש: בשביל Task.Run
+using System.Runtime.CompilerServices;
+
 namespace Helpers;
 
 /// <summary>
 /// Internal BL manager for all Application's Clock logic policies
 /// </summary>
-public static class AdminManager //stage 4
+public static class AdminManager
 {
     #region Stage 4
-    private static readonly DalApi.IDal s_dal = DalApi.Factory.Get; //stage 4
+    private static readonly IDal s_dal = Factory.Get;
     #endregion Stage 4
 
     #region Stage 5
-    internal static event Action? ConfigUpdatedObservers; //prepared for stage 5 - for config update observers
-    internal static event Action? ClockUpdatedObservers; //prepared for stage 5 - for clock update observers
+    internal static event Action? ConfigUpdatedObservers; // prepared for stage 5
+    internal static event Action? ClockUpdatedObservers;  // prepared for stage 5
     #endregion Stage 5
 
     #region Stage 4
@@ -30,9 +35,9 @@ public static class AdminManager //stage 4
             ConfigUpdatedObservers?.Invoke(); // stage 5
         }
     }
+
     public static TimeSpan GetMaxRange() => MaxRange;
     public static void SetMaxRange(TimeSpan maxRange) => MaxRange = maxRange;
-
 
     internal static DateTime Now
     {
@@ -43,47 +48,69 @@ public static class AdminManager //stage 4
             ClockUpdatedObservers?.Invoke(); // stage 5
         }
     }
+
     public static DateTime GetNow() => Now;
     public static void SetNow(DateTime newClock) => Now = newClock;
 
-
-
     /// <summary>
-    /// Method to perform application's clock from any BL class as may be required
+    /// Method to perform application's clock update from any BL class as may be required
     /// </summary>
-    /// <param name="newClock">updated clock value</param>
-    internal static void UpdateClock(DateTime newClock) //stage 4-7
+    internal static void UpdateClock(DateTime newClock)
     {
-        // new Thread(() => { // stage 7 - not sure - still under investigation - see stage 7 instructions after it will be released        
-        updateClock(newClock);//stage 4-6
-        // }).Start(); // stage 7 as above
-    }
+        // שמירת השעון הקודם + עדכון לשעון החדש
+        var oldClock = s_dal.Config.Clock;
+        s_dal.Config.Clock = newClock;
 
-    private static void updateClock(DateTime newClock) // prepared for stage 7 as DRY to eliminate needless repetition
-    {
-        var oldClock = s_dal.Config.Clock; //stage 4
-        s_dal.Config.Clock = newClock; //stage 4
+        // עדכון תצוגות (מיידי, סינכרוני)
+        ClockUpdatedObservers?.Invoke();
 
-        CallManager.UpdateExpiredCalls();
-        ClockUpdatedObservers?.Invoke(); //prepared for stage 5
+        // עדכונים מחזוריים כבדים — להרצה אסינכרונית כדי לא לחסום
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                // בשלב הבא נעביר לקריאה ל-CallManager.PeriodicUpdates(oldClock, newClock)
+                CallManager.UpdateExpiredCalls();
+            }
+            catch
+            {
+                // אפשר להוסיף לוג/Trace במידת הצורך
+            }
+        });
     }
     #endregion Stage 4
 
     #region Stage 7 base
     internal static readonly object blMutex = new();
     private static Thread? s_thread;
-    private static int s_interval { get; set; } = 1; //in minutes by second    
+    private static int s_interval { get; set; } = 1; // in minutes
     private static volatile bool s_stop = false;
+    private static volatile bool s_running = false;
     private static readonly object mutex = new();
+
+    public static bool IsSimulatorRunning => s_thread != null && s_running;
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    internal static void ThrowOnSimulatorIsRunning()
+    {
+        if (IsSimulatorRunning)
+            throw new BO.BLTemporaryNotAvailableException(
+                "Cannot perform the operation since simulator is running.");
+    }
 
     internal static void Start(int interval)
     {
         lock (mutex)
             if (s_thread == null)
             {
-                s_interval = interval;
+                s_interval = Math.Min(60, Math.Max(1, interval)); // clamp range
                 s_stop = false;
-                s_thread = new Thread(clockRunner);
+                s_running = true;
+                s_thread = new Thread(clockRunner)
+                {
+                    IsBackground = true,
+                    Name = "BL.ClockRunner"
+                };
                 s_thread.Start();
             }
     }
@@ -94,7 +121,8 @@ public static class AdminManager //stage 4
             if (s_thread != null)
             {
                 s_stop = true;
-                s_thread?.Interrupt();
+                s_running = false;
+                try { s_thread.Interrupt(); } catch { }
                 s_thread = null;
             }
     }
@@ -105,18 +133,14 @@ public static class AdminManager //stage 4
         {
             UpdateClock(Now.AddMinutes(s_interval));
 
-            #region Stage 7
-            //TO_DO:
-            //Add calls here to any logic simulation that was required in stage 7
-            //for example: course registration simulation
-            //StudentManager.SimulateCourseRegistrationAndGrade(); //stage 7
-
-            //etc...
-            #endregion Stage 7
+            #region Stage 7 simulation placeholder
+            // כאן נוסיף בהמשך (בשלבים 4.ז–4.ח)
+            // קריאות לסימולציות נוספות
+            #endregion
 
             try
             {
-                Thread.Sleep(1000); // 1 second
+                Thread.Sleep(1000); // 1 second tick
             }
             catch (ThreadInterruptedException) { }
         }

@@ -241,3 +241,18 @@ public class BlUpdateException : Exception
     {
     }
 }
+/// <summary>
+/// Exception thrown when a BL operation is temporarily unavailable
+/// (for example, when the simulator is currently running).
+/// </summary>
+[Serializable]
+public class BLTemporaryNotAvailableException : Exception
+{
+    public BLTemporaryNotAvailableException() { }
+
+    public BLTemporaryNotAvailableException(string message)
+        : base(message) { }
+
+    public BLTemporaryNotAvailableException(string message, Exception inner)
+        : base(message, inner) { }
+}

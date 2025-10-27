@@ -5,6 +5,10 @@
 /// </summary>
 using DalApi;
 using DO;
+using System;
+using System.Collections.Generic;
+using System.Linq; // LINQ
+using System.Runtime.CompilerServices; // MethodImpl
 
 namespace Dal;
 
@@ -14,108 +18,78 @@ namespace Dal;
 /// </summary>
 internal class CallImplementation : ICall
 {
-    private static readonly object lockObj = new object();
-    /// <summary>
-    /// Adds a new `Call` entity to the XML storage.
-    /// Generates a unique ID for the new `Call` and saves it.
-    /// </summary>
-    /// <param name="item">The `Call` entity to create.</param>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Create(Call item)
     {
         int nextId = Config.NextCallId;
-        List <Call> Calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+        List<Call> calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
         Call copy = item with { Id = nextId };
 
-        Calls.Add(copy);
-        XMLTools.SaveListToXMLSerializer(Calls, Config.s_calls_xml);
+        calls.Add(copy);
+        XMLTools.SaveListToXMLSerializer(calls, Config.s_calls_xml);
     }
 
-    /// <summary>
-    /// Deletes a `Call` entity by its ID from the XML storage.
-    /// Throws an exception if the `Call` does not exist.
-    /// </summary>
-    /// <param name="id">The ID of the `Call` to delete.</param>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
-        List<Call> Calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
-        if (Calls.RemoveAll(v => v.Id == id) == 0)
-            throw new DalDoesNotExistException($"Call with ID={id} does Not exist");
-        XMLTools.SaveListToXMLSerializer(Calls, Config.s_calls_xml);
+        List<Call> calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+
+        if (calls.RemoveAll(v => v.Id == id) == 0)
+            throw new DalDoesNotExistException($"Call with ID={id} does not exist");
+
+        XMLTools.SaveListToXMLSerializer(calls, Config.s_calls_xml);
     }
 
-    /// <summary>
-    /// Deletes all `Call` entities from the XML storage.
-    /// </summary>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void DeleteAll()
     {
-        lock (lockObj)
-        {
-            XMLTools.SaveListToXMLSerializer(new List<Call>(), Config.s_calls_xml);
-        }
-           
+        // Exclusive rewrite of the list
+        XMLTools.SaveListToXMLSerializer(new List<Call>(), Config.s_calls_xml);
     }
 
-    /// <summary>
-    /// Reads a `Call` entity by its ID from the XML storage.
-    /// Throws an exception if the `Call` does not exist.
-    /// </summary>
-    /// <param name="id">The ID of the `Call` to read.</param>
-    /// <returns>The `Call` entity with the specified ID.</returns>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Call? Read(int id)
     {
-        List<Call> Calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
-        var matchingVolunteer = Calls.FirstOrDefault(v => v.Id == id);
+        List<Call> calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+        var match = calls.FirstOrDefault(v => v.Id == id);
 
-        if (matchingVolunteer == null)
-            throw new DalDoesNotExistException($"Call with ID={id} does Not exist");
-        return matchingVolunteer;
+        if (match == null)
+            throw new DalDoesNotExistException($"Call with ID={id} does not exist");
+
+        return match;
     }
 
-    /// <summary>
-    /// Reads the first `Call` entity matching a given filter from the XML storage.
-    /// Throws an exception if no matching `Call` is found.
-    /// </summary>
-    /// <param name="filter">The filter condition to apply.</param>
-    /// <returns>The first matching `Call` entity.</returns>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Call? Read(Func<Call, bool> filter)
     {
-        List<Call> Calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
-        var matchingVolunteer = Calls.FirstOrDefault(v => filter(v));
+        List<Call> calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+        var match = calls.FirstOrDefault(v => filter(v));
 
-        if (matchingVolunteer == null)
-            throw new DalDoesNotExistException($"No matching Call found");
-        return matchingVolunteer;
+        if (match == null)
+            throw new DalDoesNotExistException("No matching Call found");
+
+        return match;
     }
 
-    /// <summary>
-    /// Reads all `Call` entities from the XML storage that match a given filter.
-    /// If no filter is provided, all entities are returned.
-    /// </summary>
-    /// <param name="filter">An optional filter condition to apply.</param>
-    /// <returns>An enumerable of matching `Call` entities.</returns>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public IEnumerable<Call> ReadAll(Func<Call, bool>? filter = null)
     {
-        List<Call> Calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+        List<Call> calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+
         return filter != null
-            ? from call in Calls
-              where filter(call)
-              select call
-             : from call in Calls
-               select call;
+            ? from call in calls where filter(call) select call
+            : from call in calls select call;
     }
 
-    /// <summary>
-    /// Updates an existing `Call` entity in the XML storage.
-    /// Replaces the old entity with the updated one. Throws an exception if the entity does not exist.
-    /// </summary>
-    /// <param name="item">The updated `Call` entity.</param>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Update(Call item)
     {
-        List<Call> Calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
-        if (Calls.RemoveAll(it => it.Id == item.Id) == 0)
-            throw new DalDoesNotExistException($"Call with ID={item.Id} does Not exist");
-        Calls.Add(item);
-        XMLTools.SaveListToXMLSerializer(Calls, Config.s_calls_xml);
+        List<Call> calls = XMLTools.LoadListFromXMLSerializer<Call>(Config.s_calls_xml);
+
+        if (calls.RemoveAll(it => it.Id == item.Id) == 0)
+            throw new DalDoesNotExistException($"Call with ID={item.Id} does not exist");
+
+        calls.Add(item);
+        XMLTools.SaveListToXMLSerializer(calls, Config.s_calls_xml);
     }
 }
-

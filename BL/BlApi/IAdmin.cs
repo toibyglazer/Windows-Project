@@ -19,6 +19,11 @@ public interface IAdmin
     void ResetDatabase();
     void InitializeDatabase();
 
+    // Simulator control (Stage 4.e)
+    void StartSimulator(int intervalMinutes);
+    void StopSimulator();
+    bool IsSimulatorRunning { get; }
+
     #region Stage 5
     void AddConfigObserver(Action configObserver);
     void RemoveConfigObserver(Action configObserver);
