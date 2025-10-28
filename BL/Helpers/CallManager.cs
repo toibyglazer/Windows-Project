@@ -349,22 +349,34 @@ internal static class CallManager
     //    }
     //    return null; // If MaxCompletionTime is null, return null
     //}
+    //public static TimeSpan? CalculateRemainingTime(DO.Call call)
+    //{
+    //    if (call.MaxCompletionTime.HasValue)
+    //    {
+    //        var remaining = call.MaxCompletionTime.Value - DateTime.Now;
+
+    //        // אם הזמן שנותר יותר קטן מ-0, חזור null כי הוא פג תוקף
+    //        if (remaining <= TimeSpan.Zero)
+    //        {
+    //            return TimeSpan.Zero; // הזמן פג תוקף
+    //        }
+
+    //        // אם הזמן גדול מ-0, החזר אותו
+    //        return remaining;
+    //    }
+    //    return null; // אם אין זמן סיום, החזר null
+    //}
     public static TimeSpan? CalculateRemainingTime(DO.Call call)
     {
         if (call.MaxCompletionTime.HasValue)
         {
-            var remaining = call.MaxCompletionTime.Value - DateTime.Now;
-
-            // אם הזמן שנותר יותר קטן מ-0, חזור null כי הוא פג תוקף
-            if (remaining <= TimeSpan.Zero)
-            {
-                return TimeSpan.Zero; // הזמן פג תוקף
-            }
-
-            // אם הזמן גדול מ-0, החזר אותו
+            var admin = new AdminImplementation();
+            var now = admin.GetSystemClock();                               // ← שעון הסימולטור
+            var remaining = call.MaxCompletionTime.Value - now;
+            if (remaining <= TimeSpan.Zero) return TimeSpan.Zero;
             return remaining;
         }
-        return null; // אם אין זמן סיום, החזר null
+        return null;
     }
 
     /// <summary>

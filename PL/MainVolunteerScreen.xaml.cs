@@ -25,6 +25,9 @@ namespace PL
     /// </summary>
     public partial class MainVolunteerScreen : Window, INotifyPropertyChanged
     {
+        // Stage 7 – PL 5A (Option 1 - flag)
+        private volatile bool _updateVolunteerDataWorking = false;
+
         static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -157,24 +160,25 @@ namespace PL
             }
         }
 
-        private volatile DispatcherOperation _updateVolunteerDataOperation = null;
+
         public void UpdateVolunteerData()
         {
-            if (_updateVolunteerDataOperation == null || _updateVolunteerDataOperation.Status == DispatcherOperationStatus.Completed)
+            if (!_updateVolunteerDataWorking)
             {
-                _updateVolunteerDataOperation = Dispatcher.BeginInvoke(new Action(async () =>
+                _updateVolunteerDataWorking = true;
+
+                _ = Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    if (CurrentVolunteer?.Id != null)
+                    try
                     {
-                        try
+                        if (CurrentVolunteer != null && CurrentVolunteer.Id != 0)
                         {
                             var updatedVolunteer = await s_bl.Volunteer.GetVolunteerDetailsAsync(CurrentVolunteer.Id);
                             if (updatedVolunteer != null)
                             {
                                 CurrentVolunteer = updatedVolunteer;
 
-                                // Update welcome message if you have it
-                                if (updatedVolunteer.FullName != null)
+                                if (!string.IsNullOrEmpty(updatedVolunteer.FullName))
                                 {
                                     string firstName = updatedVolunteer.FullName.Contains(" ")
                                         ? updatedVolunteer.FullName.Substring(0, updatedVolunteer.FullName.IndexOf(" "))
@@ -184,16 +188,21 @@ namespace PL
                                 }
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            // Handle any exceptions from the async operation
-                            MessageBox.Show($"Error updating volunteer data: {ex.Message}",
-                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error updating volunteer data: {ex.Message}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    finally
+                    {
+                        _updateVolunteerDataWorking = false;
                     }
                 }));
             }
         }
+
+        
 
         // שינוי UpdateButton_Click להיות אסינכרוני ולהציג את מחוון הטעינה
         public async void UpdateButton_Click(object sender, RoutedEventArgs e)

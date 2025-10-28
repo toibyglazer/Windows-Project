@@ -376,4 +376,12 @@
     <CompletionTime>2025-10-22T17:03:30.2212609+03:00</CompletionTime>
     <CompletionType>Treated</CompletionType>
   </Assignment>
+  <Assignment>
+    <Id>48</Id>
+    <CallId>53</CallId>
+    <VolunteerId>0</VolunteerId>
+    <EntryTime>2025-10-25T17:18:33</EntryTime>
+    <CompletionTime>2025-10-25T17:18:33</CompletionTime>
+    <CompletionType>Expired</CompletionType>
+  </Assignment>
 </ArrayOfAssignment>

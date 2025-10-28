@@ -6,22 +6,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PL"
         mc:Ignorable="d"
         Title="Main Management Screen"
         Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
-        Width="900" Height="600"
+        Width="900" Height="650"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <DropShadowEffect x:Key="DropShadowEffect" 
-           ShadowDepth="1" 
-           Direction="315" 
-           Color="#DDDDDD" 
-           Opacity="0.5" 
+        <DropShadowEffect x:Key="DropShadowEffect"
+           ShadowDepth="1"
+           Direction="315"
+           Color="#DDDDDD"
+           Opacity="0.5"
            BlurRadius="10"/>
 
-        <!-- Style for TextBox -->
+        <!-- Converters -->
+        <local:BoolToStartStopTextConverter x:Key="BoolToStartStopTextConverter"/>
+        <local:InverseBooleanConverter     x:Key="InverseBooleanConverter"/>
+
+        <!-- Base styles FIRST -->
         <Style TargetType="TextBox">
             <Setter Property="Height" Value="36"/>
             <Setter Property="Margin" Value="0,5,0,10"/>
@@ -30,8 +35,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                        <Border Background="#FFFFFF"
+                                CornerRadius="8"
                                 BorderBrush="#E5E7EB"
                                 BorderThickness="1">
                             <ScrollViewer x:Name="PART_ContentHost" Margin="5"/>
@@ -41,7 +46,7 @@
             </Setter>
         </Style>
 
-        <!-- Style for Button -->
+        <!-- Implicit base Button style -->
         <Style TargetType="Button">
             <Setter Property="Height" Value="36"/>
             <Setter Property="Background" Value="#F3F4F6"/>
@@ -68,7 +73,7 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Style for Label -->
+        <!-- Label -->
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="#374151"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -76,9 +81,10 @@
             <Setter Property="Margin" Value="0,0,0,5"/>
         </Style>
 
-        <Style x:Key="MainActionButton" TargetType="Button">
+        <!-- Main action button -->
+        <Style x:Key="MainActionButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Height" Value="70"/>
-            <Setter Property="Width" Value="180"/>
+            <Setter Property="Width"  Value="180"/>
             <Setter Property="Margin" Value="5"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -90,9 +96,9 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                        CornerRadius="12"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+                                CornerRadius="12"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -105,104 +111,162 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Lock wrappers AFTER base styles exist -->
+        <Style x:Key="ButtonLockable" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSimulatorRunning}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MainActionButtonLockable" TargetType="Button" BasedOn="{StaticResource MainActionButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSimulatorRunning}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
+
+   
 
     <Border Background="#F9F9F9" CornerRadius="0">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="15" Direction="-90" 
-                           RenderingBias="Quality" ShadowDepth="2"
-                           Color="#20000000"/>
+            <DropShadowEffect BlurRadius="15" Direction="-90"
+                              RenderingBias="Quality" ShadowDepth="2"
+                              Color="#20000000"/>
         </Border.Effect>
         <Border Background="#F9F9F9" CornerRadius="12" Margin="15" Effect="{StaticResource DropShadowEffect}">
             <Grid Margin="25">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
                 <Grid Margin="0,0,0,20">
-    <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="Auto" />
-    </Grid.ColumnDefinitions>
-
-    <TextBlock Grid.Column="0"
-               Text="Main Management Screen"
-               FontSize="24"
-               FontWeight="Bold"
-               Foreground="#111827"/>
-
-    <!-- Volunteer Mode button: hidden by default, shown only for managers -->
-    <Button x:Name="VolunteerModeButton"
-            Grid.Column="1"
-            Content="Volunteer Mode"
-            Visibility="Collapsed"
-            Margin="8,0,0,0"
-            Height="36"
-            Width="140"
-            Click="VolunteerModeButton_Click"
-            Style="{StaticResource MainActionButton}"
-            HorizontalAlignment="Right"/>
-</Grid>
-
-                <!-- System Clock and Configuration -->
-                <Grid Grid.Row="1" Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
+                    <TextBlock Grid.Column="0"
+                               Text="Main Management Screen"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#111827"/>
+
+                    <Button x:Name="VolunteerModeButton"
+                            Grid.Column="1"
+                            Content="Volunteer Mode"
+                            Visibility="Collapsed"
+                            Margin="8,0,0,0"
+                            Height="36" Width="140"
+                            Click="VolunteerModeButton_Click"
+                            Style="{StaticResource MainActionButton}"
+                            HorizontalAlignment="Right"/>
+                </Grid>
+
+                <!-- Clock + Config + Simulator -->
+                <Grid Grid.Row="1" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
                     <!-- System Clock -->
-                    <Border Grid.Column="0" Background="White" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="0,0,10,0">
+                    <Border Grid.Column="0" Grid.Row="0" Background="White" CornerRadius="8"
+                            BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="0,0,10,0">
                         <StackPanel>
                             <Label Content="System Clock" FontSize="16" FontWeight="Bold"/>
-                            <TextBlock Text="{Binding CurrentTime}" 
-                                       FontSize="20" 
-                                       FontWeight="Bold" 
-                                       Foreground="#374151" 
-                                       HorizontalAlignment="Center" 
-                                       Margin="0,5,0,15"/>
+                            <TextBlock Text="{Binding CurrentTime}" FontSize="20" FontWeight="Bold"
+                                       Foreground="#374151" HorizontalAlignment="Center" Margin="0,5,0,15"/>
                             <UniformGrid Rows="2" Columns="3">
-                                <Button Content="Add Minute" Click="btnAddOneMinute_Click" Margin="3"/>
-                                <Button Content="Add Hour" Click="btnAddOneHour_Click" Margin="3"/>
-                                <Button Content="Add Day" Click="btnAddOneDay_Click" Margin="3"/>
-                                <Button Content="Add Month" Click="btnAddOneMonth_Click" Margin="3"/>
-                                <Button Content="Add Year" Click="btnAddOneYear_Click" Margin="3"/>
+                                <Button Content="Add Minute" Click="btnAddOneMinute_Click" Margin="3"
+                                        Style="{StaticResource ButtonLockable}"/>
+                                <Button Content="Add Hour"   Click="btnAddOneHour_Click"   Margin="3"
+                                        Style="{StaticResource ButtonLockable}"/>
+                                <Button Content="Add Day"    Click="btnAddOneDay_Click"    Margin="3"
+                                        Style="{StaticResource ButtonLockable}"/>
+                                <Button Content="Add Month"  Click="btnAddOneMonth_Click"  Margin="3"
+                                        Style="{StaticResource ButtonLockable}"/>
+                                <Button Content="Add Year"   Click="btnAddOneYear_Click"   Margin="3"
+                                        Style="{StaticResource ButtonLockable}"/>
                             </UniformGrid>
                         </StackPanel>
                     </Border>
 
                     <!-- Configuration -->
-                    <Border Grid.Column="1" Background="White" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="10,0,0,0">
+                    <Border Grid.Column="1" Grid.Row="0" Background="White" CornerRadius="8"
+                            BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="10,0,0,0">
                         <StackPanel>
                             <Label Content="Configuration" FontSize="16" FontWeight="Bold"/>
-                            <Label Content="Maximum Time for Call:" />
-                            <TextBox Text="{Binding MaxTimeSpanValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            <Label Content="Maximum Time for Call:"/>
+                            <TextBox Text="{Binding MaxTimeSpanValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,10"/>
-                            <Button Content="Update" 
-                                    Click="btnUpdateMaxYearRange_Click"
-                                    HorizontalAlignment="Right"
-                                    Width="90" Height="36"/>
+                            <Button Content="Update" Click="btnUpdateMaxYearRange_Click"
+                                    HorizontalAlignment="Right" Width="90" Height="36"
+                                    Style="{StaticResource ButtonLockable}"/>
                         </StackPanel>
+                    </Border>
+
+                    <!-- Simulator Panel -->
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Background="White" CornerRadius="8"
+                            BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                                       Text="Simulator" FontSize="16" FontWeight="Bold"
+                                       Foreground="#111827" Margin="0,0,0,12"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"
+                                       Margin="0,0,8,0" Text="Clock interval (minutes):"/>
+
+                            <TextBox Grid.Row="1" Grid.Column="1" Width="80"
+                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"
+                                     Text="{Binding Interval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsSimulatorRunning, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                            <Button Grid.Row="1" Grid.Column="2" Margin="12,0,0,0"
+                                    Width="160" Height="36"
+                                    Content="{Binding IsSimulatorRunning, Converter={StaticResource BoolToStartStopTextConverter}}"
+                                    Click="ToggleSimulatorButton_Click"/>
+                        </Grid>
                     </Border>
                 </Grid>
 
                 <!-- Main Action Buttons -->
-                <Border Grid.Row="2" Background="#F0F4F8" CornerRadius="12" BorderBrush="#D1D5DB" BorderThickness="1" Padding="15">
+                <Border Grid.Row="3" Background="#F0F4F8" CornerRadius="12"
+                        BorderBrush="#D1D5DB" BorderThickness="1" Padding="15">
                     <UniformGrid Rows="1" Columns="4">
-                        <Button Content="Volunteer Management" 
+                        <Button Content="Volunteer Management"
                                 Style="{StaticResource MainActionButton}"
-                                  Click="VolunteerManagementButton_Click"/>
-                        <Button Content="Call Management" 
+                                Click="VolunteerManagementButton_Click"/>
+                        <Button Content="Call Management"
                                 Style="{StaticResource MainActionButton}"
                                 Click="CallManagementButton_Click"/>
-                        <Button Content="Initialize Database" 
-                                Style="{StaticResource MainActionButton}"
+                        <Button Content="Initialize Database"
+                                Style="{StaticResource MainActionButtonLockable}"
                                 Click="InitializeDB_Click"/>
-                        <Button Content="Reset Database" 
-                                Style="{StaticResource MainActionButton}"
+                        <Button Content="Reset Database"
+                                Style="{StaticResource MainActionButtonLockable}"
                                 Click="ResetDB_Click"/>
                     </UniformGrid>
                 </Border>

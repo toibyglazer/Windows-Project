@@ -212,16 +212,20 @@ public partial class VolunteerWindow : Window, INotifyPropertyChanged
         }
     }
 
-    public volatile DispatcherOperation _updateVolunteerDataOperation = null;
+    // Stage 7 – PL 5A (Option 1 - flag)
+    private volatile bool _updateVolunteerDataWorking = false;
+
     public void UpdateVolunteerData()
     {
-        if (_updateVolunteerDataOperation == null || _updateVolunteerDataOperation.Status == DispatcherOperationStatus.Completed)
+        if (!_updateVolunteerDataWorking)
         {
-            _updateVolunteerDataOperation = Dispatcher.BeginInvoke(new Action(async () =>
+            _updateVolunteerDataWorking = true;
+
+            _ = Dispatcher.BeginInvoke(new Action(async () =>
             {
-                if (CurrentVolunteer?.Id != null)
+                try
                 {
-                    try
+                    if (CurrentVolunteer != null && CurrentVolunteer.Id != 0)
                     {
                         var updatedVolunteer = await s_bl.Volunteer.GetVolunteerDetailsAsync(CurrentVolunteer.Id);
                         if (updatedVolunteer != null)
@@ -229,11 +233,15 @@ public partial class VolunteerWindow : Window, INotifyPropertyChanged
                             CurrentVolunteer = updatedVolunteer;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error updating volunteer data: {ex.Message}",
-                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error updating volunteer data: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    _updateVolunteerDataWorking = false;
                 }
             }));
         }

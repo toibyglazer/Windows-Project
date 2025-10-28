@@ -25,6 +25,8 @@ namespace PL.Call
 
     public class RemainingTimeConverter : IMultiValueConverter
     {
+       
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             // First value is RemainingTime, second value is Status, third value is TotalCompletionTime
@@ -348,22 +350,35 @@ namespace PL.Call
 
         private bool _observerRegistered = false;
 
+
+        // Stage 7 – PL 5A: coalescing + marshaling to UI thread
+        private volatile bool _callListObserverWorking = false;
+
         public void CallListObserver()
         {
-            // מניעת עדכונים מרובים במקביל
-            if (!_isUpdating)
+            if (!_callListObserverWorking)
             {
-                UpdateCallList();
+                _callListObserverWorking = true;
+
+                _ = Dispatcher.BeginInvoke(() =>
+                {
+                    // כאן אנחנו כבר על ה-UI thread
+                    if (!_isUpdating)
+                    {
+                        UpdateCallList(); // קוראת ל-UpdateCallListAsync מאחורי הקלעים
+                    }
+
+                    _callListObserverWorking = false;
+                });
             }
         }
 
+        private bool _clockObserverRegistered = false;
         public async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // הסתרת אינדיקטור הטעינה באופן מיידי
             if (LoadingIndicator != null)
-            {
                 LoadingIndicator.Visibility = Visibility.Collapsed;
-            }
 
             // יצירת מנגנון ביטול פעולות
             _cancellationTokenSource = new CancellationTokenSource();
@@ -371,11 +386,21 @@ namespace PL.Call
             // רישום לאירוע חריגה לא מטופלת
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
+            // --- Observers ---
+            // צופה לשינויים ברשימת הקריאות (כבר היה)
             if (!_observerRegistered)
             {
                 s_bl.Call.AddObserver(CallListObserver);
                 _observerRegistered = true;
             }
+
+            // צופה ל"טיקים" של שעון הסימולטור (חדש) – מרענן את הרשימה כל פעם שהזמן מתקדם
+            if (!_clockObserverRegistered)
+            {
+                s_bl.Admin.AddClockObserver(CallListObserver);   // <-- חדש
+                _clockObserverRegistered = true;
+            }
+            // --- /Observers ---
 
             // טעינת הנתונים ללא הפעלת אינדיקטור
             _isUpdating = true;
@@ -392,14 +417,10 @@ namespace PL.Call
                         );
 
                         if (callType != BO.CallType.All)
-                        {
                             calls = calls.Where(call => call.Type == callType);
-                        }
 
                         if (callStatus != BO.CallStatus.All)
-                        {
                             calls = calls.Where(call => call.Status == callStatus);
-                        }
 
                         // סינון לפי שם מתנדב אחרון
                         if (!string.IsNullOrWhiteSpace(VolunteerFilter))
@@ -418,13 +439,15 @@ namespace PL.Call
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading calls: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error loading calls: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 _isUpdating = false;
             }
         }
+
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
@@ -460,13 +483,19 @@ namespace PL.Call
                 _debounceTimer = null;
             }
 
-            // הסרת הצופה
+            // הסרת הצופים
             try
             {
                 if (_observerRegistered)
                 {
                     s_bl.Call.RemoveObserver(CallListObserver);
                     _observerRegistered = false;
+                }
+
+                if (_clockObserverRegistered)
+                {
+                    s_bl.Admin.RemoveClockObserver(CallListObserver); // <-- חדש
+                    _clockObserverRegistered = false;
                 }
             }
             catch (Exception ex)

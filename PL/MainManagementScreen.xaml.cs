@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using BO;                 // שימוש ב-VolunteerRole
+using System.Windows.Data;            // IValueConverter
+using System.Globalization;          // CultureInfo
+using BO;                            // VolunteerRole
 using BlApi;
 using PL.Call;
 using PL.Volunteer;
@@ -11,10 +13,36 @@ namespace PL;
 
 public partial class MainManagementScreen : Window
 {
+    // Stage 7 – PL 5A: coalescing + marshaling to UI thread
+    private volatile bool _clockObserverWorking = false;
+    private volatile bool _configObserverWorking = false;
+
     static readonly IBl s_bl = Factory.Get();
 
     // מזהה המשתמש שמחובר כרגע (מוזרם מה-Login)
     private readonly int _currentUserId;
+
+    #region NEW: Simulator Dependency Properties
+
+    public int Interval
+    {
+        get => (int)GetValue(IntervalProperty);
+        set => SetValue(IntervalProperty, value);
+    }
+    public static readonly DependencyProperty IntervalProperty =
+        DependencyProperty.Register(nameof(Interval), typeof(int), typeof(MainManagementScreen),
+            new PropertyMetadata(1)); // ברירת מחדל: 1 דקה
+
+    public bool IsSimulatorRunning
+    {
+        get => (bool)GetValue(IsSimulatorRunningProperty);
+        set => SetValue(IsSimulatorRunningProperty, value);
+    }
+    public static readonly DependencyProperty IsSimulatorRunningProperty =
+        DependencyProperty.Register(nameof(IsSimulatorRunning), typeof(bool), typeof(MainManagementScreen),
+            new PropertyMetadata(false));
+
+    #endregion
 
     #region DP: CurrentTime & MaxTimeSpanValue
 
@@ -43,6 +71,8 @@ public partial class MainManagementScreen : Window
     public MainManagementScreen()
     {
         InitializeComponent();
+        // ערך התחלתי דיפולטי לקצב הסימולטור (אם לא מגיע מבחוץ)
+        if (Interval <= 0) Interval = 1;
     }
 
     // בנאי שמעביר את מזהה המשתמש הנוכחי (מנהל שהוא גם מתנדב)
@@ -116,13 +146,41 @@ public partial class MainManagementScreen : Window
 
     private void clockObserver()
     {
-        CurrentTime = s_bl.Admin.GetSystemClock();
+        if (!_clockObserverWorking)
+        {
+            _clockObserverWorking = true;
+            _ = Dispatcher.BeginInvoke(() =>
+            {
+                try
+                {
+                    CurrentTime = s_bl.Admin.GetSystemClock();
+                }
+                finally
+                {
+                    _clockObserverWorking = false;
+                }
+            });
+        }
     }
 
     private void configObserver()
     {
-        var riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
-        MaxTimeSpanValue = riskTimeSpan.ToString();
+        if (!_configObserverWorking)
+        {
+            _configObserverWorking = true;
+            _ = Dispatcher.BeginInvoke(() =>
+            {
+                try
+                {
+                    var riskTimeSpan = s_bl.Admin.GetRiskTimeRange();
+                    MaxTimeSpanValue = riskTimeSpan.ToString();
+                }
+                finally
+                {
+                    _configObserverWorking = false;
+                }
+            });
+        }
     }
 
     #endregion
@@ -131,7 +189,6 @@ public partial class MainManagementScreen : Window
 
     private void btnAddOneMinute_Click(object sender, RoutedEventArgs e)
     {
-        // תיקון הטעות שהייתה – כאן צריך לקדם את השעון בדקה
         s_bl.Admin.AdvanceSystemClock(BO.TimeUnit.MINUTE);
     }
 
@@ -382,4 +439,42 @@ public partial class MainManagementScreen : Window
     }
 
     #endregion
+
+    #region NEW: Start/Stop Simulator button handler
+
+    private void ToggleSimulatorButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // וידוא שה-Interval חוקי
+            if (Interval <= 0)
+            {
+                MessageBox.Show("Interval must be a positive integer (minutes).",
+                                "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Interval = 1;
+                return;
+            }
+
+            if (!IsSimulatorRunning)
+            {
+                // START
+                s_bl.Admin.StartSimulator(Interval);   // stage 7
+                IsSimulatorRunning = true;
+            }
+            else
+            {
+                // STOP
+                s_bl.Admin.StopSimulator();    // stage 7 (לפי הנוסח שסיפקת)
+                IsSimulatorRunning = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Simulator error: {ex.Message}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    #endregion
 }
+

@@ -1,7 +1,7 @@
 ﻿<Application x:Class="PL.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="Login.xaml">
+             StartupUri="MainManagementScreen.xaml">
 
     <Application.Resources>
         <!-- Global window icon: use application resource Icon4.ico from the PL assembly -->

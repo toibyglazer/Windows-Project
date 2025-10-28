@@ -276,33 +276,46 @@ namespace PL.Call
             }
         }
 
-        public volatile DispatcherOperation _updateCallDataOperation = null;
+        // Stage 7 – PL 5A (Option 1 - flag)
+        private volatile bool _updateCallDataWorking = false;
+
         public void UpdateCallData()
         {
-            if (_updateCallDataOperation == null || _updateCallDataOperation.Status == DispatcherOperationStatus.Completed)
+            if (!_updateCallDataWorking)
             {
-                _updateCallDataOperation = Dispatcher.BeginInvoke(new Action(() =>
+                _updateCallDataWorking = true;
+
+                _ = Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    if (CurrentCall?.Id != null)
+                    try
                     {
-                        var updatedCall = s_bl.Call.GetCallDetailsById(CurrentCall.Id);
-                        if (updatedCall != null)
+                        // הגנה בסיסית: ודאי שיש מה לרענן
+                        if (CurrentCall != null && CurrentCall.Id != 0)
                         {
-                            CurrentCall = updatedCall;
-
-                            // Update formatted call type text
-                            if (FormattedCallType != null)
+                            var updatedCall = s_bl.Call.GetCallDetailsById(CurrentCall.Id);
+                            if (updatedCall != null)
                             {
-                                FormattedCallType.Text = FormatCallType(CurrentCall.Type.ToString());
-                            }
+                                CurrentCall = updatedCall;
 
-                            // Update image
-                            LoadCallTypeImage(CurrentCall.Type);
+                                // עדכון טקסט סוג הקריאה בפורמט ידידותי
+                                if (FormattedCallType != null)
+                                {
+                                    FormattedCallType.Text = FormatCallType(CurrentCall.Type.ToString());
+                                }
+
+                                // עדכון האייקון
+                                LoadCallTypeImage(CurrentCall.Type);
+                            }
                         }
+                    }
+                    finally
+                    {
+                        _updateCallDataWorking = false;
                     }
                 }));
             }
         }
+
 
         public async void AddOrUpdateButton_Click(object sender, RoutedEventArgs e)
         {

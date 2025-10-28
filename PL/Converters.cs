@@ -60,6 +60,31 @@ namespace PL
             throw new NotImplementedException();
         }
     }
+
+    public class BoolToStartStopTextConverter : IValueConverter
+    {
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isRunning = value is bool b && b;
+            return isRunning ? "Stop Simulator" : "Start Simulator";
+        }
+
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
+            => Binding.DoNothing;
+    }
+
+    public class InverseBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            bool b = value is bool v && v;
+            return !b;
+        }
+
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
+            => Binding.DoNothing;
+    }
+
     //public class EnumDisplayConverter : IValueConverter
     //{
     //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

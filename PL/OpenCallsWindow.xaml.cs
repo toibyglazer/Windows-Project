@@ -69,6 +69,11 @@ namespace PL
 
     public partial class OpenCallsWindow : Window, INotifyPropertyChanged
     {
+        // Stage 7 – PL 5A (Option 1 - flags)
+        private volatile bool _updateOpenCallsWorking = false;
+        private volatile bool _loadCoordinatesWorking = false;
+        private volatile bool _updateDistancesWorking = false;
+
         private Dictionary<int, GeoCoordinates> _callCoordinates = new Dictionary<int, GeoCoordinates>();
         private bool _isMapLoading = false;
         public bool IsMapLoading
@@ -895,36 +900,37 @@ document.addEventListener('DOMContentLoaded', function() {
         /// </summary>
         private async Task UpdateDistancesToCallsAsync()
         {
+            if (_updateDistancesWorking) return;
+            _updateDistancesWorking = true;
+
             try
             {
                 Debug.WriteLine("UpdateDistancesToCallsAsync started");
-
-                if (OpenCalls == null || !OpenCalls.Any() || _callCoordinates.Count == 0)
-                    return;
+                if (OpenCalls == null || !OpenCalls.Any() || _callCoordinates.Count == 0) return;
 
                 foreach (var call in OpenCalls)
                 {
                     if (_callCoordinates.TryGetValue(call.Id, out var coords))
                     {
-                        // Calculate distance between volunteer and call
                         double distance = await GeocodingHelper.CalculateDistanceAsync(
                             _userLatitude, _userLongitude, coords.Latitude, coords.Longitude);
-
-                        // Update distance in call object
                         call.DistanceToActiveCall = distance;
                     }
                 }
 
-                // Refresh the data grid
-                await Dispatcher.InvokeAsync(() => {
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
                     OpenCallsDataGrid.Items.Refresh();
-                });
-
+                }));
                 Debug.WriteLine("UpdateDistancesToCallsAsync completed");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error updating distances to calls: {ex.Message}");
+            }
+            finally
+            {
+                _updateDistancesWorking = false;
             }
         }
 
@@ -1040,35 +1046,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
         private async void LoadCoordinatesAsync()
         {
+            if (_loadCoordinatesWorking) return;
+            _loadCoordinatesWorking = true;
+
             try
             {
-                if (OpenCalls == null || !OpenCalls.Any())
-                    return;
+                if (OpenCalls == null || !OpenCalls.Any()) return;
 
                 IsMapLoading = true;
                 Debug.WriteLine("LoadCoordinatesAsync started");
 
-                // Get coordinates for all calls
                 _callCoordinates = await GeocodingHelper.GetCoordinatesForCallsAsync(OpenCalls);
 
-                // Update map with new coordinates
-                UpdateMapMarkersWithCoordinates();
+                // עדכון המפה חייב להיות ב־UI thread
+                await Dispatcher.BeginInvoke(new Action(UpdateMapMarkersWithCoordinates));
 
-                // Update distances if we have volunteer coordinates
+                // אם יש קואורדינטות למתנדב – נחשב מרחקים
                 if (_userLatitude != 0 && _userLongitude != 0)
-                {
                     await UpdateDistancesToCallsAsync();
-                }
-
-                IsMapLoading = false;
-                Debug.WriteLine("LoadCoordinatesAsync completed");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error loading coordinates: {ex.Message}");
+            }
+            finally
+            {
                 IsMapLoading = false;
+                _loadCoordinatesWorking = false;
+                Debug.WriteLine("LoadCoordinatesAsync finished");
             }
         }
+
 
         private void UpdateMapMarkersWithCoordinates()
         {
@@ -1217,6 +1225,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         public async Task UpdateOpenCallsAsync()
         {
+            if (_updateOpenCallsWorking) return;
+            _updateOpenCallsWorking = true;
+
             try
             {
                 Debug.WriteLine("UpdateOpenCallsAsync started");
@@ -1233,29 +1244,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 OpenCalls = openCalls.ToList();
                 Debug.WriteLine($"Retrieved {OpenCalls.Count()} open calls");
 
-                await Dispatcher.InvokeAsync(() => {
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
                     OpenCallsDataGrid.Items.Refresh();
-
                     foreach (var column in OpenCallsDataGrid.Columns)
-                    {
                         column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
-                    }
+                }));
 
-                    Debug.WriteLine("DataGrid refreshed and columns auto-sized");
-                });
-
-                // Load coordinates after updating the list
+                // המשך צינור הנתונים – גיאוקודינג לאחר עדכון הרשימה
                 LoadCoordinatesAsync();
-
-                IsLoading = false;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error loading open calls: {ex.Message}");
-                Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                MessageBox.Show($"Error loading open calls: {ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error loading open calls: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
                 IsLoading = false;
+                _updateOpenCallsWorking = false;
+                Debug.WriteLine("UpdateOpenCallsAsync finished");
             }
         }
 

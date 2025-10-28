@@ -23,6 +23,9 @@ namespace PL.Volunteer
     {
         static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
 
+        // Stage 7 – PL 5A: coalescing + marshaling to UI thread
+        private volatile bool _volunteerListObserverWorking = false;
+
         public IEnumerable<BO.VolunteerInList> VolunteerList
         {
             get { return (IEnumerable<BO.VolunteerInList>)GetValue(VolunteerListProperty); }
@@ -91,10 +94,25 @@ namespace PL.Volunteer
 
         public void VolunteerListObserver()
         {
-           
-            
-            UpdateVolunteerList();
+            if (!_volunteerListObserverWorking)
+            {
+                _volunteerListObserverWorking = true;
+
+                _ = Dispatcher.BeginInvoke(() =>
+                {
+                    try
+                    {
+                        // כל עדכון ה-UI חייב לרוץ על ה-UI thread
+                        UpdateVolunteerList();
+                    }
+                    finally
+                    {
+                        _volunteerListObserverWorking = false;
+                    }
+                });
+            }
         }
+
         public void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // מוסיפים צופה על כל המתנדבים

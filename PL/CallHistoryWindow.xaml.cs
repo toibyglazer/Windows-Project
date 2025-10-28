@@ -245,20 +245,31 @@ namespace PL
             }
         }
 
-        // Observer method
+        // Stage 7 – PL 5A: coalescing + marshaling to UI thread
+        private volatile bool _callHistoryObserverWorking = false;
+
         public void CallHistoryObserver()
         {
-            try
+            if (!_callHistoryObserverWorking)
             {
-                // This method is called when call data changes elsewhere
-                Dispatcher.Invoke(UpdateCallHistory);
-            }
-            catch (Exception ex)
-            {
-                // Use Dispatcher to show message box on UI thread
-                Dispatcher.Invoke(() => {
-                    MessageBox.Show($"Error updating call history: {ex.Message}",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _callHistoryObserverWorking = true;
+
+                _ = Dispatcher.BeginInvoke(() =>
+                {
+                    try
+                    {
+                        // כל עדכון ה-UI חייב לרוץ על ה-UI thread
+                        UpdateCallHistory();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error updating call history: {ex.Message}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    finally
+                    {
+                        _callHistoryObserverWorking = false;
+                    }
                 });
             }
         }
