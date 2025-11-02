@@ -462,27 +462,31 @@ internal static class CallManager
     /// </summary>
     public static async Task<DO.Call> ConvertToDOCallAsync(BO.Call call)
     {
-        // Get geolocation (latitude and longitude) for the full address of the call
+        // Geo
         GeoCoordinates geoCoordinates = await Tools.CallOpenStreetMapApiAsync(call.FullAddress);
         if (geoCoordinates == null)
             throw new Exception("Unable to retrieve geolocation.");
 
-
         double longitude = geoCoordinates.Longitude;
         double latitude = geoCoordinates.Latitude;
+
+        // *** שעון הסימולטור במקום DateTime.Now ***
+        var admin = new AdminImplementation();
+        DateTime openingTime = admin.GetSystemClock();
 
         // Return a new DO.Call object with the relevant data
         return new DO.Call(
             Id: call.Id,
-            Type: (DO.CallType)call.Type, // Convert the call type
+            Type: (DO.CallType)call.Type,   // Convert the call type
             FullAddress: call.FullAddress,
             Latitude: latitude,
             Longitude: longitude,
-            OpeningTime: DateTime.Now,
+            OpeningTime: openingTime,       // <-- שימוש בשעון הסימולטור
             MaxCompletionTime: call.MaxCompletionTime,
             Description: call.Description
         );
     }
+
 
     /// <summary>
     /// Validates the data of a BO.Call object, ensuring the latitude, longitude, call type, address, and max end time are valid.

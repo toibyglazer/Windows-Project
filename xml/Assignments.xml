@@ -4,384 +4,528 @@
     <Id>1</Id>
     <CallId>1</CallId>
     <VolunteerId>735927006</VolunteerId>
-    <EntryTime>2025-04-01T08:06:00</EntryTime>
-    <CompletionTime>2025-04-02T17:16:41</CompletionTime>
+    <EntryTime>2025-04-01T08:12:00</EntryTime>
+    <CompletionTime>2025-08-30T08:14:51</CompletionTime>
     <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
     <Id>2</Id>
     <CallId>2</CallId>
     <VolunteerId>985810993</VolunteerId>
-    <EntryTime>2025-04-01T08:16:00</EntryTime>
-    <CompletionTime>2025-05-06T08:05:57</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-28T17:59:07</EntryTime>
+    <CompletionTime />
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>3</Id>
     <CallId>3</CallId>
     <VolunteerId>553026436</VolunteerId>
-    <EntryTime>2025-04-01T08:11:00</EntryTime>
-    <CompletionTime>2025-04-14T18:30:21</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-25T13:33:16</EntryTime>
+    <CompletionTime />
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>4</Id>
     <CallId>4</CallId>
     <VolunteerId>614562379</VolunteerId>
-    <EntryTime>2025-04-01T08:26:00</EntryTime>
-    <CompletionTime>2025-04-02T08:37:10</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-14T04:20:41</EntryTime>
+    <CompletionTime />
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>5</Id>
     <CallId>5</CallId>
     <VolunteerId>912011889</VolunteerId>
-    <EntryTime>2025-04-01T08:28:00</EntryTime>
-    <CompletionTime>2025-07-18T21:42:20</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-28T08:20:27</EntryTime>
+    <CompletionTime />
+    <CompletionType>AdminCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>6</Id>
     <CallId>6</CallId>
     <VolunteerId>680412384</VolunteerId>
-    <EntryTime>2025-04-01T08:10:00</EntryTime>
-    <CompletionTime>2025-04-08T04:03:09</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-14T13:01:18</EntryTime>
+    <CompletionTime />
+    <CompletionType>AdminCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>7</Id>
     <CallId>7</CallId>
     <VolunteerId>434477790</VolunteerId>
-    <EntryTime>2025-04-01T08:13:00</EntryTime>
-    <CompletionTime>2025-06-05T10:41:09</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-12T20:30:36</EntryTime>
+    <CompletionTime />
+    <CompletionType>AdminCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>8</Id>
     <CallId>8</CallId>
     <VolunteerId>705204873</VolunteerId>
-    <EntryTime>2025-04-01T08:26:00</EntryTime>
-    <CompletionTime>2025-09-26T11:10:17</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-10-05T23:41:44</EntryTime>
+    <CompletionTime />
+    <CompletionType>AdminCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>9</Id>
     <CallId>9</CallId>
     <VolunteerId>901234567</VolunteerId>
-    <EntryTime>2025-04-01T08:07:00</EntryTime>
-    <CompletionTime>2025-04-11T06:12:00</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-09-21T02:26:36</EntryTime>
+    <CompletionTime />
+    <CompletionType>Expired</CompletionType>
   </Assignment>
   <Assignment>
     <Id>10</Id>
     <CallId>10</CallId>
     <VolunteerId>294703103</VolunteerId>
-    <EntryTime>2025-04-01T08:25:00</EntryTime>
-    <CompletionTime>2025-04-15T06:46:12</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-09-26T03:09:01</EntryTime>
+    <CompletionTime />
+    <CompletionType>Expired</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>11</Id>
-    <CallId>11</CallId>
-    <VolunteerId>255335531</VolunteerId>
-    <EntryTime>2025-04-01T08:25:00</EntryTime>
-    <CompletionTime>2025-05-06T19:24:39</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <Id>38</Id>
+    <CallId>38</CallId>
+    <VolunteerId>680412384</VolunteerId>
+    <EntryTime>2025-10-13T18:52:30</EntryTime>
+    <CompletionTime>2025-10-29T19:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>12</Id>
     <CallId>12</CallId>
     <VolunteerId>345210678</VolunteerId>
-    <EntryTime>2025-04-01T08:30:00</EntryTime>
-    <CompletionTime>2025-04-08T23:20:33</CompletionTime>
-    <CompletionType>Treated</CompletionType>
+    <EntryTime>2025-09-03T19:01:30</EntryTime>
+    <CompletionTime>2025-10-29T19:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>13</Id>
-    <CallId>13</CallId>
-    <VolunteerId>374306371</VolunteerId>
-    <EntryTime>2025-04-01T08:03:00</EntryTime>
-    <CompletionTime>2025-04-11T01:51:26</CompletionTime>
+    <Id>35</Id>
+    <CallId>35</CallId>
+    <VolunteerId>553026436</VolunteerId>
+    <EntryTime>2025-09-23T18:59:30</EntryTime>
+    <CompletionTime>2025-10-29T20:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>37</Id>
+    <CallId>37</CallId>
+    <VolunteerId>912011889</VolunteerId>
+    <EntryTime>2025-08-18T18:58:30</EntryTime>
+    <CompletionTime>2025-10-29T20:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>16</Id>
+    <CallId>16</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-10-16T18:53:30</EntryTime>
+    <CompletionTime>2025-10-29T20:37:30</CompletionTime>
     <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
     <Id>14</Id>
     <CallId>14</CallId>
     <VolunteerId>523220655</VolunteerId>
-    <EntryTime>2025-04-01T08:03:00</EntryTime>
-    <CompletionTime>2025-07-21T13:31:44</CompletionTime>
+    <EntryTime>2025-09-20T19:01:30</EntryTime>
+    <CompletionTime>2025-10-29T21:37:30</CompletionTime>
     <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>15</Id>
-    <CallId>15</CallId>
-    <VolunteerId>678543901</VolunteerId>
-    <EntryTime>2025-04-01T08:19:00</EntryTime>
-    <CompletionTime>2025-04-29T13:28:41</CompletionTime>
+    <Id>36</Id>
+    <CallId>36</CallId>
+    <VolunteerId>614562379</VolunteerId>
+    <EntryTime>2025-08-09T18:48:30</EntryTime>
+    <CompletionTime>2025-10-29T21:37:30</CompletionTime>
     <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>16</Id>
-    <CallId>16</CallId>
+    <Id>39</Id>
+    <CallId>39</CallId>
+    <VolunteerId>434477790</VolunteerId>
+    <EntryTime>2025-09-07T18:59:30</EntryTime>
+    <CompletionTime>2025-10-29T21:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>32</Id>
+    <CallId>32</CallId>
     <VolunteerId>281041475</VolunteerId>
-    <EntryTime>2025-10-12T13:30:08</EntryTime>
-    <CompletionTime />
+    <EntryTime>2025-08-15T18:44:30</EntryTime>
+    <CompletionTime>2025-10-29T21:37:30</CompletionTime>
     <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>17</Id>
-    <CallId>17</CallId>
-    <VolunteerId>489627356</VolunteerId>
-    <EntryTime>2025-10-20T00:55:54</EntryTime>
-    <CompletionTime />
-    <CompletionType>VolunteerCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>18</Id>
-    <CallId>18</CallId>
+    <Id>34</Id>
+    <CallId>34</CallId>
     <VolunteerId>154553671</VolunteerId>
-    <EntryTime>2025-10-02T07:43:49</EntryTime>
-    <CompletionTime />
+    <EntryTime>2025-10-11T18:52:30</EntryTime>
+    <CompletionTime>2025-10-29T21:37:30</CompletionTime>
     <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>19</Id>
     <CallId>19</CallId>
     <VolunteerId>735927006</VolunteerId>
-    <EntryTime>2025-10-02T10:40:50</EntryTime>
-    <CompletionTime />
+    <EntryTime>2025-09-29T18:40:30</EntryTime>
+    <CompletionTime>2025-10-29T22:37:30</CompletionTime>
     <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>20</Id>
-    <CallId>20</CallId>
-    <VolunteerId>985810993</VolunteerId>
-    <EntryTime>2025-10-16T01:30:25</EntryTime>
-    <CompletionTime />
-    <CompletionType>VolunteerCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>21</Id>
-    <CallId>21</CallId>
-    <VolunteerId>912011889</VolunteerId>
-    <EntryTime>2025-10-05T04:01:20</EntryTime>
-    <CompletionTime />
-    <CompletionType>AdminCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>22</Id>
-    <CallId>22</CallId>
-    <VolunteerId>680412384</VolunteerId>
-    <EntryTime>2025-10-21T23:24:18</EntryTime>
-    <CompletionTime />
-    <CompletionType>AdminCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>23</Id>
-    <CallId>23</CallId>
-    <VolunteerId>434477790</VolunteerId>
-    <EntryTime>2025-09-26T02:48:59</EntryTime>
-    <CompletionTime />
-    <CompletionType>AdminCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>24</Id>
-    <CallId>24</CallId>
-    <VolunteerId>705204873</VolunteerId>
-    <EntryTime>2025-10-04T06:20:33</EntryTime>
-    <CompletionTime />
-    <CompletionType>AdminCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>25</Id>
-    <CallId>25</CallId>
-    <VolunteerId>901234567</VolunteerId>
-    <EntryTime>2025-10-20T18:13:09</EntryTime>
-    <CompletionTime />
-    <CompletionType>AdminCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>26</Id>
-    <CallId>26</CallId>
-    <VolunteerId>294703103</VolunteerId>
-    <EntryTime>2025-10-21T17:44:54</EntryTime>
-    <CompletionTime />
-    <CompletionType>AdminCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>27</Id>
-    <CallId>27</CallId>
-    <VolunteerId>255335531</VolunteerId>
-    <EntryTime>2025-09-14T15:20:20</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>28</Id>
-    <CallId>28</CallId>
-    <VolunteerId>345210678</VolunteerId>
-    <EntryTime>2025-08-08T06:50:06</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>29</Id>
-    <CallId>29</CallId>
-    <VolunteerId>374306371</VolunteerId>
-    <EntryTime>2025-09-18T01:59:52</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>30</Id>
-    <CallId>30</CallId>
-    <VolunteerId>523220655</VolunteerId>
-    <EntryTime>2025-08-08T23:06:05</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>31</Id>
-    <CallId>31</CallId>
+    <Id>15</Id>
+    <CallId>15</CallId>
     <VolunteerId>678543901</VolunteerId>
-    <EntryTime>2025-10-08T02:06:57</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>32</Id>
-    <CallId>32</CallId>
-    <VolunteerId>281041475</VolunteerId>
-    <EntryTime>2025-08-30T10:39:24</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
+    <EntryTime>2025-10-11T18:43:30</EntryTime>
+    <CompletionTime>2025-10-29T23:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
     <Id>33</Id>
     <CallId>33</CallId>
     <VolunteerId>489627356</VolunteerId>
-    <EntryTime>2025-10-21T18:38:18</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
+    <EntryTime>2025-10-17T19:04:30</EntryTime>
+    <CompletionTime>2025-10-30T00:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>34</Id>
-    <CallId>34</CallId>
-    <VolunteerId>154553671</VolunteerId>
-    <EntryTime>2025-10-06T15:15:22</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>35</Id>
-    <CallId>35</CallId>
-    <VolunteerId>553026436</VolunteerId>
-    <EntryTime>2025-10-06T06:08:16</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>36</Id>
-    <CallId>36</CallId>
-    <VolunteerId>614562379</VolunteerId>
-    <EntryTime>2025-09-04T21:19:18</EntryTime>
-    <CompletionTime />
-    <CompletionType>Expired</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>37</Id>
-    <CallId>37</CallId>
-    <VolunteerId>912011889</VolunteerId>
-    <EntryTime>2025-10-12T16:32:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
-  </Assignment>
-  <Assignment>
-    <Id>38</Id>
-    <CallId>38</CallId>
-    <VolunteerId>680412384</VolunteerId>
-    <EntryTime>2025-10-21T16:46:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
-  </Assignment>
-  <Assignment>
-    <Id>39</Id>
-    <CallId>39</CallId>
-    <VolunteerId>434477790</VolunteerId>
-    <EntryTime>2025-10-19T16:53:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
-  </Assignment>
-  <Assignment>
-    <Id>40</Id>
-    <CallId>40</CallId>
-    <VolunteerId>705204873</VolunteerId>
-    <EntryTime>2025-09-27T16:42:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
+    <Id>26</Id>
+    <CallId>26</CallId>
+    <VolunteerId>294703103</VolunteerId>
+    <EntryTime>2025-10-21T18:49:30</EntryTime>
+    <CompletionTime>2025-10-30T00:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
     <Id>41</Id>
     <CallId>41</CallId>
     <VolunteerId>901234567</VolunteerId>
-    <EntryTime>2025-10-03T16:31:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
+    <EntryTime>2025-09-24T18:52:30</EntryTime>
+    <CompletionTime>2025-10-30T00:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>42</Id>
-    <CallId>42</CallId>
-    <VolunteerId>294703103</VolunteerId>
-    <EntryTime>2025-10-07T16:29:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
+    <Id>30</Id>
+    <CallId>30</CallId>
+    <VolunteerId>523220655</VolunteerId>
+    <EntryTime>2025-07-28T18:41:30</EntryTime>
+    <CompletionTime>2025-10-30T00:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>43</Id>
-    <CallId>43</CallId>
-    <VolunteerId>255335531</VolunteerId>
-    <EntryTime>2025-10-18T16:47:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
+    <Id>46</Id>
+    <CallId>35</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-10-29T22:37:30</EntryTime>
+    <CompletionTime>2025-10-30T01:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>22</Id>
+    <CallId>22</CallId>
+    <VolunteerId>680412384</VolunteerId>
+    <EntryTime>2025-08-02T19:03:30</EntryTime>
+    <CompletionTime>2025-10-30T01:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>24</Id>
+    <CallId>24</CallId>
+    <VolunteerId>705204873</VolunteerId>
+    <EntryTime>2025-10-17T19:01:30</EntryTime>
+    <CompletionTime>2025-10-30T02:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>17</Id>
+    <CallId>17</CallId>
+    <VolunteerId>489627356</VolunteerId>
+    <EntryTime>2025-08-07T18:48:30</EntryTime>
+    <CompletionTime>2025-10-30T02:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>18</Id>
+    <CallId>18</CallId>
+    <VolunteerId>154553671</VolunteerId>
+    <EntryTime>2025-08-10T18:53:30</EntryTime>
+    <CompletionTime>2025-10-30T02:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>20</Id>
+    <CallId>20</CallId>
+    <VolunteerId>985810993</VolunteerId>
+    <EntryTime>2025-10-14T18:55:30</EntryTime>
+    <CompletionTime>2025-10-30T02:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>31</Id>
+    <CallId>31</CallId>
+    <VolunteerId>678543901</VolunteerId>
+    <EntryTime>2025-08-11T18:57:30</EntryTime>
+    <CompletionTime>2025-10-30T02:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>29</Id>
+    <CallId>29</CallId>
+    <VolunteerId>374306371</VolunteerId>
+    <EntryTime>2025-10-10T18:55:30</EntryTime>
+    <CompletionTime>2025-10-30T04:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>23</Id>
+    <CallId>23</CallId>
+    <VolunteerId>434477790</VolunteerId>
+    <EntryTime>2025-08-30T19:02:30</EntryTime>
+    <CompletionTime>2025-10-30T06:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>48</Id>
+    <CallId>12</CallId>
+    <VolunteerId>523220655</VolunteerId>
+    <EntryTime>2025-10-30T05:37:30</EntryTime>
+    <CompletionTime>2025-10-30T06:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>25</Id>
+    <CallId>25</CallId>
+    <VolunteerId>901234567</VolunteerId>
+    <EntryTime>2025-08-14T18:51:30</EntryTime>
+    <CompletionTime>2025-10-30T06:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
   </Assignment>
   <Assignment>
     <Id>44</Id>
     <CallId>44</CallId>
     <VolunteerId>345210678</VolunteerId>
-    <EntryTime>2025-09-24T16:32:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
+    <EntryTime>2025-08-10T19:04:30</EntryTime>
+    <CompletionTime>2025-10-30T07:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>42</Id>
+    <CallId>42</CallId>
+    <VolunteerId>294703103</VolunteerId>
+    <EntryTime>2025-09-19T18:41:30</EntryTime>
+    <CompletionTime>2025-10-30T07:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>47</Id>
+    <CallId>56</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-10-30T04:37:30</EntryTime>
+    <CompletionTime>2025-10-30T07:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>21</Id>
+    <CallId>21</CallId>
+    <VolunteerId>912011889</VolunteerId>
+    <EntryTime>2025-07-29T18:48:30</EntryTime>
+    <CompletionTime>2025-10-30T07:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>11</Id>
+    <CallId>11</CallId>
+    <VolunteerId>255335531</VolunteerId>
+    <EntryTime>2025-10-27T18:59:30</EntryTime>
+    <CompletionTime>2025-10-30T09:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>50</Id>
+    <CallId>31</CallId>
+    <VolunteerId>523220655</VolunteerId>
+    <EntryTime>2025-10-30T07:37:30</EntryTime>
+    <CompletionTime>2025-10-30T09:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>27</Id>
+    <CallId>27</CallId>
+    <VolunteerId>255335531</VolunteerId>
+    <EntryTime>2025-09-03T18:48:30</EntryTime>
+    <CompletionTime>2025-10-30T10:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>49</Id>
+    <CallId>51</CallId>
+    <VolunteerId>434477790</VolunteerId>
+    <EntryTime>2025-10-30T06:37:30</EntryTime>
+    <CompletionTime>2025-10-30T11:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>40</Id>
+    <CallId>40</CallId>
+    <VolunteerId>705204873</VolunteerId>
+    <EntryTime>2025-08-02T18:55:30</EntryTime>
+    <CompletionTime>2025-10-30T13:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>28</Id>
+    <CallId>28</CallId>
+    <VolunteerId>345210678</VolunteerId>
+    <EntryTime>2025-08-06T18:54:30</EntryTime>
+    <CompletionTime>2025-10-30T13:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>52</Id>
+    <CallId>55</CallId>
+    <VolunteerId>614562379</VolunteerId>
+    <EntryTime>2025-10-30T12:37:30</EntryTime>
+    <CompletionTime>2025-10-30T14:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>51</Id>
+    <CallId>50</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-10-30T11:37:30</EntryTime>
+    <CompletionTime>2025-10-30T15:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>54</Id>
+    <CallId>29</CallId>
+    <VolunteerId>345210678</VolunteerId>
+    <EntryTime>2025-10-30T14:37:30</EntryTime>
+    <CompletionTime>2025-10-30T16:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>55</Id>
+    <CallId>30</CallId>
+    <VolunteerId>523220655</VolunteerId>
+    <EntryTime>2025-10-30T17:37:30</EntryTime>
+    <CompletionTime>2025-10-30T19:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
     <Id>45</Id>
     <CallId>45</CallId>
     <VolunteerId>374306371</VolunteerId>
-    <EntryTime>2025-10-18T16:36:33</EntryTime>
-    <CompletionTime />
-    <CompletionType />
-  </Assignment>
-  <Assignment>
-    <Id>46</Id>
-    <CallId>46</CallId>
-    <VolunteerId>735927006</VolunteerId>
-    <EntryTime>2025-10-22T16:25:52.8947355+03:00</EntryTime>
-    <CompletionTime>2025-10-22T16:56:22.011204+03:00</CompletionTime>
-    <CompletionType>VolunteerCancelled</CompletionType>
-  </Assignment>
-  <Assignment>
-    <Id>47</Id>
-    <CallId>47</CallId>
-    <VolunteerId>735927006</VolunteerId>
-    <EntryTime>2025-10-22T16:56:59.4683491+03:00</EntryTime>
-    <CompletionTime>2025-10-22T17:03:30.2212609+03:00</CompletionTime>
+    <EntryTime>2025-08-17T19:05:30</EntryTime>
+    <CompletionTime>2025-10-30T20:37:30</CompletionTime>
     <CompletionType>Treated</CompletionType>
   </Assignment>
   <Assignment>
-    <Id>48</Id>
+    <Id>57</Id>
+    <CallId>46</CallId>
+    <VolunteerId>678543901</VolunteerId>
+    <EntryTime>2025-10-30T19:37:30</EntryTime>
+    <CompletionTime>2025-10-30T22:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>56</Id>
+    <CallId>48</CallId>
+    <VolunteerId>154553671</VolunteerId>
+    <EntryTime>2025-10-30T18:37:30</EntryTime>
+    <CompletionTime>2025-10-30T22:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>13</Id>
+    <CallId>13</CallId>
+    <VolunteerId>374306371</VolunteerId>
+    <EntryTime>2025-08-08T18:49:30</EntryTime>
+    <CompletionTime>2025-10-30T23:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>53</Id>
+    <CallId>52</CallId>
+    <VolunteerId>489627356</VolunteerId>
+    <EntryTime>2025-10-30T12:37:30</EntryTime>
+    <CompletionTime>2025-10-30T23:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>43</Id>
+    <CallId>43</CallId>
+    <VolunteerId>255335531</VolunteerId>
+    <EntryTime>2025-08-06T18:40:30</EntryTime>
+    <CompletionTime>2025-10-31T01:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>60</Id>
+    <CallId>13</CallId>
+    <VolunteerId>678543901</VolunteerId>
+    <EntryTime>2025-10-31T01:37:30</EntryTime>
+    <CompletionTime>2025-10-31T02:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>58</Id>
+    <CallId>32</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-10-30T19:37:30</EntryTime>
+    <CompletionTime>2025-10-31T03:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>59</Id>
+    <CallId>38</CallId>
+    <VolunteerId>489627356</VolunteerId>
+    <EntryTime>2025-10-30T23:37:30</EntryTime>
+    <CompletionTime>2025-10-31T06:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>61</Id>
+    <CallId>13</CallId>
+    <VolunteerId>680412384</VolunteerId>
+    <EntryTime>2025-10-31T03:37:30</EntryTime>
+    <CompletionTime>2025-10-31T07:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>62</Id>
+    <CallId>13</CallId>
+    <VolunteerId>523220655</VolunteerId>
+    <EntryTime>2025-10-31T09:37:30</EntryTime>
+    <CompletionTime>2025-10-31T13:37:30</CompletionTime>
+    <CompletionType>VolunteerCancelled</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>63</Id>
+    <CallId>20</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-10-31T11:37:30</EntryTime>
+    <CompletionTime>2025-10-31T16:37:30</CompletionTime>
+    <CompletionType>Expired</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>64</Id>
+    <CallId>13</CallId>
+    <VolunteerId>678543901</VolunteerId>
+    <EntryTime>2025-10-31T15:37:30</EntryTime>
+    <CompletionTime>2025-10-31T17:37:30</CompletionTime>
+    <CompletionType>Treated</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>65</Id>
     <CallId>53</CallId>
     <VolunteerId>0</VolunteerId>
-    <EntryTime>2025-10-25T17:18:33</EntryTime>
-    <CompletionTime>2025-10-25T17:18:33</CompletionTime>
+    <EntryTime>2025-11-05T08:37:30</EntryTime>
+    <CompletionTime>2025-11-05T08:37:30</CompletionTime>
     <CompletionType>Expired</CompletionType>
+  </Assignment>
+  <Assignment>
+    <Id>66</Id>
+    <CallId>34</CallId>
+    <VolunteerId>281041475</VolunteerId>
+    <EntryTime>2025-11-05T23:37:30</EntryTime>
+    <CompletionTime />
+    <CompletionType />
   </Assignment>
 </ArrayOfAssignment>

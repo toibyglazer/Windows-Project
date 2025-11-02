@@ -431,7 +431,7 @@ public static class Initialization
         DateTime[] maxCompletionTimesTreated = new DateTime[15];
 
 
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 1; i++)
         {
             DateTime maxCompletionTime = GetRandomDateTimeBetween(fixedOpeningTime, now);
             AllOpeningTimes[i] = fixedOpeningTime;
@@ -453,7 +453,7 @@ public static class Initialization
 
 
         DateTime baseTime = now.AddDays(-30);
-        for (int i = 15; i < 20; i++)
+        for (int i = 1; i < 4; i++)
         {
             DateTime openingTime = GetRandomDateTimeBetween(baseTime, now.AddDays(-1));
             DateTime maxCompletionTime = GetRandomDateTimeBetween(openingTime.AddMinutes(2), now);
@@ -475,7 +475,7 @@ public static class Initialization
             s_dal!.Call.Create(call);
         }
 
-        for (int i = 20; i < 26; i++)
+        for (int i = 4; i < 8; i++)
         {
             DateTime openingTime = now.AddDays(-s_rand.Next(1, 30));
             DateTime maxCompletionTime = GetRandomDateTimeBetween(openingTime, now);
@@ -496,7 +496,7 @@ public static class Initialization
 
             s_dal!.Call.Create(call);
         }
-        for (int i = 26; i < 36; i++)
+        for (int i = 8; i < 10; i++)
         {
             DateTime openingTime = now.AddDays(-s_rand.Next(1, 100));
             DateTime maxCompletionTime = GetRandomDateTimeBetween(openingTime, now);
@@ -519,9 +519,9 @@ public static class Initialization
         }
 
 
-        for (int i = 36; i < 56; i++)
+        for (int i = 10; i < 56; i++)
         {
-            DateTime openingTime = now.AddDays(-s_rand.Next(1, 30));
+            DateTime openingTime = now.AddDays(-s_rand.Next(1, 100));
             DateTime maxCompletionTime = GetRandomDateTimeBetween(now, now.AddDays(30));
 
             AllOpeningTimes[i] = openingTime;
@@ -588,7 +588,7 @@ public static class Initialization
         int assignmentId = 0;
         DateTime now = s_dal.Config.Clock;
 
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 1; i++)
         {
             DateTime openingTime = AllOpeningTimes[i];
             DateTime? maxCompletionTime = AllMaxCompletionTimes[i] ?? now;
@@ -623,7 +623,7 @@ public static class Initialization
             s_dal!.Assignment.Create(a);
         }
        
-        for (int i = 15; i < 20; i++)
+        for (int i = 1; i < 4; i++)
         {
             DateTime openingTime = AllOpeningTimes[i];
             DateTime maxTime = AllMaxCompletionTimes[i] ?? now;
@@ -641,7 +641,7 @@ public static class Initialization
             s_dal!.Assignment.Create(a);
         }
 
-        for (int i = 20; i < 26; i++)
+        for (int i = 4; i < 8; i++)
         {
             DateTime openingTime = AllOpeningTimes[i];
             DateTime maxTime = AllMaxCompletionTimes[i] ?? now;
@@ -658,7 +658,7 @@ public static class Initialization
 
             s_dal!.Assignment.Create(a);
         }
-        for (int i = 26; i < 36; i++)
+        for (int i = 8; i < 10; i++)
         {
             DateTime openingTime = AllOpeningTimes[i];
             DateTime maxTime = AllMaxCompletionTimes[i] ?? now;
@@ -676,7 +676,7 @@ public static class Initialization
             s_dal!.Assignment.Create(a);
         }
         // הקצאות לקריאות פתוחות
-        for (int i = 36; i < 45; i++)
+        for (int i = 10; i < 45; i++)
         {
             DateTime openingTime = AllOpeningTimes[i];
 

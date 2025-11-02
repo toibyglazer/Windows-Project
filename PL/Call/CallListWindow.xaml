@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PL.Call"
         Title="Call List"
+        Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
         Width="921.6"
         Height="614.4"
         Background="#F9F9F9"
@@ -20,23 +21,16 @@
                           Color="#DDDDDD" 
                           Opacity="0.5" 
                           BlurRadius="8.55"/>
+
+        <!-- Toggle template for ComboBox -->
         <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition Width="17.1" />
                 </Grid.ColumnDefinitions>
-                <Border x:Name="Border" 
-                 Grid.ColumnSpan="2" 
-                 Background="Transparent"
-                 BorderBrush="Transparent"
-                 BorderThickness="0" />
-                <Path x:Name="Arrow"
-               Grid.Column="1"     
-               Fill="#374151"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Data="M0,0 L0,1.71 L3.42,5.13 L6.84,1.71 L6.84,0 L3.42,3.42 z"/>
+                <Border x:Name="Border" Grid.ColumnSpan="2" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" />
+                <Path x:Name="Arrow" Grid.Column="1" Fill="#374151" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M0,0 L0,1.71 L3.42,5.13 L6.84,1.71 L6.84,0 L3.42,3.42 z"/>
             </Grid>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
@@ -45,19 +39,15 @@
             </ControlTemplate.Triggers>
         </ControlTemplate>
 
-
-        <!-- Style for ComboBox -->
+        <!-- Style for ComboBox: compact -->
         <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Height" Value="34.2"/>
-            <Setter Property="Margin" Value="0,4.275,0,12.825"/>
-            <Setter Property="Padding" Value="8.55,0"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="0,2,0,6"/>
+            <Setter Property="Padding" Value="8,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
-                        <Border Background="#FFFFFF" 
-                                CornerRadius="6.84" 
-                                BorderBrush="#E5E7EB"
-                                BorderThickness="0.855">
+                        <Border Background="#FFFFFF" CornerRadius="6" BorderBrush="#E5E7EB" BorderThickness="0.855">
                             <Grid>
                                 <ToggleButton IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                               Template="{StaticResource ComboBoxToggleButton}"/>
@@ -65,19 +55,11 @@
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                   ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                  Margin="8.55,0,25.65,0"
+                                                  Margin="8,0,25,0"
                                                   VerticalAlignment="Center"/>
-                                <Popup IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                       Placement="Bottom"
-                                       AllowsTransparency="True" 
-                                       Focusable="False"
-                                       PopupAnimation="Slide">
-                                    <Grid Background="White" 
-                                          MinWidth="{TemplateBinding ActualWidth}"
-                                          MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                        <Border CornerRadius="6.84" 
-                                                BorderBrush="#E5E7EB"
-                                                BorderThickness="0.855">
+                                <Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                    <Grid Background="White" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                        <Border CornerRadius="6" BorderBrush="#E5E7EB" BorderThickness="0.855">
                                             <ScrollViewer SnapsToDevicePixels="True">
                                                 <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
                                             </ScrollViewer>
@@ -91,19 +73,16 @@
             </Setter>
         </Style>
 
-        <!-- Style for Button -->
+        <!-- Style for Button: slightly shorter -->
         <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Height" Value="34.2"/>
+            <Setter Property="Height" Value="32"/>
             <Setter Property="Background" Value="#3B82F6"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="6.84"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6.84" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -116,22 +95,17 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Style for Label -->
+        <!-- Style for Label: compact -->
         <Style x:Key="ModernLabel" TargetType="Label">
             <Setter Property="Foreground" Value="#374151"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="11.97"/>
-            <Setter Property="Margin" Value="0,0,0,4.275"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </Window.Resources>
 
-    <Border Background="#F9F9F9" 
-            CornerRadius="12.825" 
-            Margin="17.1" 
-            Padding="25.65"
-            BorderBrush="#E0E0E0"
-            BorderThickness="0.855"
-            Effect="{StaticResource DropShadowEffect}">
+    <Border Background="#F9F9F9" CornerRadius="12.825" Margin="12" Padding="16" BorderBrush="#E0E0E0" BorderThickness="0.855" Effect="{StaticResource DropShadowEffect}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -141,66 +115,54 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <TextBlock Text="Call List" 
-                       FontSize="23.94" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,17.1"
-                       Grid.Row="0"/>
+            <TextBlock Text="Call List" FontSize="22" FontWeight="Bold" Margin="0,0,0,8" Grid.Row="0"/>
 
-            <!-- Filters in a single white box -->
-            <Border Grid.Row="1" Background="White" CornerRadius="8.55" Margin="0,0,0,17.1" Padding="17.1">
+            <!-- Filters: single row, compact -->
+            <Border Grid.Row="1" Background="White" CornerRadius="8" Margin="0,0,0,8" Padding="10">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="71*"/>
-                        <ColumnDefinition Width="29*"/>
-                        <ColumnDefinition Width="100*"/>
+                        <ColumnDefinition Width="2.2*"/>
+                        <ColumnDefinition Width="2.2*"/>
+                        <ColumnDefinition Width="3*"/>
                     </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
 
-                    <!-- Filter by Status -->
-                    <Label Content="Filter Calls By Status:" Grid.Column="0" Grid.Row="0"
-                   Style="{StaticResource ModernLabel}" Grid.ColumnSpan="2" Margin="0,0,0,4"/>
-                    <ComboBox Grid.Column="0" Grid.Row="1"
-                      Style="{StaticResource ModernComboBox}"
-                      ItemsSource="{Binding callStatusCollection}"
-                      SelectionChanged="ComboBox_SelectionChanged"
-                      SelectedValue="{Binding callStatus, Mode=TwoWay}"
-                      Margin="0,4,16,12" Grid.ColumnSpan="2"/>
+                    <!-- Status -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Label Content="Status:" Style="{StaticResource ModernLabel}"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}"
+                                  Width="180"
+                                  ItemsSource="{Binding callStatusCollection}"
+                                  SelectionChanged="ComboBox_SelectionChanged"
+                                  SelectedValue="{Binding callStatus, Mode=TwoWay}"/>
+                    </StackPanel>
 
-                    <!-- Filter by Call Type -->
-                    <Label Content="Filter Calls By Call Type:" Grid.Column="1" Grid.Row="0"
-                   Style="{StaticResource ModernLabel}" Grid.ColumnSpan="2" Margin="116,0,0,4"/>
-                    <ComboBox Grid.Row="1"
-                      Style="{StaticResource ModernComboBox}"
-                      ItemsSource="{Binding CallTypeCollection}"
-                      SelectionChanged="ComboBox_SelectionChanged"
-                      SelectedValue="{Binding callType, Mode=TwoWay}"
-                      Grid.ColumnSpan="2" Margin="116,4,26,12" Grid.Column="1"/>
+                    <!-- Type -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Label Content="Type:" Style="{StaticResource ModernLabel}"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}"
+                                  Width="180"
+                                  ItemsSource="{Binding CallTypeCollection}"
+                                  SelectionChanged="ComboBox_SelectionChanged"
+                                  SelectedValue="{Binding callType, Mode=TwoWay}"/>
+                    </StackPanel>
 
-                    <!-- Filter by Volunteer Name -->
-                    <Label Content="Filter By Last Volunteer:" Grid.Column="0" Grid.Row="2"
-                   Style="{StaticResource ModernLabel}" Grid.ColumnSpan="3" Margin="0,8,0,4"/>
-                    <TextBox x:Name="VolunteerFilterTextBox" 
-                     Grid.Column="0" Grid.Row="3" 
-                     Grid.ColumnSpan="3"
-                     Height="34.2"
-                     Padding="8.55,0"
-                     VerticalContentAlignment="Center"
-                     Margin="0,4,26,12"
-                     TextChanged="VolunteerFilterTextBox_TextChanged"
-                     BorderBrush="#E5E7EB"
-                     BorderThickness="0.855">
-                        <TextBox.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6.84"/>
-                            </Style>
-                        </TextBox.Resources>
-                    </TextBox>
+                    <!-- Last Volunteer -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Label Content="Last Volunteer:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox x:Name="VolunteerFilterTextBox"
+                                 Height="28"
+                                 Width="220"
+                                 Padding="8,0"
+                                 VerticalContentAlignment="Center"
+                                 TextChanged="VolunteerFilterTextBox_TextChanged"
+                                 BorderBrush="#E5E7EB" BorderThickness="0.855">
+                            <TextBox.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -221,7 +183,7 @@
                           HorizontalScrollBarVisibility="Auto"
                           EnableRowVirtualization="True"
                           RowDetailsVisibilityMode="VisibleWhenSelected"
-                          Margin="0,0,0,17.1"
+                          Margin="0,0,0,8"
                           GridLinesVisibility="All"
                           HorizontalGridLinesBrush="#E5E7EB"
                           VerticalGridLinesBrush="#E5E7EB">
@@ -230,12 +192,12 @@
                             <Setter Property="Background" Value="#F3F4F6"/>
                             <Setter Property="Foreground" Value="#111827"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Padding" Value="8.55,12.825"/>
+                            <Setter Property="Padding" Value="8,8"/>
                             <Setter Property="BorderThickness" Value="0,0,0.855,0.855"/>
                             <Setter Property="BorderBrush" Value="#E5E7EB"/>
                         </Style>
                         <Style TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="8.55,6.84"/>
+                            <Setter Property="Padding" Value="8,4"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridCell">
@@ -256,7 +218,6 @@
                                     <Setter Property="Background" Value="#E5E7EB"/>
                                     <Setter Property="Foreground" Value="#111827"/>
                                 </Trigger>
-
                             </Style.Triggers>
                         </Style>
                     </DataGrid.Resources>
@@ -289,10 +250,7 @@
                                             <DataTrigger.EnterActions>
                                                 <BeginStoryboard>
                                                     <Storyboard RepeatBehavior="Forever">
-                                                        <ColorAnimation 
-                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
-                From="Red" To="White" Duration="0:0:0.6"
-                AutoReverse="True" />
+                                                        <ColorAnimation Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" From="Red" To="White" Duration="0:0:0.6" AutoReverse="True" />
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </DataTrigger.EnterActions>
@@ -302,10 +260,7 @@
                                             <DataTrigger.EnterActions>
                                                 <BeginStoryboard>
                                                     <Storyboard RepeatBehavior="Forever">
-                                                        <ColorAnimation 
-                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
-                From="Red" To="White" Duration="0:0:0.6"
-                AutoReverse="True" />
+                                                        <ColorAnimation Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" From="Red" To="White" Duration="0:0:0.6" AutoReverse="True" />
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </DataTrigger.EnterActions>
@@ -329,35 +284,19 @@
                 </DataGrid>
             </Grid>
 
-            <!-- Loading Indicator -->
+            <!-- Loading Indicator (unchanged) -->
             <Grid x:Name="LoadingIndicator" Grid.Row="0" Grid.RowSpan="4" Visibility="Collapsed" Panel.ZIndex="1000">
                 <Rectangle Fill="#80000000" />
-                <Border Background="White" 
-                        CornerRadius="10" 
-                        Width="200" 
-                        Height="100" 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Center"
-                        BorderBrush="#E5E7EB"
-                        BorderThickness="1">
+                <Border Background="White" CornerRadius="10" Width="200" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#E5E7EB" BorderThickness="1">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <ProgressBar IsIndeterminate="True" Width="150" Height="10" Margin="0,0,0,15" />
-                        <TextBlock Text="Loading data..." 
-                                   Foreground="#374151" 
-                                   FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="Loading data..." Foreground="#374151" FontWeight="SemiBold" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Add Call Button -->
-            <Button Grid.Row="3"
-                    Content="Add Call"
-                    Style="{StaticResource ModernButton}"
-                    Width="171"
-                    Margin="0,0,0,0"
-                    HorizontalAlignment="Center"
-                    Click="AddCallButton_Click"/>
+            <Button Grid.Row="3" Content="Add Call" Style="{StaticResource ModernButton}" Width="150" HorizontalAlignment="Right" Margin="0" Click="AddCallButton_Click"/>
         </Grid>
     </Border>
 </Window>

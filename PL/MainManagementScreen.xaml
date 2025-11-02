@@ -205,18 +205,25 @@
                     </Border>
 
                     <!-- Configuration -->
+                    <!-- Configuration -->
                     <Border Grid.Column="1" Grid.Row="0" Background="White" CornerRadius="8"
-                            BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="10,0,0,0">
+        BorderBrush="#E5E7EB" BorderThickness="1" Padding="15" Margin="10,0,0,0">
                         <StackPanel>
                             <Label Content="Configuration" FontSize="16" FontWeight="Bold"/>
                             <Label Content="Maximum Time for Call:"/>
+
+                            <!-- היה רק Text=...  הוספנו IsEnabled עם הממיר ההפוך -->
                             <TextBox Text="{Binding MaxTimeSpanValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,10"/>
+                 Margin="0,0,0,10"
+                 IsEnabled="{Binding IsSimulatorRunning, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                            <!-- הכפתור כבר משתמש ב-ButtonLockable ומנוטרל בזמן ריצה -->
                             <Button Content="Update" Click="btnUpdateMaxYearRange_Click"
-                                    HorizontalAlignment="Right" Width="90" Height="36"
-                                    Style="{StaticResource ButtonLockable}"/>
+                HorizontalAlignment="Right" Width="90" Height="36"
+                Style="{StaticResource ButtonLockable}"/>
                         </StackPanel>
                     </Border>
+
 
                     <!-- Simulator Panel -->
                     <Border Grid.Row="1" Grid.ColumnSpan="2" Background="White" CornerRadius="8"

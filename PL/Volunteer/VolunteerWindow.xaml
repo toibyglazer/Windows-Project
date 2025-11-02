@@ -6,13 +6,16 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:PL.Volunteer"
         mc:Ignorable="d"
-        Title="Volunteer Details" Height="720" Width="1000" 
+        Title="Volunteer Details"
+        Width="600" Height="432"          
+    MinWidth="480" MinHeight="320"
         Icon="pack://application:,,,/PL;component/Icons/Icon4.ico"
         WindowStyle="SingleBorderWindow"
         AllowsTransparency="False"
         ResizeMode="CanResize"
-        Background="Transparent"
-        MouseDown="Window_MouseDown"
+        Background="#F9F9F9"
+ 
+    MouseDown="Window_MouseDown"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
     <Window.Resources>
@@ -28,17 +31,13 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="20" />
                 </Grid.ColumnDefinitions>
-                <Border x:Name="Border" 
-                    Grid.ColumnSpan="2" 
-                    Background="Transparent"
-                    BorderBrush="Transparent"
-                    BorderThickness="0" />
+                <Border Grid.ColumnSpan="2" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" />
                 <Path x:Name="Arrow"
-                  Grid.Column="1"     
-                  Fill="#374151"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Center"
-                  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"/>
+                      Grid.Column="1"
+                      Fill="#374151"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"/>
             </Grid>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
@@ -56,8 +55,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                        <Border Background="#FFFFFF"
+                                CornerRadius="8"
                                 BorderBrush="#E5E7EB"
                                 BorderThickness="1">
                             <ScrollViewer x:Name="PART_ContentHost" Margin="5"/>
@@ -75,28 +74,28 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
-                        <Border Background="#FFFFFF" 
-                                CornerRadius="8" 
+                        <Border Background="#FFFFFF"
+                                CornerRadius="8"
                                 BorderBrush="#E5E7EB"
                                 BorderThickness="1">
                             <Grid>
                                 <ToggleButton IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                            Template="{StaticResource ComboBoxToggleButton}"/>
+                                              Template="{StaticResource ComboBoxToggleButton}"/>
                                 <ContentPresenter x:Name="ContentSite"
-                                                Content="{TemplateBinding SelectionBoxItem}"
-                                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                Margin="10,0,30,0"
-                                                VerticalAlignment="Center"/>
-                                <Popup IsOpen="{TemplateBinding IsDropDownOpen}" 
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                  Margin="10,0,30,0"
+                                                  VerticalAlignment="Center"/>
+                                <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
                                        Placement="Bottom"
-                                       AllowsTransparency="True" 
+                                       AllowsTransparency="True"
                                        Focusable="False"
                                        PopupAnimation="Slide">
-                                    <Grid Background="White" 
+                                    <Grid Background="White"
                                           MinWidth="{TemplateBinding ActualWidth}"
                                           MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                        <Border CornerRadius="8" 
+                                        <Border CornerRadius="8"
                                                 BorderBrush="#E5E7EB"
                                                 BorderThickness="1">
                                             <ScrollViewer SnapsToDevicePixels="True">
@@ -146,246 +145,238 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="#F9F9F9" CornerRadius="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="15" Direction="-90" 
-                           RenderingBias="Quality" ShadowDepth="2"
-                           Color="#20000000"/>
-        </Border.Effect>
+    <!-- רקע מלא לכל האזור, ו־Viewbox לסקייל אחיד -->
+    <Grid Background="#F9F9F9">
+        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- משטח בסיס במידות המקוריות: 1000x720 -->
+            <Grid Width="1000" Height="720">
+                <Border Background="#F9F9F9" CornerRadius="0">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="15" Direction="-90"
+                                          RenderingBias="Quality" ShadowDepth="2"
+                                          Color="#20000000"/>
+                    </Border.Effect>
 
-        <Grid Margin="30">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="182*" />
-                <RowDefinition Height="405*"/>
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="2*" />
-            </Grid.ColumnDefinitions>
+                    <Grid Margin="30">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="182*" />
+                            <RowDefinition Height="405*"/>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
 
-            <!-- Header with close button -->
-            <Grid Grid.ColumnSpan="2">
-                <TextBlock Text="Volunteer Details" 
-                         FontSize="28" 
-                         FontWeight="Bold" 
-                         Foreground="#111827"/>
-            </Grid>
-
-            <!-- Left Column -->
-            <Border Grid.Row="1" 
-        Grid.Column="0" 
-        Background="White" 
-        CornerRadius="15"
-        Margin="0,2,20,-5"
-        Padding="20" Grid.RowSpan="3">
-                <StackPanel>
-                    <!-- Profile Picture -->
-                    <Border Width="180" 
-        Height="180" 
-        CornerRadius="90" 
-        BorderBrush="#E5E7EB" 
-        BorderThickness="2"
-        Margin="0,0,0,20">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" 
-                          ShadowDepth="1" 
-                          Color="#20000000"/>
-                        </Border.Effect>
-                        <Grid>
-                            <!-- תמונת הפרופיל עם חיתוך עגול -->
-                            <Ellipse x:Name="ImageContainer">
-                                <Ellipse.Fill>
-                                    <ImageBrush x:Name="ProfileImageBrush" 
-                            Stretch="UniformToFill"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
-
-                            <!-- כפתור "+" -->
-                            <Button Content="+" 
-                Width="40" Height="40"
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Right"
-                Margin="0,0,10,10"
-                IsHitTestVisible="False"/>
+                        <!-- Header -->
+                        <Grid Grid.ColumnSpan="2">
+                            <TextBlock Text="Volunteer Details"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#111827"/>
                         </Grid>
-                    </Border>
 
+                        <!-- Left Column -->
+                        <Border Grid.Row="1"
+                                Grid.Column="0"
+                                Background="White"
+                                CornerRadius="15"
+                                Margin="0,2,20,-5"
+                                Padding="20" Grid.RowSpan="3">
+                            <StackPanel>
+                                <!-- Profile Picture -->
+                                <Border Width="180"
+                                        Height="180"
+                                        CornerRadius="90"
+                                        BorderBrush="#E5E7EB"
+                                        BorderThickness="2"
+                                        Margin="0,0,0,20">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="10"
+                                                          ShadowDepth="1"
+                                                          Color="#20000000"/>
+                                    </Border.Effect>
+                                    <Grid>
+                                        <!-- תמונת פרופיל -->
+                                        <Ellipse x:Name="ImageContainer">
+                                            <Ellipse.Fill>
+                                                <ImageBrush x:Name="ProfileImageBrush" Stretch="UniformToFill"/>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
 
+                                        <!-- כפתור + דמי -->
+                                        <Button Content="+"
+                                                Width="40" Height="40"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Right"
+                                                Margin="0,0,10,10"
+                                                IsHitTestVisible="False"/>
+                                    </Grid>
+                                </Border>
 
+                                <!-- Profile Fields -->
+                                <StackPanel Margin="0,10">
+                                    <Label Content="ID"/>
+                                    <TextBox Text="{Binding CurrentVolunteer.Id, Mode=TwoWay}"
+                                             IsReadOnly="{Binding ButtonText, Converter={StaticResource AddUpdateToReadOnlyConverterKey}}"
+                                             Margin="0,0,0,10" Height="38"/>
 
+                                    <Label Content="Full Name"/>
+                                    <TextBox Text="{Binding CurrentVolunteer.FullName, Mode=TwoWay,
+                                                    NotifyOnValidationError=true, ValidatesOnExceptions=true}"
+                                             Margin="0,0,0,10" Height="35"/>
 
+                                    <Label Content="Phone Number"/>
+                                    <TextBox Text="{Binding CurrentVolunteer.PhoneNumber, Mode=TwoWay,
+                                                    NotifyOnValidationError=true, ValidatesOnExceptions=true}"
+                                             Margin="0,0,0,10" Height="36"/>
 
-                    <!-- Profile Fields -->
-                    <StackPanel Margin="0,10">
-                        <Label Content="ID"/>
-                        <TextBox Text="{Binding CurrentVolunteer.Id, Mode=TwoWay}"
-                     IsReadOnly="{Binding ButtonText, Converter={StaticResource AddUpdateToReadOnlyConverterKey}}"
-                     Margin="0,0,0,10" Height="38"/>
+                                    <Label Content="Email"/>
+                                    <TextBox Text="{Binding CurrentVolunteer.Email, Mode=TwoWay,
+                                                    NotifyOnValidationError=true, ValidatesOnExceptions=true}"
+                                             Margin="0,0,0,10" Height="33"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
 
-                        <Label Content="Full Name"/>
-                        <TextBox Text="{Binding CurrentVolunteer.FullName, Mode=TwoWay, 
-                     NotifyOnValidationError=true, ValidatesOnExceptions=true}"
-                     Margin="0,0,0,10" Height="35"/>
+                        <!-- Right Column -->
+                        <Border Background="White"
+                                CornerRadius="15"
+                                Margin="313,2,0,0"
+                                Padding="20" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2">
+                            <StackPanel>
+                                <TextBlock Text="Additional Details"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,20"/>
 
-                        <Label Content="Phone Number"/>
-                        <TextBox Text="{Binding CurrentVolunteer.PhoneNumber, Mode=TwoWay, 
-                     NotifyOnValidationError=true, ValidatesOnExceptions=true}"
-                     Margin="0,0,0,10" Height="36"/>
+                                <Label Content="Current Address"/>
+                                <TextBox x:Name="AddressTextBox"
+                                         Text="{Binding CurrentVolunteer.CurrentAddress, Mode=TwoWay}"
+                                         VerticalContentAlignment="Center"
+                                         HorizontalAlignment="Stretch"
+                                         Margin="10"
+                                         KeyUp="AddressTextBox_KeyUp"/>
 
-                        <Label Content="Email"/>
-                        <TextBox Text="{Binding CurrentVolunteer.Email, Mode=TwoWay, 
-                     NotifyOnValidationError=true, ValidatesOnExceptions=true}"
-                     Margin="0,0,0,10" Height="33"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+                                <Popup x:Name="SuggestionsPopup"
+                                       PlacementTarget="{Binding ElementName=AddressTextBox}"
+                                       Placement="Bottom"
+                                       IsOpen="False"
+                                       Width="{Binding ActualWidth, ElementName=AddressTextBox}"
+                                       AllowsTransparency="True"
+                                       StaysOpen="False"
+                                       Focusable="False">
+                                    <Border Background="White"
+                                            BorderBrush="#E5E7EB"
+                                            BorderThickness="1"
+                                            CornerRadius="0 0 8 8">
+                                        <ListBox x:Name="SuggestionsList"
+                                                 MaxHeight="200"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 SelectionChanged="SuggestionsList_SelectionChanged"/>
+                                    </Border>
+                                </Popup>
 
+                                <Label Content="Role"/>
+                                <ComboBox ItemsSource="{Binding volunteerRoleCollection}"
+                                          SelectedItem="{Binding CurrentVolunteer.Role, Mode=TwoWay}"/>
 
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-            <!-- Right Column -->
-            <Border 
-        Background="White" 
-        CornerRadius="15"
-        Margin="313,2,0,0"
-        Padding="20" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2">
-                <StackPanel>
-                    <TextBlock Text="Additional Details" 
-                 FontSize="20" 
-                 FontWeight="Bold" 
-                 Margin="0,0,0,20"/>
+                                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                        <Label Content="Max Distance"/>
+                                        <TextBox Text="{Binding CurrentVolunteer.MaxDistance, Mode=TwoWay,
+                                                        StringFormat='{}{0:N2} km'}"/>
+                                    </StackPanel>
 
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                        <Label Content="Distance Type"/>
+                                        <ComboBox ItemsSource="{Binding DistanceTypesCollection}"
+                                                  SelectedValue="{Binding CurrentVolunteer.DistanceType, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </Grid>
 
-                 
-                        <Label Content="Current Address"/>
-    <TextBox x:Name="AddressTextBox" 
-             Text="{Binding CurrentVolunteer.CurrentAddress, Mode=TwoWay}" 
-             VerticalContentAlignment="Center"
-             HorizontalAlignment="Stretch"
-             Margin="10" 
-             KeyUp="AddressTextBox_KeyUp"/>
-    
-    <Popup x:Name="SuggestionsPopup" 
-           PlacementTarget="{Binding ElementName=AddressTextBox}" 
-           Placement="Bottom"
-           IsOpen="False"
-           Width="{Binding ActualWidth, ElementName=AddressTextBox}"
-           AllowsTransparency="True"
-           StaysOpen="False"
-           Focusable="False">
-        <Border Background="White" 
-                BorderBrush="#E5E7EB" 
-                BorderThickness="1" 
-                CornerRadius="0 0 8 8">
-            <ListBox x:Name="SuggestionsList" 
-                     MaxHeight="200"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     SelectionChanged="SuggestionsList_SelectionChanged"/>
-        </Border>
-    </Popup>
+                                <!-- KPI Cards -->
+                                <Grid Margin="0,20,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                    <Label Content="Role"/>
-                    <ComboBox ItemsSource="{Binding volunteerRoleCollection}" 
-                 SelectedItem="{Binding CurrentVolunteer.Role, Mode=TwoWay}"/>
+                                    <Border Grid.Column="0" Margin="0,0,5,0" CornerRadius="10" Background="#F0F0F0">
+                                        <StackPanel Margin="10">
+                                            <TextBlock Text="Total Handled Calls" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                            <TextBlock Text="{Binding CurrentVolunteer.TotalHandledCalls}"
+                                                       FontSize="24" FontWeight="Bold" />
+                                        </StackPanel>
+                                    </Border>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="1" Margin="5,0" CornerRadius="10" Background="#F0F0F0">
+                                        <StackPanel Margin="10">
+                                            <TextBlock Text="Total Cancelled Calls" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                            <TextBlock Text="{Binding CurrentVolunteer.TotalCancelledCalls}"
+                                                       FontSize="24" FontWeight="Bold" />
+                                        </StackPanel>
+                                    </Border>
 
-                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <Label Content="Max Distance"/>
-                            <TextBox Text="{Binding CurrentVolunteer.MaxDistance, Mode=TwoWay, 
-                         StringFormat='{}{0:N2} km'}"/>
-                        </StackPanel>
+                                    <Border Grid.Column="2" Margin="5,0,0,0" CornerRadius="10" Background="#F0F0F0">
+                                        <StackPanel Margin="10">
+                                            <TextBlock Text="Total Expired Calls" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                            <TextBlock Text="{Binding CurrentVolunteer.TotalExpiredCalls}"
+                                                       FontSize="24" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
 
-                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                            <Label Content="Distance Type"/>
-                            <ComboBox ItemsSource="{Binding DistanceTypesCollection}" 
-                         SelectedValue="{Binding CurrentVolunteer.DistanceType, Mode=TwoWay}"/>
-                        </StackPanel>
+                                <StackPanel Margin="0,10">
+                                    <!-- Active Status -->
+                                    <DockPanel VerticalAlignment="Center">
+                                        <Label Content="Active Status" VerticalAlignment="Center"/>
+                                        <CheckBox IsChecked="{Binding CurrentVolunteer.IsActive, Mode=TwoWay}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="10,0"/>
+                                    </DockPanel>
+
+                                    <!-- Buttons -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                        <Button x:Name="DeleteVolunteerButton"
+                                                Click="DeleteVolunteerButton_Click"
+                                                Width="40" Height="40"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                ToolTip="Delete Volunteer"
+                                                Margin="10,0,0,0">
+                                            <TextBlock Text="🗑"
+                                                       FontSize="20"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="Black"/>
+                                        </Button>
+                                        <Button Content="Active Reading Check"
+                                                Click="OnOpenActiveCallClick"
+                                                Width="150"
+                                                Margin="0,0,10,0"
+                                                Visibility="{Binding CurrentVolunteer.Id, Converter={StaticResource IdToVisibilityConverterKey}}"/>
+                                        <Button Content="{Binding ButtonText}"
+                                                Click="AddOrUpdateButton_Click"
+                                                Width="150"
+                                                Margin="10,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </StackPanel>
+                        </Border>
+
                     </Grid>
-
-                    <!-- New Fields -->
-                    <Grid Margin="0,20,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0" Margin="0,0,5,0" CornerRadius="10" Background="#F0F0F0">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="Total Handled Calls" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding CurrentVolunteer.TotalHandledCalls}" 
-                       FontSize="24" FontWeight="Bold" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Grid.Column="1" Margin="5,0" CornerRadius="10" Background="#F0F0F0">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="Total Cancelled Calls" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding CurrentVolunteer.TotalCancelledCalls}" 
-                       FontSize="24" FontWeight="Bold" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Grid.Column="2" Margin="5,0,0,0" CornerRadius="10" Background="#F0F0F0">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="Total Expired Calls" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding CurrentVolunteer.TotalExpiredCalls}" 
-                       FontSize="24" FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                    <StackPanel Margin="0,10">
-                        <!-- Active Status Section -->
-                        <DockPanel VerticalAlignment="Center">
-                            <Label Content="Active Status" VerticalAlignment="Center"/>
-                            <CheckBox IsChecked="{Binding CurrentVolunteer.IsActive, Mode=TwoWay}"
-                  VerticalAlignment="Center"
-                  Margin="10,0"/>
-                        </DockPanel>
-
-                        <!-- Buttons in the next row -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                            <!-- Delete Volunteer Button with Icon -->
-                            <Button x:Name="DeleteVolunteerButton"
-Click="DeleteVolunteerButton_Click"
-Width="40"
-Height="40"
-Background="Transparent"
-BorderThickness="0"
-ToolTip="Delete Volunteer"
-Margin="10,0,0,0">
-                                <TextBlock Text="🗑" 
-       FontSize="20" 
-       VerticalAlignment="Center"
-       HorizontalAlignment="Center"
-       Foreground="Black"/>
-                            </Button>
-                            <Button Content="Active Reading Check"
-                Click="OnOpenActiveCallClick"
-                Width="150"
-                Margin="0,0,10,0"
-                Visibility="{Binding CurrentVolunteer.Id, Converter={StaticResource IdToVisibilityConverterKey}}"/>
-
-                            <Button Content="{Binding ButtonText}"
-                Click="AddOrUpdateButton_Click"
-                Width="150"
-                Margin="10,0,0,0"/>
-
-
-                        </StackPanel>
-                    </StackPanel>
-
-                </StackPanel>
-            </Border>
-
-
-        </Grid>
-    </Border>
+                </Border>
+            </Grid>
+        </Viewbox>
+    </Grid>
 </Window>

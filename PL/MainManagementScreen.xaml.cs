@@ -218,6 +218,15 @@ public partial class MainManagementScreen : Window
 
     private void btnUpdateMaxYearRange_Click(object sender, RoutedEventArgs e)
     {
+        // מניעת שינוי קונפיג בזמן שהסימולטור רץ
+        if (IsSimulatorRunning)
+        {
+            MessageBox.Show("Cannot update configuration while the simulator is running.",
+                            "Simulator Running", MessageBoxButton.OK, MessageBoxImage.Information);
+            MaxTimeSpanValue = s_bl.Admin.GetRiskTimeRange().ToString(); // שחזור לערך הנוכחי
+            return;
+        }
+
         try
         {
             string parsed = MaxTimeSpanValue;
@@ -360,12 +369,18 @@ public partial class MainManagementScreen : Window
     {
         var win = new VolunteerListWindow
         {
-            Owner = this,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            ShowInTaskbar = true
         };
+
+        // מיקום במרכז ביחס לחלון הראשי, בלי Owner
+        win.Left = this.Left + (this.Width - win.Width) / 2;
+        win.Top = this.Top + (this.Height - win.Height) / 2;
+
         win.Show();
         win.Activate();
     }
+
 
     private void CallManagementButton_Click(object sender, RoutedEventArgs e)
     {
