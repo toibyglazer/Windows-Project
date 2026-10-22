@@ -702,10 +702,17 @@ internal static class CallManager
         private const string SmtpHost = "smtp.gmail.com";
         private const int SmtpPort = 587;
         private const string SenderEmail = "toibymichalminiproject@gmail.com";
-        private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD") ?? throw new InvalidOperationException("VOLUNTEER_APP_GMAIL_PASSWORD environment variable is not set.");
+        private static string? SenderPassword => Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD");
+        private static bool EmailConfigured => !string.IsNullOrWhiteSpace(SenderPassword);
 
         public static async Task SendEmailWithAttachmentAsync(string recipientEmail, string subject, string body, string attachmentPath)
         {
+            if (!EmailConfigured)
+            {
+                Console.WriteLine("Email unavailable: VOLUNTEER_APP_GMAIL_PASSWORD is not configured.");
+                return;
+            }
+
             try
             {
                 using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
@@ -770,6 +777,12 @@ internal static class CallManager
 
         public static async Task SendEmailToVolunteersForNewCallAsync(BO.Call call)
         {
+            if (!EmailConfigured)
+            {
+                Console.WriteLine("Email unavailable: VOLUNTEER_APP_GMAIL_PASSWORD is not configured.");
+                return;
+            }
+
             var volunteers = s_dal.Volunteer.ReadAll();
 
             foreach (var volunteer in volunteers)
@@ -876,6 +889,12 @@ internal static class CallManager
 
         public static async Task SendCancellationEmailToVolunteerAsync(int assignmentId)
         {
+            if (!EmailConfigured)
+            {
+                Console.WriteLine("Email unavailable: VOLUNTEER_APP_GMAIL_PASSWORD is not configured.");
+                return;
+            }
+
             DO.Assignment assignment = s_dal.Assignment.Read(assignmentId)
                 ?? throw new BO.BlDoesNotExistException($"Assignment with ID {assignmentId} does not exist.");
 
@@ -983,6 +1002,12 @@ internal static class CallManager
 
         public static async Task SendEmailWithImageAsync(string recipientEmail, string subject, string body)
         {
+            if (!EmailConfigured)
+            {
+                Console.WriteLine("Email unavailable: VOLUNTEER_APP_GMAIL_PASSWORD is not configured.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(recipientEmail))
             {
                 Console.WriteLine("Invalid recipient email.");
