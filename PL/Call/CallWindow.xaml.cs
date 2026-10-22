@@ -326,7 +326,9 @@ namespace PL.Call
                     // Wait for the operation to complete
                     await s_bl.Call.AddCallAsync(CurrentCall);
                     OnPropertyChanged(nameof(CurrentCall));
-                    MessageBox.Show($"Call added successfully! The system sent an email to all volunteers in the call area.",
+                    MessageBox.Show(!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD"))
+                        ? "Call added successfully! Email notifications were attempted for volunteers in the call area."
+                        : "Call added successfully! Email unavailable: VOLUNTEER_APP_GMAIL_PASSWORD is not configured.",
                         "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else if (ButtonText == "Update")
