@@ -129,23 +129,23 @@ The simulator models volunteer and call activity as time progresses, with timed 
 
 The solution is organized as a multi-project layered application:
 
-```text
-PL — Presentation Layer (WPF / XAML)
-    Login, manager & volunteer views, maps, statistics
-                     |
-                     v
-BL — Business Logic Layer
-    BlApi interfaces + implementations + helpers
-    Validation, authentication, matching, notifications,
-    simulator and assignment rules
-                     |
-                     v
-DalFacade — Data Access Contracts
-    Entities (DO), interfaces, factory/configuration
-                 /       \
-                v         v
-           DalList       DalXml
-           In-memory     XML files
+```mermaid
+flowchart TD
+    PL["PL - Presentation Layer<br/>(WPF / XAML)<br/><br/>Login, manager & volunteer views,<br/>maps, statistics"]
+    BL["BL - Business Logic Layer<br/><br/>BlApi interfaces + implementations + helpers<br/>Validation, authentication, matching,<br/>notifications, simulator and assignment rules"]
+    DAL["DalFacade - Data Access Contracts<br/><br/>Entities (DO), interfaces,<br/>factory/configuration"]
+    DL["DalList<br/>In-memory"]
+    DX["DalXml<br/>XML files"]
+
+    PL --> BL
+    BL --> DAL
+    DAL --> DL
+    DAL --> DX
+
+    classDef layer fill:#eff6ff,stroke:#3b82f6,color:#172554,stroke-width:1.5px
+    classDef storage fill:#f5f3ff,stroke:#8b5cf6,color:#4c1d95,stroke-width:1.5px
+    class PL,BL,DAL layer
+    class DL,DX storage
 ```
 
 | Project / folder | Responsibility |
