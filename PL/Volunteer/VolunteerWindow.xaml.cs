@@ -608,14 +608,14 @@ public class SendEmailNewVolunteer
     private const string SmtpHost = "smtp.gmail.com";
     private const int SmtpPort = 587;
     private const string SenderEmail = "toibymichalminiproject@gmail.com";
-    private const string SenderPassword = "hwxs xylf bfmy iwqg";
+    private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD") ?? throw new InvalidOperationException("VOLUNTEER_APP_GMAIL_PASSWORD environment variable is not set.");
 
     public class SimpleEmailSender
     {
         private const string SmtpHost = "smtp.gmail.com";
         private const int SmtpPort = 587;
         private const string SenderEmail = "toibymichalminiproject@gmail.com";
-        private const string SenderPassword = "hwxs xylf bfmy iwqg";
+        private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD") ?? throw new InvalidOperationException("VOLUNTEER_APP_GMAIL_PASSWORD environment variable is not set.");
 
         public static async Task SendStaticEmailAsync(string recipientEmail, string volunteerFullName, string generatedPassword)
         {
