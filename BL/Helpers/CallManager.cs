@@ -702,7 +702,7 @@ internal static class CallManager
         private const string SmtpHost = "smtp.gmail.com";
         private const int SmtpPort = 587;
         private const string SenderEmail = "toibymichalminiproject@gmail.com";
-        private const string SenderPassword = "iwge idji gbtj lomm";
+        private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD") ?? throw new InvalidOperationException("VOLUNTEER_APP_GMAIL_PASSWORD environment variable is not set.");
 
         public static async Task SendEmailWithAttachmentAsync(string recipientEmail, string subject, string body, string attachmentPath)
         {
@@ -1045,7 +1045,7 @@ internal static class CallManager
 //        private const string SmtpHost = "smtp.gmail.com";
 //        private const int SmtpPort = 587;
 //        private const string SenderEmail = "toibymichalminiproject@gmail.com";
-//        private const string SenderPassword = "iwge idji gbtj lomm";
+//        private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD");
 //        public static void SendEmailWithAttachment(string recipientEmail, string subject, string body, string attachmentPath)
 //        {
 //            try
