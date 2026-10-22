@@ -204,17 +204,17 @@ Security-oriented components were implemented as additional engineering features
 
 ```mermaid
 flowchart TD
-    A["📝 Manager creates assistance request"]
-    B["📍 BL validates request and resolves location"]
-    C[("🗄️ DAL persists request")]
-    D["👥 BL checks volunteers' locations and distance preferences"]
-    E["✉️ Eligible volunteers receive HTML email and map notification"]
-    F["✅ Volunteer accepts a nearby assignment"]
+    A["Manager creates assistance request"]
+    B["BL validates request and resolves location"]
+    C[("DAL persists request")]
+    D["BL checks volunteers' locations and distance preferences"]
+    E["Eligible volunteers receive HTML email and map notification"]
+    F["Volunteer accepts a nearby assignment"]
     G{"Assignment status"}
-    H["🟢 Active"]
-    I["✅ Completed"]
-    J["🚫 Canceled"]
-    K["📊 History, statistics and manager views update"]
+    H["Active"]
+    I["Completed"]
+    J["Canceled"]
+    K["History, statistics and manager views update"]
 
     A --> B --> C --> D --> E --> F --> G
     G --> H
