@@ -519,6 +519,7 @@ public partial class VolunteerWindow : Window, INotifyPropertyChanged
 
                     try
                     {
+                        bool emailConfigured = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD"));
                         await SimpleEmailSender.SendStaticEmailAsync(CurrentVolunteer.Email, CurrentVolunteer.FullName, generatedPassword);
 
 
@@ -526,7 +527,7 @@ public partial class VolunteerWindow : Window, INotifyPropertyChanged
                         progressDialog.Close();
 
                         // Show success message
-                        MessageBox.Show("Email sent successfully to the volunteer!",
+                        MessageBox.Show(emailConfigured ? "Email sent successfully to the volunteer!" : "Volunteer saved. Email unavailable: configure VOLUNTEER_APP_GMAIL_PASSWORD to enable sending.",
                             "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         OnPropertyChanged(nameof(CurrentVolunteer));
@@ -608,17 +609,23 @@ public class SendEmailNewVolunteer
     private const string SmtpHost = "smtp.gmail.com";
     private const int SmtpPort = 587;
     private const string SenderEmail = "toibymichalminiproject@gmail.com";
-    private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD") ?? throw new InvalidOperationException("VOLUNTEER_APP_GMAIL_PASSWORD environment variable is not set.");
+    private static string? SenderPassword => Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD");
 
     public class SimpleEmailSender
     {
         private const string SmtpHost = "smtp.gmail.com";
         private const int SmtpPort = 587;
         private const string SenderEmail = "toibymichalminiproject@gmail.com";
-        private static readonly string SenderPassword = Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD") ?? throw new InvalidOperationException("VOLUNTEER_APP_GMAIL_PASSWORD environment variable is not set.");
+        private static string? SenderPassword => Environment.GetEnvironmentVariable("VOLUNTEER_APP_GMAIL_PASSWORD");
 
         public static async Task SendStaticEmailAsync(string recipientEmail, string volunteerFullName, string generatedPassword)
         {
+            if (string.IsNullOrWhiteSpace(SenderPassword))
+            {
+                System.Diagnostics.Debug.WriteLine("Email unavailable: VOLUNTEER_APP_GMAIL_PASSWORD is not configured.");
+                return;
+            }
+
             if (string.IsNullOrEmpty(recipientEmail))
                 throw new InvalidOperationException("Recipient email address is missing.");
 
