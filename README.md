@@ -7,6 +7,50 @@ An end-to-end academic desktop application designed to coordinate volunteer orga
 
 > **Academic data notice:** All volunteers, accounts, names, email addresses, and other records provided as project data are fictional or simulated for educational/testing purposes. They do not represent real registered users. They are included to illustrate the application workflow.
 
+## System Overview
+
+The diagram below shows how managers and volunteers interact with the application, how its layers are connected, and where external services fit in.
+
+```mermaid
+flowchart TB
+    M["Manager"]
+    V["Volunteer"]
+    UI["WPF Desktop Application<br/>Login · Dashboards · Requests · Statistics"]
+    BL["Business Logic (BL)<br/>Authentication · Validation · Assignments<br/>Distance Matching · Simulation · Notifications"]
+    DAL["Data Access Interfaces (DalFacade)"]
+    MEM[("In-Memory Storage<br/>DalList")]
+    XML[("XML Persistence<br/>DalXml")]
+
+    GEO["OpenStreetMap / Nominatim<br/>Geocoding & Routing"]
+    MAP["Leaflet / LocationIQ<br/>Interactive & Static Maps"]
+    MAIL["Gmail SMTP<br/>Email Notifications"]
+    CHART["QuickChart<br/>Analytics Charts"]
+
+    M --> UI
+    V --> UI
+    UI --> BL
+    BL --> DAL
+    DAL --> MEM
+    DAL --> XML
+
+    BL -.-> GEO
+    UI -.-> MAP
+    BL -.-> MAP
+    BL -.-> MAIL
+    UI -.-> CHART
+
+    classDef actor fill:#eff6ff,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef layer fill:#f0fdfa,stroke:#0d9488,color:#134e4a,stroke-width:2px
+    classDef storage fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,stroke-width:1.5px
+    classDef external fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:1.5px
+    class M,V actor
+    class UI,BL,DAL layer
+    class MEM,XML storage
+    class GEO,MAP,MAIL,CHART external
+```
+
+*Solid arrows represent the main application flow; dotted arrows indicate external service integrations.*
+
 ## Features at a Glance
 
 | Area | Capabilities |
