@@ -158,22 +158,37 @@ Security-oriented components were implemented as additional engineering features
 
 ## Example Request Flow
 
-```text
-Manager creates assistance request
-    ↓
-BL validates request and resolves location
-    ↓
-DAL persists request
-    ↓
-BL checks volunteers' positions and distance preferences
-    ↓
-Eligible volunteers receive HTML email/map notification
-    ↓
-Volunteer opens a nearby request and accepts an assignment
-    ↓
-Assignment moves through active / completed / canceled states
-    ↓
-History, volunteer statistics and manager views update
+```mermaid
+flowchart TD
+    A["📝 Manager creates assistance request"]
+    B["📍 BL validates request and resolves location"]
+    C[("🗄️ DAL persists request")]
+    D["👥 BL checks volunteers' locations and distance preferences"]
+    E["✉️ Eligible volunteers receive HTML email and map notification"]
+    F["✅ Volunteer accepts a nearby assignment"]
+    G{"Assignment status"}
+    H["🟢 Active"]
+    I["✅ Completed"]
+    J["🚫 Canceled"]
+    K["📊 History, statistics and manager views update"]
+
+    A --> B --> C --> D --> E --> F --> G
+    G --> H
+    H --> I
+    H --> J
+    I --> K
+    J --> K
+
+    classDef action fill:#eff6ff,stroke:#3b82f6,color:#172554,stroke-width:1.5px
+    classDef storage fill:#ecfeff,stroke:#0891b2,color:#164e63,stroke-width:1.5px
+    classDef decision fill:#fff7ed,stroke:#f59e0b,color:#78350f,stroke-width:1.5px
+    classDef done fill:#f0fdf4,stroke:#22c55e,color:#14532d,stroke-width:1.5px
+    classDef canceled fill:#fff1f2,stroke:#fb7185,color:#881337,stroke-width:1.5px
+    class A,B,D,E,F,K action
+    class C storage
+    class G decision
+    class H,I done
+    class J canceled
 ```
 
 ## Running the Application
